@@ -65,7 +65,7 @@ export default function WhatsAppWidget() {
                 </div>
                 <div className="action-text">
                   <strong>1-Click Visitor Registration</strong>
-                  <span>Visitor Desk: {CONTACT_CONFIG.visitor.display}</span>
+                  <span>Instant Visitor Badge & Entry Pass</span>
                 </div>
                 <i className="fa-solid fa-chevron-right action-arrow"></i>
               </a>
@@ -81,7 +81,7 @@ export default function WhatsAppWidget() {
                 </div>
                 <div className="action-text">
                   <strong>1-Click Exhibitor Stall Booking</strong>
-                  <span>Exhibitor Desk: {CONTACT_CONFIG.exhibitor.display}</span>
+                  <span>Floorplan Allotment & Booking Support</span>
                 </div>
                 <i className="fa-solid fa-chevron-right action-arrow"></i>
               </a>

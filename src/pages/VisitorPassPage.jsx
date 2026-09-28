@@ -110,7 +110,7 @@ export default function VisitorPassPage({ onNotify }) {
               rel="noopener noreferrer"
               className="btn btn-whatsapp"
             >
-              <i className="fa-brands fa-whatsapp"></i> WhatsApp Pass ({CONTACT_CONFIG.visitor.display})
+              <i className="fa-brands fa-whatsapp"></i> Get Pass on WhatsApp
             </a>
           </div>
 
@@ -288,7 +288,7 @@ export default function VisitorPassPage({ onNotify }) {
                     rel="noopener noreferrer"
                     className="btn btn-whatsapp btn-block"
                   >
-                    <i className="fa-brands fa-whatsapp"></i> Confirm & Send via WhatsApp ({CONTACT_CONFIG.visitor.display})
+                    <i className="fa-brands fa-whatsapp"></i> Confirm via WhatsApp
                   </a>
                 </div>
               </form>

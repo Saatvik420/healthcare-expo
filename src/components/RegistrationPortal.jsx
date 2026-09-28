@@ -109,7 +109,7 @@ export default function RegistrationPortal({ activeTab, setActiveTab, onNotify }
                 rel="noopener noreferrer"
                 className="btn btn-whatsapp"
               >
-                <i className="fa-brands fa-whatsapp"></i> Visitor Desk ({CONTACT_CONFIG.visitor.display})
+                <i className="fa-brands fa-whatsapp"></i> Visitor Desk WhatsApp
               </a>
               <a
                 href={waExhibitorUrl}
@@ -117,7 +117,7 @@ export default function RegistrationPortal({ activeTab, setActiveTab, onNotify }
                 rel="noopener noreferrer"
                 className="btn btn-whatsapp-outline"
               >
-                <i className="fa-brands fa-whatsapp"></i> Exhibitor Desk ({CONTACT_CONFIG.exhibitor.display})
+                <i className="fa-brands fa-whatsapp"></i> Exhibitor Desk WhatsApp
               </a>
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function RegistrationPortal({ activeTab, setActiveTab, onNotify }
                     className="btn btn-sm btn-whatsapp"
                     title={`Visitor Desk WhatsApp (${CONTACT_CONFIG.visitor.display})`}
                   >
-                    <i className="fa-brands fa-whatsapp"></i> WhatsApp ({CONTACT_CONFIG.visitor.number})
+                    <i className="fa-brands fa-whatsapp"></i> WhatsApp Helpdesk
                   </a>
                 </div>
               </div>
@@ -276,7 +276,7 @@ export default function RegistrationPortal({ activeTab, setActiveTab, onNotify }
                     className="btn btn-sm btn-whatsapp"
                     title={`Exhibitor Secretariat WhatsApp (${CONTACT_CONFIG.exhibitor.display})`}
                   >
-                    <i className="fa-brands fa-whatsapp"></i> WhatsApp ({CONTACT_CONFIG.exhibitor.number})
+                    <i className="fa-brands fa-whatsapp"></i> WhatsApp Secretariat
                   </a>
                 </div>
               </div>

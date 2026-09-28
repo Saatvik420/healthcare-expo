@@ -55,7 +55,7 @@ export default function WhatsAppSection() {
               rel="noopener noreferrer"
               className="btn btn-whatsapp btn-block"
             >
-              <i className="fa-brands fa-whatsapp"></i> Register Visitor ({CONTACT_CONFIG.visitor.display})
+              <i className="fa-brands fa-whatsapp"></i> Register Visitor via WhatsApp
             </a>
           </div>
 
@@ -83,7 +83,7 @@ export default function WhatsAppSection() {
               rel="noopener noreferrer"
               className="btn btn-whatsapp btn-block"
             >
-              <i className="fa-brands fa-whatsapp"></i> Book Stall ({CONTACT_CONFIG.exhibitor.display})
+              <i className="fa-brands fa-whatsapp"></i> Book Stall via WhatsApp
             </a>
           </div>
 

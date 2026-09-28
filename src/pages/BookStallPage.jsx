@@ -5,8 +5,26 @@ import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 
 const boothOptions = [
   {
+    id: '9sqm',
+    title: '9 sq.m Shell Scheme',
+    badge: 'Standard',
+    dimensions: '3m x 3m',
+    basePrice: 2600,
+    priceInr: '₹2,15,000',
+    description: 'Our turnkey standard setup for mid-sized manufacturers, CDMOs, and medical suppliers.',
+    inclusions: [
+      'Modular wall partition panels (2.5m H)',
+      '1 Fascia board with company name & stall no.',
+      '3 Spotlights & 1 Power socket (5 Amp)',
+      '1 Reception table, 1 Round table & 3 Chairs',
+      '1 Lockable storage counter & waste bin',
+      'Complimentary listing in official directory',
+    ],
+  },
+  {
     id: 'healthcare-suite',
-    title: '15 sq.m Healthcare Facility Suite',
+    title: '15 sq.m Healthcare Suite',
+    badge: 'Recommended',
     dimensions: '5m x 3m',
     basePrice: 4200,
     priceInr: '₹3,45,000',
@@ -22,64 +40,20 @@ const boothOptions = [
     ],
   },
   {
-    id: '6sqm',
-    title: '6 sq.m Shell Scheme',
-    dimensions: '3m x 2m',
-    basePrice: 1800,
-    priceInr: '₹1,50,000',
-    description: 'Ideal for early-stage pharma labs, startups, and specialized ingredient innovators.',
-    inclusions: [
-      'Modular wall partition panels (2.5m H)',
-      '1 Fascia board with company name',
-      '2 Spotlights & 1 Single-phase power outlet',
-      '1 Information counter & 2 Chairs',
-      '1 Waste bin & carpeted flooring',
-    ],
-  },
-  {
-    id: '9sqm',
-    title: '9 sq.m Shell Scheme',
-    dimensions: '3m x 3m',
-    basePrice: 2600,
-    priceInr: '₹2,15,000',
-    description: 'Our standard setup for mid-sized manufacturers, CDMOs, and suppliers.',
-    inclusions: [
-      'Modular wall partition panels (2.5m H)',
-      '1 Fascia board with company name & stall no.',
-      '3 Spotlights & 1 Power socket (5 Amp)',
-      '1 Reception table, 1 Round table & 3 Chairs',
-      '1 Lockable storage counter & waste bin',
-      'Complimentary listing in official directory',
-    ],
-  },
-  {
-    id: '12sqm',
-    title: '12 sq.m Prime Scheme',
-    dimensions: '4m x 3m',
-    basePrice: 3400,
-    priceInr: '₹2,80,000',
-    description: 'Spacious configuration for clinical tech, machinery demonstrations, and client meetings.',
-    inclusions: [
-      'Prime aisle placement in pavilion',
-      '4 LED Spotlights & 2 Power sockets (5/15 Amp)',
-      '2 Reception counters & 4 Premium chairs',
-      'Brochure stand & lockable credenza',
-      '2 VIP Delegate Passes included',
-    ],
-  },
-  {
     id: 'raw18',
     title: '18+ sq.m Raw Bare Space',
+    badge: 'Custom Build',
     dimensions: 'Custom / Island',
     basePrice: 4800,
     priceInr: '₹3,95,000',
-    description: 'Bare ground space for bespoke double-decker hospital pavilions or custom corporate booths.',
+    description: 'Bare ground space for bespoke double-decker hospital pavilions, machinery showcases, or custom corporate booths.',
     inclusions: [
       'Custom 2-side or 4-side open island position',
       'Raw floor footprint with marking boundaries',
       'High-capacity 3-phase industrial power feed',
       'Dedicated exhibitor logistics loading dock access',
       '4 VIP Delegate Passes & lounge access',
+      'Priority spotlight in Confluence event guide',
     ],
   },
 ];
@@ -108,7 +82,7 @@ export default function BookStallPage({ onNotify }) {
     notes: '',
   });
 
-  const activeOption = boothOptions.find((b) => b.id === selectedBooth) || boothOptions[0];
+  const activeOption = boothOptions.find((b) => b.id === selectedBooth) || boothOptions[1] || boothOptions[0];
 
   const calculateTotal = () => {
     let total = activeOption.basePrice;
@@ -208,14 +182,17 @@ export default function BookStallPage({ onNotify }) {
               rel="noopener noreferrer"
               className="btn btn-whatsapp"
             >
-              <i className="fa-brands fa-whatsapp"></i> Book Stall ({CONTACT_CONFIG.exhibitor.display})
+              <i className="fa-brands fa-whatsapp"></i> Book Stall via WhatsApp
             </a>
           </div>
 
           {/* Step 1: Select Booth Size */}
           <div className="section-subtitle-bar">
-            <h3>Step 1: Choose Booth Format & Size</h3>
-            <span>All Shell Scheme booths include carpet, walls, electricals, and fascia lettering</span>
+            <div className="step-heading-row">
+              <span className="step-badge">Step 1</span>
+              <h3>Choose Booth Format & Size</h3>
+            </div>
+            <span>All Shell Scheme booths include carpet, partition walls, electricals, and custom fascia lettering</span>
           </div>
 
           <div className="booth-options-grid">
@@ -224,26 +201,33 @@ export default function BookStallPage({ onNotify }) {
               return (
                 <div
                   key={booth.id}
-                  className={`booth-option-card ${isSelected ? 'selected' : ''}`}
+                  className={`booth-option-card ${isSelected ? 'selected' : ''} ${booth.popular ? 'featured-booth' : ''}`}
                   onClick={() => setSelectedBooth(booth.id)}
                 >
-                  {booth.popular && <div className="popular-badge">High Demand</div>}
+                  {booth.popular && (
+                    <div className="popular-badge">
+                      <i className="fa-solid fa-crown"></i> High Demand
+                    </div>
+                  )}
                   <div className="booth-header">
                     <h4>{booth.title}</h4>
-                    <span className="booth-dim">{booth.dimensions}</span>
+                    <span className="booth-dim">
+                      <i className="fa-solid fa-ruler-combined"></i> {booth.dimensions}
+                    </span>
                   </div>
                   <div className="booth-price">
                     <strong>${booth.basePrice}</strong>
-                    <span> / {booth.priceInr}</span>
+                    <span className="inr-tag">{booth.priceInr}</span>
                   </div>
                   <p className="booth-desc">{booth.description}</p>
 
                   <div className="booth-inclusions">
-                    <h5>Included Equipment:</h5>
+                    <h5>Included Equipment & Benefits:</h5>
                     <ul>
                       {booth.inclusions.map((item, idx) => (
                         <li key={idx}>
-                          <i className="fa-solid fa-check text-primary"></i> {item}
+                          <i className="fa-solid fa-circle-check inclusion-icon"></i>
+                          <span>{item}</span>
                         </li>
                       ))}
                     </ul>
@@ -253,7 +237,13 @@ export default function BookStallPage({ onNotify }) {
                     type="button"
                     className={`btn btn-block ${isSelected ? 'btn-primary' : 'btn-outline'}`}
                   >
-                    {isSelected ? 'Selected Package' : 'Choose This Stall'}
+                    {isSelected ? (
+                      <>
+                        <i className="fa-solid fa-circle-check"></i> Selected Package
+                      </>
+                    ) : (
+                      'Choose This Stall'
+                    )}
                   </button>
                 </div>
               );
@@ -261,6 +251,14 @@ export default function BookStallPage({ onNotify }) {
           </div>
 
           {/* Step 2: Calculator & Form Grid */}
+          <div className="section-subtitle-bar">
+            <div className="step-heading-row">
+              <span className="step-badge">Step 2</span>
+              <h3>Configure Add-ons & Request Allotment</h3>
+            </div>
+            <span>Calculate live package investment and submit your official hall space reservation</span>
+          </div>
+
           <div className="booth-config-grid">
             {/* Addons & Live Cost Breakdown */}
             <div className="cost-breakdown-card">
@@ -268,7 +266,7 @@ export default function BookStallPage({ onNotify }) {
               <p>Enhance your visibility with premium booth enhancements:</p>
 
               <div className="addons-list">
-                <label className="addon-item">
+                <label className={`addon-item ${addons.cornerStall ? 'selected-addon' : ''}`}>
                   <input
                     type="checkbox"
                     checked={addons.cornerStall}
@@ -283,7 +281,7 @@ export default function BookStallPage({ onNotify }) {
                   </span>
                 </label>
 
-                <label className="addon-item">
+                <label className={`addon-item ${addons.extraPower ? 'selected-addon' : ''}`}>
                   <input
                     type="checkbox"
                     checked={addons.extraPower}
@@ -296,7 +294,7 @@ export default function BookStallPage({ onNotify }) {
                   <span className="addon-cost">+$250</span>
                 </label>
 
-                <label className="addon-item">
+                <label className={`addon-item ${addons.leadApp ? 'selected-addon' : ''}`}>
                   <input
                     type="checkbox"
                     checked={addons.leadApp}
@@ -309,7 +307,7 @@ export default function BookStallPage({ onNotify }) {
                   <span className="addon-cost">+$150</span>
                 </label>
 
-                <label className="addon-item">
+                <label className={`addon-item ${addons.catalogueAd ? 'selected-addon' : ''}`}>
                   <input
                     type="checkbox"
                     checked={addons.catalogueAd}
@@ -470,7 +468,7 @@ export default function BookStallPage({ onNotify }) {
                     rel="noopener noreferrer"
                     className="btn btn-whatsapp btn-block"
                   >
-                    <i className="fa-brands fa-whatsapp"></i> Book via WhatsApp ({CONTACT_CONFIG.exhibitor.display})
+                    <i className="fa-brands fa-whatsapp"></i> Book via WhatsApp
                   </a>
                 </div>
               </form>
