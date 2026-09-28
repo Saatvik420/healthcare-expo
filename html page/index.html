@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Global Healthcare Expo | Premier Pharma & Healthcare Platform</title>
+  
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #ecfdf5;
+      --accent-navy: #0f172a;
+      --surface-light: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --white: #ffffff;
+      --radius: 12px;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.04);
+      --shadow-md: 0 10px 25px -5px rgba(0,0,0,0.07), 0 8px 10px -6px rgba(0,0,0,0.04);
+      --shadow-lg: 0 20px 30px -10px rgba(5, 150, 105, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      color: var(--text-dark);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+
+    /* Top Strip */
+    .top-bar {
+      background-color: var(--accent-navy);
+      color: #94a3b8;
+      font-size: 0.8rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .container {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    .top-bar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .top-bar-links a {
+      color: #cbd5e1;
+      text-decoration: none;
+      margin-left: 1.25rem;
+      transition: color 0.2s;
+    }
+
+    .top-bar-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Navigation Bar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.98);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.1rem 0;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .logo-symbol {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--primary) 0%, #10b981 100%);
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      color: var(--white);
+      font-size: 1.25rem;
+      box-shadow: 0 4px 10px rgba(5,150,105,0.3);
+    }
+
+    .brand-text h1 {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--accent-navy);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-text span {
+      font-size: 0.75rem;
+      color: var(--primary);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.75rem;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-dark);
+      font-weight: 600;
+      font-size: 0.925rem;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--white);
+      box-shadow: 0 4px 12px rgba(5,150,105,0.25);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-outline {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: var(--white);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--primary-light);
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      background: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)),
+                  url('https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+      color: var(--white);
+      padding: 6.5rem 0 7rem;
+    }
+
+    .hero-wrapper {
+      max-width: 820px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+      padding: 0.35rem 1rem;
+      border-radius: 100px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3.25rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+      letter-spacing: -0.03em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(120deg, #34d399, #10b981);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: #cbd5e1;
+      margin-bottom: 2.25rem;
+      max-width: 650px;
+    }
+
+    .hero-ctas {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    /* Stats Ribbon */
+    .stats-bar {
+      background: var(--white);
+      margin-top: -3.5rem;
+      position: relative;
+      z-index: 20;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--border-color);
+      padding: 2rem;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      text-align: center;
+    }
+
+    .stat-item h3 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      margin-bottom: 0.2rem;
+    }
+
+    .stat-item p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Section Headers */
+    .section {
+      padding: 6rem 0;
+    }
+
+    .section-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto 3.5rem;
+    }
+
+    .section-header .tag {
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .section-header h2 {
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: var(--accent-navy);
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    /* Sectors Grid */
+    .sectors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.75rem;
+    }
+
+    .sector-card {
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--white);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sector-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
+    }
+
+    .sector-img {
+      height: 180px;
+      width: 100%;
+      object-fit: cover;
+    }
+
+    .sector-content {
+      padding: 1.5rem;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sector-content h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.6rem;
+      color: var(--accent-navy);
+    }
+
+    .sector-content p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      flex-grow: 1;
+    }
+
+    .sector-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.875rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* Registration & Booking Section */
+    .registration-section {
+      background: var(--surface-light);
+      border-top: 1px solid var(--border-color);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .portal-box {
+      background: var(--white);
+      border-radius: 16px;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      max-width: 860px;
+      margin: 0 auto;
+    }
+
+    .tabs-header {
+      display: flex;
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 1.25rem;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--white);
+      color: var(--primary);
+      border-bottom: 3px solid var(--primary);
+    }
+
+    .form-container {
+      padding: 3rem 2.5rem;
+    }
+
+    .tab-pane {
+      display: none;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    .form-intro {
+      margin-bottom: 2rem;
+    }
+
+    .form-intro h3 {
+      font-size: 1.4rem;
+      color: var(--accent-navy);
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .form-intro p {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+
+    .col-full {
+      grid-column: span 2;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-group label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #334155;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      padding: 0.8rem 1rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text-dark);
+      background-color: var(--white);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
+    }
+
+    .btn-block {
+      width: 100%;
+      margin-top: 1.5rem;
+      padding: 1rem;
+      font-size: 1rem;
+    }
+
+    /* FAQ Section */
+    .faq-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .faq-item {
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+
+    .faq-question {
+      padding: 1.2rem;
+      background: var(--surface-light);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-weight: 600;
+      color: var(--accent-navy);
+    }
+
+    .faq-answer {
+      padding: 1.2rem;
+      background: var(--white);
+      display: none;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.95rem;
+      color: var(--text-muted);
+    }
+
+    .faq-item.open .faq-answer {
+      display: block;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--accent-navy);
+      color: #94a3b8;
+      padding: 4.5rem 0 2rem;
+      font-size: 0.9rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-col h4 {
+      color: var(--white);
+      font-size: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .footer-col ul {
+      list-style: none;
+    }
+
+    .footer-col ul li {
+      margin-bottom: 0.65rem;
+    }
+
+    .footer-col ul li a {
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footer-col ul li a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 2rem;
+      text-align: center;
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 2.5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .col-full { grid-column: span 1; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; }
+      .form-container { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="container top-bar-content">
+      <div>
+        <i class="fa-regular fa-calendar-days text-primary"></i> <strong>October 14–16, 2026</strong> | Pragati Maidan, New Delhi
+      </div>
+      <div class="top-bar-links">
+        <a href="#sectors"><i class="fa-solid fa-list-check"></i> Focus Areas</a>
+        <a href="#registration"><i class="fa-solid fa-envelope"></i> Contact Desk</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Header -->
+  <header>
+    <div class="container nav-container">
+      <a href="#" class="brand-logo">
+        <div class="logo-symbol">
+          <i class="fa-solid fa-notes-medical"></i>
+        </div>
+        <div class="brand-text">
+          <h1>The Global Healthcare Expo</h1>
+          <span>International Pharma Summit</span>
+        </div>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#sectors">Key Sectors</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn btn-outline" onclick="openPortalTab('visitor')">Visitor Pass</button>
+        <button class="btn btn-primary" onclick="openPortalTab('exhibitor')">Book Stall</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="container hero-wrapper">
+      <div class="hero-badge">
+        <i class="fa-solid fa-globe"></i> The Global Pharma & Healthcare Community
+      </div>
+      <h1>Accelerate Your <span>Pharma & Medical</span> Supply Chain.</h1>
+      <p>Uniting manufacturers, ingredient producers, machinery providers, and healthcare innovators from across 40+ countries under one international platform.</p>
+      
+      <div class="hero-ctas">
+        <button class="btn btn-primary" onclick="openPortalTab('visitor')">
+          <i class="fa-solid fa-id-card"></i> Register as Visitor
+        </button>
+        <button class="btn btn-outline" onclick="openPortalTab('exhibitor')">
+          <i class="fa-solid fa-store"></i> Become an Exhibitor
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Bar -->
+  <div class="container">
+    <div class="stats-bar">
+      <div class="stats-grid">
+        <div class="stat-item">
+          <h3>600+</h3>
+          <p>Exhibiting Brands</p>
+        </div>
+        <div class="stat-item">
+          <h3>25,000+</h3>
+          <p>Trade Attendees</p>
+        </div>
+        <div class="stat-item">
+          <h3>45+</h3>
+          <p>Global Delegations</p>
+        </div>
+        <div class="stat-item">
+          <h3>20,000 m²</h3>
+          <p>Exhibition Floor</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sectors Section (CPHI Style) -->
+  <section class="section" id="sectors">
+    <div class="container">
+      <div class="section-header">
+        <span class="tag">Comprehensive Marketplace</span>
+        <h2>Focus Areas & Product Zones</h2>
+        <p>Explore specialized pavilions covering the entire lifecycle of pharmaceutical and healthcare manufacturing.</p>
+      </div>
+
+      <div class="sectors-grid">
+        <!-- Sector 1 -->
+        <div class="sector-card">
+          <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?auto=format&fit=crop&w=600&q=80" alt="APIs and Ingredients" class="sector-img" />
+          <div class="sector-content">
+            <h3>APIs & Fine Chemicals</h3>
+            <p>Active ingredients, raw chemical intermediates, herbal extracts, and custom pharmaceutical synthesis.</p>
+            <a href="#registration" class="sector-link" onclick="openPortalTab('exhibitor')">Exhibit in this zone <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Sector 2 -->
+        <div class="sector-card">
+          <img src="https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=600&q=80" alt="Finished Formulations" class="sector-img" />
+          <div class="sector-content">
+            <h3>Finished Dosages & Formulations</h3>
+            <p>Generics, over-the-counter medicine, capsules, tablets, intravenous therapies, and biosimilar portfolios.</p>
+            <a href="#registration" class="sector-link" onclick="openPortalTab('exhibitor')">Exhibit in this zone <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Sector 3 -->
+        <div class="sector-card">
+          <img src="https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?auto=format&fit=crop&w=600&q=80" alt="Pharma Machinery" class="sector-img" />
+          <div class="sector-content">
+            <h3>Pharma Machinery & Cleanroom</h3>
+            <p>High-speed tableting, cleanroom sterile systems, fluid handling, purification, and analytical instruments.</p>
+            <a href="#registration" class="sector-link" onclick="openPortalTab('exhibitor')">Exhibit in this zone <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+
+        <!-- Sector 4 -->
+        <div class="sector-card">
+          <img src="https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&w=600&q=80" alt="Packaging & Medical Tech" class="sector-img" />
+          <div class="sector-content">
+            <h3>Packaging & Drug Delivery</h3>
+            <p>Pre-filled syringes, blisters, vials, cold-chain transport packaging, and anti-counterfeiting tracking technology.</p>
+            <a href="#registration" class="sector-link" onclick="openPortalTab('exhibitor')">Exhibit in this zone <i class="fa-solid fa-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Registration Portal -->
+  <section class="section registration-section" id="registration">
+    <div class="container">
+      <div class="section-header">
+        <span class="tag">Online Registration Portal</span>
+        <h2>Confirm Your Participation</h2>
+        <p>Book booth space for your company or acquire your visitor trade pass to attend key sessions.</p>
+      </div>
+
+      <div class="portal-box">
+        <!-- Tab Bar -->
+        <div class="tabs-header">
+          <button class="tab-btn active" id="tab-visitor" onclick="switchTab('visitor')">
+            <i class="fa-regular fa-user"></i> Visitor Pass Registration
+          </button>
+          <button class="tab-btn" id="tab-exhibitor" onclick="switchTab('exhibitor')">
+            <i class="fa-solid fa-briefcase"></i> Exhibitor Booth Booking
+          </button>
+        </div>
+
+        <div class="form-container">
+          <!-- Visitor Pane -->
+          <div class="tab-pane active" id="pane-visitor">
+            <div class="form-intro">
+              <h3>Complimentary Trade Visitor Pass</h3>
+              <p>Gain access to the full exhibition hall, tech keynote sessions, and digital matchmaking hub.</p>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'Visitor Pass Generated! Check your email.')">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="v-fname">First Name *</label>
+                  <input type="text" id="v-fname" placeholder="Enter first name" required />
+                </div>
+                <div class="form-group">
+                  <label for="v-lname">Last Name *</label>
+                  <input type="text" id="v-lname" placeholder="Enter last name" required />
+                </div>
+                <div class="form-group">
+                  <label for="v-email">Business Email *</label>
+                  <input type="email" id="v-email" placeholder="name@company.com" required />
+                </div>
+                <div class="form-group">
+                  <label for="v-phone">Mobile / WhatsApp *</label>
+                  <input type="tel" id="v-phone" placeholder="+91 98765 43210" required />
+                </div>
+                <div class="form-group col-full">
+                  <label for="v-org">Company / Institution Name *</label>
+                  <input type="text" id="v-org" placeholder="Full legal organization name" required />
+                </div>
+                <div class="form-group col-full">
+                  <label for="v-interest">Sector of Interest *</label>
+                  <select id="v-interest" required>
+                    <option value="" disabled selected>-- Select primary category --</option>
+                    <option value="apis">APIs, Intermediates & Fine Chemicals</option>
+                    <option value="finished">Finished Formulations & Generic Drugs</option>
+                    <option value="machinery">Pharma Processing Machinery & Equipment</option>
+                    <option value="packaging">Packaging Materials & Medical Devices</option>
+                  </select>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Complete Registration</button>
+            </form>
+          </div>
+
+          <!-- Exhibitor Pane -->
+          <div class="tab-pane" id="pane-exhibitor">
+            <div class="form-intro">
+              <h3>Reserve Booth Space</h3>
+              <p>Showcase your products directly to over 25,000 procurement leads and B2B distributors.</p>
+            </div>
+            <form onsubmit="handleFormSubmit(event, 'Exhibitor Request Submitted! Our floor manager will connect with you.')">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label for="e-person">Contact Person Name *</label>
+                  <input type="text" id="e-person" placeholder="Full name of representative" required />
+                </div>
+                <div class="form-group">
+                  <label for="e-designation">Designation</label>
+                  <input type="text" id="e-designation" placeholder="e.g. Director, Sales Lead" />
+                </div>
+                <div class="form-group col-full">
+                  <label for="e-company">Exhibiting Company Name *</label>
+                  <input type="text" id="e-company" placeholder="Official Registered Company Name" required />
+                </div>
+                <div class="form-group">
+                  <label for="e-email">Corporate Email *</label>
+                  <input type="email" id="e-email" placeholder="trade@company.com" required />
+                </div>
+                <div class="form-group">
+                  <label for="e-phone">Direct Contact Number *</label>
+                  <input type="tel" id="e-phone" placeholder="+91 98765 43210" required />
+                </div>
+
+                <!-- Exact Space Required Dropdown -->
+                <div class="form-group col-full">
+                  <label for="e-space">Space Required *</label>
+                  <select id="e-space" required>
+                    <option value="" disabled selected>-- Select Booth Configuration --</option>
+                    <option value="6sqm">6 sq.m (Standard Shell Scheme)</option>
+                    <option value="9sqm">9 sq.m (Standard Shell Scheme)</option>
+                    <option value="12sqm">12 sq.m (Prime Shell Scheme)</option>
+                    <option value="others">Others (Custom Raw Space / Island Booth)</option>
+                  </select>
+                </div>
+
+                <div class="form-group col-full">
+                  <label for="e-notes">Booth Preferences & Technical Notes</label>
+                  <textarea id="e-notes" rows="3" placeholder="Corner booth preference, 3-phase power requirement, water inlet, etc."></textarea>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Submit Space Booking Request</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ Section -->
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <span class="tag">Inquiries</span>
+        <h2>Frequently Asked Questions</h2>
+      </div>
+
+      <div class="faq-container">
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            What is included in the standard Shell Scheme booth?
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Standard booths (6 sq.m, 9 sq.m, 12 sq.m) include partition wall panels, carpet flooring, company fascia board, spotlights, electrical connection, a reception counter, and two chairs.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            Is Visitor Pass registration free of charge?
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Yes, pre-registration for verified healthcare, B2B trade, and pharma professionals is complimentary when done online prior to the expo dates.
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <div class="faq-question" onclick="toggleFaq(this)">
+            When will stall allocation letters be issued?
+            <i class="fa-solid fa-chevron-down"></i>
+          </div>
+          <div class="faq-answer">
+            Stall allocations are finalized on a first-come, first-served basis following the receipt of the booking advance and registration agreement.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div class="brand-logo" style="margin-bottom: 1rem;">
+            <div class="logo-symbol"><i class="fa-solid fa-notes-medical"></i></div>
+            <div class="brand-text">
+              <h1 style="color:white;">The Global Healthcare Expo</h1>
+            </div>
+          </div>
+          <p>The definitive networking and sourcing hub for the international pharmaceutical manufacturing and healthcare industry.</p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Sectors</h4>
+          <ul>
+            <li><a href="#sectors">APIs & Ingredients</a></li>
+            <li><a href="#sectors">Formulations</a></li>
+            <li><a href="#sectors">Machinery & Tech</a></li>
+            <li><a href="#sectors">Packaging Systems</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Registration</h4>
+          <ul>
+            <li><a href="#registration" onclick="openPortalTab('visitor')">Trade Visitor Pass</a></li>
+            <li><a href="#registration" onclick="openPortalTab('exhibitor')">Book an Exhibit Stall</a></li>
+            <li><a href="#faq">Sponsorship Deck</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Contact Desk</h4>
+          <p><i class="fa-solid fa-envelope"></i> contact@globalhealthcareexpo.com</p>
+          <p style="margin-top: 0.5rem;"><i class="fa-solid fa-phone"></i> +91 11 4000 8000</p>
+          <p style="margin-top: 0.5rem;"><i class="fa-solid fa-location-dot"></i> New Delhi, India</p>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 The Global Healthcare Expo. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Interactivity Scripts -->
+  <script>
+    function switchTab(tab) {
+      const visitorPane = document.getElementById('pane-visitor');
+      const exhibitorPane = document.getElementById('pane-exhibitor');
+      const visitorTab = document.getElementById('tab-visitor');
+      const exhibitorTab = document.getElementById('tab-exhibitor');
+
+      if (tab === 'visitor') {
+        visitorPane.classList.add('active');
+        exhibitorPane.classList.remove('active');
+        visitorTab.classList.add('active');
+        exhibitorTab.classList.remove('active');
+      } else {
+        exhibitorPane.classList.add('active');
+        visitorPane.classList.remove('active');
+        exhibitorTab.classList.add('active');
+        visitorTab.classList.remove('active');
+      }
+    }
+
+    function openPortalTab(tab) {
+      switchTab(tab);
+      const target = document.getElementById('registration');
+      target.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleFaq(element) {
+      const parent = element.parentElement;
+      parent.classList.toggle('open');
+      const icon = element.querySelector('i');
+      if (parent.classList.contains('open')) {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+      } else {
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+      }
+    }
+
+    function handleFormSubmit(e, message) {
+      e.preventDefault();
+      alert(message);
+      e.target.reset();
+    }
+  </script>
+</body>
+</html>
