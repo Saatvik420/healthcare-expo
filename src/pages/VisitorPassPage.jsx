@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
+import logoImg from '../assets/logo-transparent.png';
 
 import { SECTOR_OPTIONS } from '../config/sectorsData';
 
@@ -289,9 +290,11 @@ export default function VisitorPassPage({ onNotify }) {
             <div className="badge-preview-side">
               <div className="badge-preview-box">
                 <div className="badge-header">
-                  <div className="badge-logo-icon">
-                    <i className="fa-solid fa-hospital-user"></i>
-                  </div>
+                  <img
+                    src={logoImg}
+                    alt="The Global Healthcare Expo"
+                    className="badge-expo-brand-logo"
+                  />
                   <div>
                     <h4>THE GLOBAL HEALTHCARE EXPO</h4>
                     <span>INDIA–ASEAN GLOBAL CONFLUENCE &bull; 21st &amp; 22nd Jan 2027</span>

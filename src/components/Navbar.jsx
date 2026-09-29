@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
+import logoImg from '../assets/logo-transparent.png';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -35,23 +36,22 @@ export default function Navbar() {
       <header>
         <div className="container nav-container">
           <Link to="/" className="brand-logo" onClick={closeMenu}>
-            <div className="logo-symbol">
-              <i className="fa-solid fa-hospital-user"></i>
-            </div>
-            <div className="brand-text">
-              <h1>The Global Healthcare Expo</h1>
-              <span className="brand-domain-subtext">Part of IndiGlobalExpo.com</span>
-            </div>
+            <img
+              src={logoImg}
+              alt="The Global Healthcare Expo"
+              className="navbar-brand-logo-img"
+            />
           </Link>
 
           <ul className={`nav-links ${mobileMenuOpen ? 'mobile-open' : ''}`}>
             {/* Mobile Header Inside Drawer */}
             <li className="mobile-drawer-header">
               <div className="mobile-drawer-brand">
-                <div className="logo-symbol mini">
-                  <i className="fa-solid fa-hospital-user"></i>
-                </div>
-                <span>The Global Healthcare Expo 2027</span>
+                <img
+                  src={logoImg}
+                  alt="The Global Healthcare Expo 2027"
+                  className="mobile-drawer-logo-img"
+                />
               </div>
               <button
                 type="button"

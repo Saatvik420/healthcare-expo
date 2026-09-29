@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
-import aseanLogo from '../assets/Indian Asean Global Confluence Logo with GTTCI Logo.png';
+import logoImg from '../assets/logo.png';
+import posterImg from '../assets/poster.png';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 
 export default function Footer() {
@@ -9,26 +10,24 @@ export default function Footer() {
         <div className="footer-grid">
           {/* Brand Column */}
           <div className="footer-col footer-brand-col">
-            <Link to="/" className="brand-logo" style={{ marginBottom: '1rem', textDecoration: 'none' }}>
-              <div className="logo-symbol">
-                <i className="fa-solid fa-hospital-user"></i>
-              </div>
-              <div className="brand-text">
-                <h1 style={{ color: 'white' }}>The Global Healthcare Expo</h1>
-                <span style={{ color: '#34d399' }} className="brand-domain-subtext">Part of IndiGlobalExpo.com</span>
-              </div>
+            <Link to="/" className="brand-logo" style={{ marginBottom: '1.25rem', textDecoration: 'none' }}>
+              <img
+                src={logoImg}
+                alt="The Global Healthcare Expo"
+                className="footer-brand-logo-img"
+              />
             </Link>
             <p>
-              The Global Healthcare Expo 2027 is designed as a business and market-expansion platform for pharmaceutical, health-tech, diagnostics providers & other healthcare companies looking to expand their presence across Thailand, ASEAN and international markets.
+              The Global Healthcare Expo 2027 is designed as a business and market-expansion platform for pharmaceutical, health-tech, diagnostics providers &amp; other healthcare companies looking to expand their presence across Thailand, ASEAN and international markets.
             </p>
 
             <div className="footer-partner-badge">
-              <span className="footer-partner-caption">Official Initiative Banner:</span>
-              <div className="footer-logo-box">
+              <span className="footer-partner-caption">Official Expo Poster:</span>
+              <div className="footer-poster-box">
                 <img
-                  src={aseanLogo}
-                  alt="India-ASEAN Global Confluence 2027 with GTTCI Logo"
-                  className="footer-asean-logo"
+                  src={posterImg}
+                  alt="The Global Healthcare Expo 2027 Official Poster"
+                  className="footer-poster-thumb"
                 />
               </div>
             </div>
@@ -39,22 +38,22 @@ export default function Footer() {
             <h4>Exhibition Pavilions</h4>
             <ul>
               <li>
-                <a href="/#sectors">Healthcare Facilities & Hospitals</a>
+                <a href="/#who-should-exhibit">Pharmaceuticals</a>
               </li>
               <li>
-                <a href="/#sectors">Diagnostics & Surgicals</a>
+                <a href="/#who-should-exhibit">API &amp; Fine Chemicals</a>
               </li>
               <li>
-                <a href="/#sectors">APIs & Fine Chemicals</a>
+                <a href="/#who-should-exhibit">Medical Devices</a>
               </li>
               <li>
-                <a href="/#sectors">Formulations & Generics</a>
+                <a href="/#who-should-exhibit">Surgical Equipments</a>
               </li>
               <li>
-                <a href="/#sectors">Machinery & Cleanroom</a>
+                <a href="/#who-should-exhibit">Health-tech &amp; AI</a>
               </li>
               <li>
-                <a href="/#sectors">Packaging & Delivery Systems</a>
+                <a href="/#who-should-exhibit">Hospital Solutions</a>
               </li>
             </ul>
           </div>
@@ -116,14 +115,14 @@ export default function Footer() {
             </div>
             <div className="footer-contact-item">
               <i className="fa-solid fa-location-dot"></i>
-              <span>Bangkok, Thailand (21st & 22nd January 2027)</span>
+              <span>Bangkok, Thailand (21st &amp; 22nd January 2027)</span>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <p>
-            &copy; 2027 The Global Healthcare Expo &bull; India-ASEAN Global Confluence &bull; In collaboration with GTTCI & Asepsis Marketing. All rights reserved.
+            &copy; 2027 The Global Healthcare Expo &bull; India-ASEAN Global Confluence &bull; In collaboration with GTTCI &amp; Asepsis Marketing. All rights reserved.
           </p>
         </div>
       </div>

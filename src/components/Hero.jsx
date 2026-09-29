@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import aseanLogo from '../assets/Indian Asean Global Confluence Logo with GTTCI Logo.png';
+import posterImg from '../assets/poster.png';
 
 export default function Hero() {
   return (
@@ -8,7 +8,7 @@ export default function Hero() {
         <div className="hero-wrapper">
           <div className="hero-badge-group">
             <span className="hero-cs-pill">
-              <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027
+              <i className="fa-solid fa-calendar-days"></i> 21st &amp; 22nd January 2027
             </span>
             <div className="hero-expo-spotlight-badge">
               <span className="hero-expo-title-highlight">
@@ -73,25 +73,21 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Co-Branding Card featuring India-ASEAN Global Confluence & GTTCI Logo */}
+        {/* Official Event Poster Spotlight Card */}
         <div className="hero-partner-card">
           <div className="partner-card-inner">
             <div className="partner-card-header">
-              <span className="partner-eyebrow">ORGANISED UNDER THE AEGIS OF</span>
-              <h4>India–ASEAN Global Confluence 2027</h4>
+              <span className="partner-eyebrow">OFFICIAL EVENT SPOTLIGHT</span>
+              <h4>The Global Healthcare Expo 2027</h4>
             </div>
-            <div className="partner-logo-wrapper">
+            <div className="hero-poster-wrapper">
               <img
-                src={aseanLogo}
-                alt="India-ASEAN Global Confluence 2027 Logo with GTTCI"
-                className="hero-asean-logo-img"
+                src={posterImg}
+                alt="The Global Healthcare Expo 2027 Official Poster - Bangkok, Thailand"
+                className="hero-poster-img"
               />
             </div>
             <div className="partner-card-footer">
-              <p>
-                <strong>The Global Healthcare Expo 2027</strong> is organized under <strong>IndiGlobal Expo</strong> in
-                official association with the <strong>Global Trade &amp; Technology Council of India (GTTCI)</strong>.
-              </p>
               <div className="partner-meta-row">
                 <span><i className="fa-solid fa-calendar-check text-primary"></i> 21st &amp; 22nd January 2027</span>
                 <span><i className="fa-solid fa-location-dot text-primary"></i> Bangkok, Thailand</span>

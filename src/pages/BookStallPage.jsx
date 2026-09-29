@@ -3,6 +3,7 @@ import { useSearchParams, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { SECTOR_OPTIONS } from '../config/sectorsData';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
+import logoImg from '../assets/logo-transparent.png';
 
 const boothOptions = [
   {
@@ -351,9 +352,11 @@ export default function BookStallPage({ onNotify }) {
             <div className="badge-preview-side">
               <div className="badge-preview-box">
                 <div className="badge-header">
-                  <div className="badge-logo-icon">
-                    <i className="fa-solid fa-hospital-user"></i>
-                  </div>
+                  <img
+                    src={logoImg}
+                    alt="The Global Healthcare Expo"
+                    className="badge-expo-brand-logo"
+                  />
                   <div>
                     <h4>THE GLOBAL HEALTHCARE EXPO</h4>
                     <span>INDIA–ASEAN GLOBAL CONFLUENCE &bull; BANGKOK 2027</span>

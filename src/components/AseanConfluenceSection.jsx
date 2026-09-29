@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import aseanLogo from '../assets/Indian Asean Global Confluence Logo with GTTCI Logo.png';
+import posterImg from '../assets/poster.png';
 
 export default function AseanConfluenceSection() {
   return (
@@ -17,17 +17,17 @@ export default function AseanConfluenceSection() {
         </div>
 
         <div className="confluence-grid">
-          {/* Left Column: Official Confluence Logo & Partner Showcase */}
+          {/* Left Column: Official Poster & Partner Showcase */}
           <div className="confluence-logo-card">
             <div className="confluence-badge-ribbon">
-              <span>Official Confluence Banner</span>
+              <span>Official Expo Poster</span>
             </div>
             
-            <div className="confluence-image-container">
+            <div className="confluence-image-container confluence-poster-wrapper">
               <img
-                src={aseanLogo}
-                alt="India-ASEAN Global Confluence 2027 Logo with GTTCI Co-Presenter"
-                className="confluence-showcase-logo"
+                src={posterImg}
+                alt="The Global Healthcare Expo 2027 Official Event Poster"
+                className="confluence-showcase-poster"
               />
             </div>
 
