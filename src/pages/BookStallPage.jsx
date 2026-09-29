@@ -115,6 +115,8 @@ export default function BookStallPage({ onNotify }) {
       hall:
         formData.sector === 'healthcare-facilities'
           ? 'Hall 6 (Healthcare Facilities & Hospitals)'
+          : formData.sector === 'diagnostics-surgicals'
+          ? 'Hall 5 (Diagnostics & Surgicals)'
           : formData.sector === 'apis'
           ? 'Hall 1 & 2 (APIs)'
           : formData.sector === 'finished'
@@ -152,7 +154,7 @@ export default function BookStallPage({ onNotify }) {
       <section className="page-header">
         <div className="container">
           <span className="tag">
-            <i className="fa-solid fa-sparkles"></i> COMING SOON 2027 &bull; Exhibitor Portal
+            <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027 &bull; Exhibitor Portal
           </span>
           <h1>Book Your Healthcare Facility & Pharma Stall</h1>
           <p>
@@ -439,6 +441,7 @@ export default function BookStallPage({ onNotify }) {
                       required
                     >
                       <option value="healthcare-facilities">Hall 6: Healthcare Facilities & Hospital Infrastructure (Featured)</option>
+                      <option value="diagnostics-surgicals">Hall 5: Diagnostics and Surgicals (New)</option>
                       <option value="apis">Hall 1-2: APIs & Fine Chemicals</option>
                       <option value="finished">Hall 3: Finished Dosages & Formulations</option>
                       <option value="machinery">Hall 4: Pharma Machinery & Cleanroom</option>

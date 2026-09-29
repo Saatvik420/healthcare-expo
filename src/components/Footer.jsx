@@ -37,22 +37,25 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h4>Sectors & Zones</h4>
+            <h4>Exhibition Pavilions</h4>
             <ul>
               <li>
-                <Link to="/sectors?zone=healthcare-facilities">Healthcare Facilities & Hospitals</Link>
+                <a href="/#sectors">Healthcare Facilities & Hospitals</a>
               </li>
               <li>
-                <Link to="/sectors?zone=apis">APIs & Ingredients</Link>
+                <a href="/#sectors">Diagnostics & Surgicals</a>
               </li>
               <li>
-                <Link to="/sectors?zone=finished">Formulations & Generics</Link>
+                <a href="/#sectors">APIs & Fine Chemicals</a>
               </li>
               <li>
-                <Link to="/sectors?zone=machinery">Machinery & Cleanroom</Link>
+                <a href="/#sectors">Formulations & Generics</a>
               </li>
               <li>
-                <Link to="/sectors?zone=packaging">Packaging Systems</Link>
+                <a href="/#sectors">Machinery & Cleanroom</a>
+              </li>
+              <li>
+                <a href="/#sectors">Packaging Systems</a>
               </li>
             </ul>
           </div>

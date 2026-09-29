@@ -7,7 +7,7 @@ export default function AseanConfluenceSection() {
       <div className="container">
         <div className="section-header">
           <span className="tag">
-            <i className="fa-solid fa-sparkles"></i> Official Banner Initiative &bull; COMING SOON 2027
+            <i className="fa-solid fa-calendar-days"></i> Official Banner Initiative &bull; 21st & 22nd January 2027
           </span>
           <h2>Held Under India-ASEAN Global Confluence 2027</h2>
           <p>
@@ -36,7 +36,7 @@ export default function AseanConfluenceSection() {
                 <i className="fa-solid fa-calendar-check text-primary"></i>
                 <div>
                   <strong>Edition & Timeline</strong>
-                  <span>2027 Edition &bull; Coming Soon</span>
+                  <span>21st & 22nd January 2027</span>
                 </div>
               </div>
               <div className="confluence-meta-item">
@@ -117,9 +117,9 @@ export default function AseanConfluenceSection() {
             </div>
 
             <div className="confluence-actions-row">
-              <Link to="/sectors" className="btn btn-primary">
+              <a href="#sectors" className="btn btn-primary">
                 <i className="fa-solid fa-cubes"></i> Explore Product Pavilions
-              </Link>
+              </a>
               <Link to="/book-stall" className="btn btn-outline">
                 <i className="fa-solid fa-store"></i> Reserve Exhibition Booth
               </Link>

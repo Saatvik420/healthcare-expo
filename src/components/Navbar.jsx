@@ -51,13 +51,12 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li>
-            <NavLink
-              to="/sectors"
-              className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
+            <a
+              href="/#sectors"
               onClick={closeMenu}
             >
-              Key Sectors
-            </NavLink>
+              Pavilions
+            </a>
           </li>
           <li>
             <NavLink

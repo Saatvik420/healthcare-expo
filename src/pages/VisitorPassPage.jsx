@@ -51,6 +51,8 @@ export default function VisitorPassPage({ onNotify }) {
       sectorLabel:
         formData.sector === 'healthcare-facilities'
           ? 'Healthcare Facilities & Hospital Infrastructure'
+          : formData.sector === 'diagnostics-surgicals'
+          ? 'Diagnostics and Surgicals'
           : formData.sector === 'apis'
           ? 'APIs & Fine Chemicals'
           : formData.sector === 'finished'
@@ -80,7 +82,7 @@ export default function VisitorPassPage({ onNotify }) {
       <section className="page-header">
         <div className="container">
           <span className="tag">
-            <i className="fa-solid fa-sparkles"></i> COMING SOON 2027 &bull; Trade Visitor Pass
+            <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027 &bull; Trade Visitor Pass
           </span>
           <h1>Pre-Register for IndiGlobal Healthcare Expo</h1>
           <p>
@@ -256,6 +258,7 @@ export default function VisitorPassPage({ onNotify }) {
                       required
                     >
                       <option value="healthcare-facilities">Healthcare Facilities & Hospital Infrastructure (Featured)</option>
+                      <option value="diagnostics-surgicals">Diagnostics and Surgicals (New)</option>
                       <option value="apis">APIs, Intermediates & Fine Chemicals</option>
                       <option value="finished">Finished Formulations & Generic Drugs</option>
                       <option value="machinery">Pharma Processing Machinery & Cleanroom</option>
@@ -302,8 +305,8 @@ export default function VisitorPassPage({ onNotify }) {
                     <i className="fa-solid fa-hospital-user"></i>
                   </div>
                   <div>
-                    <h4>INDIGLOBAL HEALTHCARE EXPO</h4>
-                    <span>INDIA-ASEAN GLOBAL CONFLUENCE 2027 &bull; COMING SOON</span>
+                    <h4>THE GLOBAL HEALTHCARE EXPO</h4>
+                    <span>INDIA-ASEAN GLOBAL CONFLUENCE &bull; 21st & 22nd January 2027</span>
                   </div>
                 </div>
 

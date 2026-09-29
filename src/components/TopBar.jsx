@@ -6,16 +6,16 @@ export default function TopBar() {
       <div className="container top-bar-content">
         <div className="top-bar-info">
           <span className="topbar-coming-soon-pill">
-            <i className="fa-solid fa-sparkles"></i> COMING SOON 2027
+            <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027
           </span>
           <span className="topbar-confluence-text">
-            <strong>India-ASEAN Global Confluence 2027</strong> &bull; An IndiGlobal Expo Initiative (GTTCI)
+            <strong>India-ASEAN Global Confluence 2027</strong> &bull; Bangkok, Thailand
           </span>
         </div>
         <div className="top-bar-links">
-          <Link to="/sectors">
-            <i className="fa-solid fa-hospital"></i> Healthcare & Pharma
-          </Link>
+          <a href="/#sectors">
+            <i className="fa-solid fa-hospital"></i> Healthcare Pavilions
+          </a>
           <Link to="/schedule">
             <i className="fa-solid fa-clock"></i> Schedule
           </Link>

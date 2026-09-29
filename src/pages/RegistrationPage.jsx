@@ -18,7 +18,7 @@ export default function RegistrationPage({ onNotify }) {
       <section className="page-header">
         <div className="container">
           <span className="tag">
-            <i className="fa-solid fa-sparkles"></i> COMING SOON 2027 &bull; Official Registration Desk
+            <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027 &bull; Official Registration Desk
           </span>
           <h1>Registration & Booth Booking Portal</h1>
           <p>

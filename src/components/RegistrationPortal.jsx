@@ -81,7 +81,7 @@ export default function RegistrationPortal({ activeTab, setActiveTab, onNotify }
       <div className="container">
         <div className="section-header">
           <span className="tag">
-            <i className="fa-solid fa-sparkles"></i> COMING SOON 2027 &bull; Fast-Track Portal
+            <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027 &bull; Fast-Track Portal
           </span>
           <h2>Confirm Your Participation</h2>
           <p>
@@ -241,6 +241,7 @@ export default function RegistrationPortal({ activeTab, setActiveTab, onNotify }
                         -- Select primary category --
                       </option>
                       <option value="healthcare-facilities">Healthcare Facilities & Hospital Infrastructure (Featured)</option>
+                      <option value="diagnostics-surgicals">Diagnostics and Surgicals (New)</option>
                       <option value="apis">APIs, Intermediates & Fine Chemicals</option>
                       <option value="finished">Finished Formulations & Generic Drugs</option>
                       <option value="machinery">Pharma Processing Machinery & Equipment</option>

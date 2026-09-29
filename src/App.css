@@ -587,6 +587,312 @@ header {
 }
 
 /* ==========================================================================
+   COMPACT SECTORS SHOWCASE & POPUP MODAL
+   ========================================================================== */
+.sectors-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.sector-compact-card {
+  background: var(--white);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.sector-compact-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(5, 150, 105, 0.4);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+}
+
+.sector-card-banner {
+  position: relative;
+  height: 140px;
+  overflow: hidden;
+}
+
+.sector-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.sector-compact-card:hover .sector-card-thumb {
+  transform: scale(1.05);
+}
+
+.sector-badge-pill {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.sector-hall-pill {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: rgba(15, 23, 42, 0.85);
+  color: #f1f5f9;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  backdrop-filter: blur(4px);
+}
+
+.sector-compact-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.sector-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.5rem;
+}
+
+.sector-mini-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.sector-title-row h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent-navy);
+  line-height: 1.25;
+}
+
+.sector-tagline-text {
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin-bottom: 1.15rem;
+  flex-grow: 1;
+}
+
+.sector-compact-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.sector-popup-trigger-btn {
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+}
+
+.sector-quick-book-btn {
+  font-size: 0.8rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+}
+
+/* Sector Modal Backdrop & Content */
+.sector-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  overflow-y: auto;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sector-modal-content {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 2.25rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  animation: modalScaleIn 0.25s ease-out;
+}
+
+.sector-modal-close-btn {
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: none;
+  color: var(--text-dark);
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sector-modal-close-btn:hover {
+  background: #e2e8f0;
+  color: var(--accent-red);
+}
+
+.sector-modal-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-right: 2rem;
+}
+
+.sector-modal-icon-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary) 0%, #10b981 100%);
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.sector-modal-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sector-modal-header h2 {
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: var(--accent-navy);
+  line-height: 1.25;
+}
+
+.sector-modal-tagline {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+}
+
+.sector-modal-desc-box {
+  background: #f8fafc;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.sector-modal-desc-box h4 {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin-bottom: 0.35rem;
+}
+
+.sector-modal-desc-box p {
+  color: var(--text-dark);
+  font-size: 0.925rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.sector-modal-subcats,
+.sector-modal-highlights {
+  margin-bottom: 1.5rem;
+}
+
+.sector-modal-subcats h4,
+.sector-modal-highlights h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent-navy);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sector-subcat-list,
+.sector-highlight-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.6rem 1rem;
+}
+
+.sector-subcat-list li,
+.sector-highlight-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  line-height: 1.4;
+}
+
+.sector-subcat-list li i,
+.sector-highlight-list li i {
+  margin-top: 0.2rem;
+  flex-shrink: 0;
+}
+
+.sector-modal-footer {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-color);
+  margin-top: 1.5rem;
+}
+
+/* ==========================================================================
    HOME REGISTRATION PORTAL
    ========================================================================== */
 .registration-section {
@@ -2259,8 +2565,8 @@ footer {
    ========================================================================== */
 .contact-cards-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
   margin-bottom: 3rem;
 }
 
@@ -3744,13 +4050,48 @@ footer {
   font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.05em;
-  padding: 0.4rem 0.9rem;
+  padding: 0.45rem 1rem;
   border-radius: 100px;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.45rem;
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
-  animation: floatGentle 4s ease-in-out infinite;
+  white-space: nowrap;
+}
+
+.hero-expo-spotlight-badge {
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(6, 78, 59, 0.35) 100%);
+  border: 1.5px solid rgba(52, 211, 153, 0.55);
+  border-radius: 12px;
+  padding: 0.45rem 1.1rem;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
+  backdrop-filter: blur(10px);
+}
+
+.hero-expo-title-highlight {
+  font-size: 1.08rem;
+  font-weight: 800;
+  color: #a7f3d0;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.hero-expo-title-highlight i {
+  color: #34d399;
+}
+
+.hero-expo-collab-text {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  letter-spacing: 0.03em;
+  margin-top: 1px;
 }
 
 .hero-key-highlights {

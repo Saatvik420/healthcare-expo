@@ -174,14 +174,14 @@ export default function UserDashboardPage({ onNotify }) {
                       <i className="fa-solid fa-chevron-right arrow-icon"></i>
                     </Link>
 
-                    <Link to="/sectors" className="resource-link-row">
+                    <a href="/#sectors" className="resource-link-row">
                       <i className="fa-solid fa-boxes-stacked"></i>
                       <div>
                         <strong>Explore Product Zones</strong>
-                        <small>Locate exhibitors in Halls 1 through 5</small>
+                        <small>Locate exhibitors in Halls 1 through 6</small>
                       </div>
                       <i className="fa-solid fa-chevron-right arrow-icon"></i>
-                    </Link>
+                    </a>
 
                     <Link to="/contact" className="resource-link-row">
                       <i className="fa-solid fa-headset"></i>

@@ -8,11 +8,16 @@ export default function Hero() {
         <div className="hero-wrapper">
           <div className="hero-badge-group">
             <span className="hero-cs-pill">
-              <i className="fa-solid fa-sparkles"></i> COMING SOON 2027
+              <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027
             </span>
-            <span className="hero-badge">
-              <i className="fa-solid fa-globe"></i> IndiGlobal Expo &bull; Healthcare Facilities & Pharma Summit
-            </span>
+            <div className="hero-expo-spotlight-badge">
+              <span className="hero-expo-title-highlight">
+                <i className="fa-solid fa-hospital-user"></i> The Global Healthcare Expo 2027
+              </span>
+              <span className="hero-expo-collab-text">
+                In collaboration with GTTCI & Asepsis Marketing
+              </span>
+            </div>
           </div>
 
           <h1>
@@ -74,7 +79,7 @@ export default function Hero() {
                 <strong>Global Trade & Technology Council of India (GTTCI)</strong>.
               </p>
               <div className="partner-meta-row">
-                <span><i className="fa-solid fa-calendar-check text-primary"></i> 2027 Edition</span>
+                <span><i className="fa-solid fa-calendar-check text-primary"></i> 21st & 22nd January 2027</span>
                 <span><i className="fa-solid fa-location-dot text-primary"></i> Bangkok, Thailand</span>
               </div>
             </div>

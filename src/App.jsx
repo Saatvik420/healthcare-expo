@@ -12,7 +12,6 @@ import { DataProvider } from './context/DataContext';
 
 // Pages
 import HomePage from './pages/HomePage';
-import SectorsPage from './pages/SectorsPage';
 import VisitorPassPage from './pages/VisitorPassPage';
 import BookStallPage from './pages/BookStallPage';
 import SponsorshipPage from './pages/SponsorshipPage';
@@ -57,7 +56,6 @@ function App() {
               <Route path="/" element={<HomePage onNotify={handleNotify} />} />
               <Route path="/registration" element={<RegistrationPage onNotify={handleNotify} />} />
               <Route path="/register" element={<RegistrationPage onNotify={handleNotify} />} />
-              <Route path="/sectors" element={<SectorsPage />} />
               <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
               <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />
               <Route path="/sponsorship" element={<SponsorshipPage onNotify={handleNotify} />} />

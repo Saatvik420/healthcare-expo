@@ -60,9 +60,9 @@ export default function ContactPage({ onNotify }) {
       <section className="page-header">
         <div className="container">
           <span className="tag">Support & Assistance</span>
-          <h1>Contact Desk & Venue Logistics</h1>
+          <h1>Contact Desk & Expo Secretariat</h1>
           <p>
-            Have inquiries regarding booth allocation, travel arrangements, or visa documentation?
+            Have inquiries regarding booth allocation, visitor trade passes, or event participation?
             Our organizing secretariat and dedicated helpdesk teams are at your disposal.
           </p>
         </div>
@@ -79,11 +79,10 @@ export default function ContactPage({ onNotify }) {
               <h3>Exhibitor Secretariat</h3>
               <p>For stall bookings, floorplan layout allotments, and sponsorship packages.</p>
               <div className="contact-meta">
-                <div><i className="fa-brands fa-whatsapp text-whatsapp"></i> <strong>{CONTACT_CONFIG.exhibitor.display}</strong> (WhatsApp)</div>
-                <div><i className="fa-solid fa-phone"></i> {CONTACT_CONFIG.general.landline}</div>
-                <div><i className="fa-solid fa-envelope"></i> {CONTACT_CONFIG.general.exhibitorEmail}</div>
+                <div><i className="fa-solid fa-envelope"></i> info@indiglobalexpo.com</div>
+                <div><i className="fa-solid fa-phone"></i> +91 7357590375</div>
               </div>
-              <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginTop: '1.25rem' }}>
                 <a
                   href={getWhatsAppUrl('exhibitor', 'Hello IndiGlobal Exhibitor Secretariat, I am interested in booking an exhibitor stall for India-ASEAN Global Confluence 2027.')}
                   target="_blank"
@@ -102,11 +101,10 @@ export default function ContactPage({ onNotify }) {
               <h3>Visitor & Delegate Desk</h3>
               <p>For visitor badge assistance, group delegations, and matchmaking appointments.</p>
               <div className="contact-meta">
-                <div><i className="fa-brands fa-whatsapp text-whatsapp"></i> <strong>{CONTACT_CONFIG.visitor.display}</strong> (WhatsApp)</div>
-                <div><i className="fa-solid fa-envelope"></i> {CONTACT_CONFIG.general.visitorEmail}</div>
-                <div><i className="fa-solid fa-circle-question"></i> Helpdesk at Gate 4 & Gate 10</div>
+                <div><i className="fa-solid fa-envelope"></i> info@indiglobalexpo.com</div>
+                <div><i className="fa-solid fa-phone"></i> +91 7357590375</div>
               </div>
-              <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginTop: '1.25rem' }}>
                 <a
                   href={getWhatsAppUrl('visitor', 'Hello IndiGlobal Visitor Desk, I need assistance regarding my trade visitor pass for India-ASEAN Global Confluence 2027.')}
                   target="_blank"
@@ -115,19 +113,6 @@ export default function ContactPage({ onNotify }) {
                 >
                   <i className="fa-brands fa-whatsapp"></i> WhatsApp Visitor Desk
                 </a>
-              </div>
-            </div>
-
-            <div className="contact-info-card">
-              <div className="contact-card-icon">
-                <i className="fa-solid fa-plane-departure"></i>
-              </div>
-              <h3>International Travel & Visa</h3>
-              <p>Assistance with Indian Conference Visa letters, hotel bookings, and airport transfers.</p>
-              <div className="contact-meta">
-                <div><i className="fa-solid fa-passport"></i> visa@globalhealthcareexpo.com</div>
-                <div><i className="fa-solid fa-hotel"></i> concierge@globalhealthcareexpo.com</div>
-                <div><i className="fa-solid fa-shield-halved"></i> Fast-track official documentation</div>
               </div>
             </div>
           </div>

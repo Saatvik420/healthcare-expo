@@ -46,7 +46,7 @@ export default function WhatsAppWidget() {
 
           <div className="whatsapp-popup-body">
             <div className="whatsapp-confluence-badge">
-              <i className="fa-solid fa-sparkles"></i> <strong>Coming Soon 2027</strong> &bull; Fast-Track Registration
+              <i className="fa-solid fa-calendar-days"></i> <strong>21st & 22nd January 2027</strong> &bull; Fast-Track Registration
             </div>
             
             <p className="whatsapp-greeting-msg">

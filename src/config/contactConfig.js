@@ -8,9 +8,10 @@
 export const CONTACT_CONFIG = {
   // Visitor Trade Pass & Attendee Helpdesk
   visitor: {
-    number: '9990383139',
+    number: '7357590375',
     countryCode: '91',
-    display: '+91 99903 83139',
+    display: '+91 73575 90375',
+    email: 'info@indiglobalexpo.com',
     deskName: 'Visitor & Trade Pass Desk',
   },
 
@@ -19,15 +20,17 @@ export const CONTACT_CONFIG = {
     number: '7357590375',
     countryCode: '91',
     display: '+91 73575 90375',
+    email: 'info@indiglobalexpo.com',
     deskName: 'Exhibitor Secretariat',
   },
 
   // General Expo Secretariat
   general: {
-    landline: '+91 11 4000 8000',
+    phone: '+91 73575 90375',
+    landline: '+91 73575 90375',
     email: 'info@indiglobalexpo.com',
-    visitorEmail: 'visitor@globalhealthcareexpo.com',
-    exhibitorEmail: 'stalls@globalhealthcareexpo.com',
+    visitorEmail: 'info@indiglobalexpo.com',
+    exhibitorEmail: 'info@indiglobalexpo.com',
     venue: 'Bangkok, Thailand',
     officeAddress: 'C/O GTTCI, Areness House, 5, Sardar Patel Marg, Diplomatic Enclave, Chanakyapuri, New Delhi - 110021',
   },
@@ -36,7 +39,7 @@ export const CONTACT_CONFIG = {
 /**
  * Format raw number with country code for WhatsApp wa.me links
  * @param {'visitor' | 'exhibitor'} type 
- * @returns {string} Digits-only phone string with country code (e.g. '919990383139')
+ * @returns {string} Digits-only phone string with country code (e.g. '917357590375')
  */
 export const getCleanWhatsAppNumber = (type = 'visitor') => {
   const item = CONTACT_CONFIG[type] || CONTACT_CONFIG.visitor;
