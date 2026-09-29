@@ -8,10 +8,8 @@ const boothOptions = [
   {
     id: '9sqm',
     title: '9 sq.m Shell Scheme',
-    badge: 'Standard',
+    badge: 'Standard Setup',
     dimensions: '3m x 3m',
-    basePrice: 2600,
-    priceInr: '₹2,15,000',
     description: 'Turnkey standard setup for pharmaceuticals, medical device manufacturers, CDMOs, and healthcare innovators.',
     inclusions: [
       'Modular wall partition panels (2.5m H)',
@@ -27,15 +25,13 @@ const boothOptions = [
     title: '15 sq.m Healthcare Suite',
     badge: 'Recommended',
     dimensions: '5m x 3m',
-    basePrice: 4200,
-    priceInr: '₹3,45,000',
     popular: true,
     description: 'Bespoke turnkey suite tailored for pharma leaders, hospital chains, diagnostic networks, and healthcare technology showcases.',
     inclusions: [
       'Prime location in high-footfall pavilion',
-      '1 Executive discussion lounge with 6 leather chairs',
+      '1 Executive discussion lounge with leather seating',
       'LED display mounting bracket & reinforced walls',
-      '2 High-capacity electrical feeds & Wi-Fi hub',
+      'High-capacity electrical feeds & Wi-Fi hub',
       '3 VIP India–ASEAN Buyer Delegation passes',
       'Feature profile in IndiGlobal Expo Directory',
     ],
@@ -45,8 +41,6 @@ const boothOptions = [
     title: '18+ sq.m Raw Bare Space',
     badge: 'Custom Build',
     dimensions: 'Custom / Island',
-    basePrice: 4800,
-    priceInr: '₹3,95,000',
     description: 'Bare ground space for bespoke double-decker hospital pavilions, processing machinery showcases, or custom corporate booths.',
     inclusions: [
       'Custom 2-side or 4-side open island position',
@@ -59,32 +53,12 @@ const boothOptions = [
   },
 ];
 
-const exhibitorBenefits = [
-  'Explore export & import opportunities across Thailand, ASEAN & international markets',
-  'Connect with importers, distributors, agents, wholesalers and institutional buyers',
-  'Identify potential distribution and market-entry partners for regional expansion',
-  'Showcase pharmaceutical products, medical technologies, healthcare solutions & innovations',
-  'Develop B2B partnerships, joint ventures, strategic alliances and technology collaborations',
-  'Explore contract manufacturing, licensing, private labelling and sourcing partnerships',
-  'Generate high-value qualified business leads and establish relationships with prospective buyers',
-  'Understand emerging healthcare-market requirements and identify localization opportunities',
-  'Build stronger commercial connections between Indian, ASEAN and global healthcare businesses',
-  'Position your brand for long-term international growth and regional market development',
-];
-
 export default function BookStallPage({ onNotify }) {
   const [searchParams] = useSearchParams();
   const sectorParam = searchParams.get('sector') || 'pharmaceuticals';
   const { addExhibitor } = useData();
 
   const [selectedBooth, setSelectedBooth] = useState('healthcare-suite');
-  const [addons, setAddons] = useState({
-    cornerStall: false,
-    extraPower: false,
-    leadApp: false,
-    catalogueAd: false,
-  });
-
   const [formData, setFormData] = useState({
     contactPerson: '',
     designation: '',
@@ -96,20 +70,9 @@ export default function BookStallPage({ onNotify }) {
     notes: '',
   });
 
+  const [submittedStall, setSubmittedStall] = useState(null);
+
   const activeOption = boothOptions.find((b) => b.id === selectedBooth) || boothOptions[1] || boothOptions[0];
-
-  const calculateTotal = () => {
-    let total = activeOption.basePrice;
-    if (addons.cornerStall) total += Math.round(activeOption.basePrice * 0.1);
-    if (addons.extraPower) total += 250;
-    if (addons.leadApp) total += 150;
-    if (addons.catalogueAd) total += 400;
-    return total;
-  };
-
-  const handleCheckboxChange = (name) => {
-    setAddons((prev) => ({ ...prev, [name]: !prev[name] }));
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,6 +87,17 @@ export default function BookStallPage({ onNotify }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const stallCode = 'IGHE-EXH-' + Math.floor(100000 + Math.random() * 900000);
+    setSubmittedStall({
+      ...formData,
+      code: stallCode,
+      dateGenerated: new Date().toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    });
+
     addExhibitor({
       company: formData.company,
       contactPerson: formData.contactPerson,
@@ -132,7 +106,7 @@ export default function BookStallPage({ onNotify }) {
       phone: formData.phone,
       stallType: activeOption.title,
       hall: getSectorLabel(formData.sector),
-      amount: `$${calculateTotal()}`,
+      amount: 'Allotment on Request',
       notes: formData.notes || 'Booked via Online Exhibitor Registration Portal.',
     });
 
@@ -140,20 +114,10 @@ export default function BookStallPage({ onNotify }) {
       'Space Booking Request Submitted!',
       `Thank you, ${formData.contactPerson}. Your provisional stall booking for "${formData.company}" (${activeOption.title}) at The Global Healthcare Expo 2027 in Bangkok, Thailand has been recorded. Our floor manager will email the official contract and hall layout to ${formData.email} within 24 hours.`
     );
-    setFormData({
-      contactPerson: '',
-      designation: '',
-      company: '',
-      email: '',
-      phone: '',
-      website: '',
-      sector: 'pharmaceuticals',
-      notes: '',
-    });
   };
 
   const getWhatsAppBookingUrl = () => {
-    const text = `Hello Global Healthcare Expo Team,\n\nI want to register as an Exhibitor and book a booth for The Global Healthcare Expo 2027 in Bangkok, Thailand (India–ASEAN Global Confluence).\n\nCompany: ${formData.company || 'Not specified'}\nContact Person: ${formData.contactPerson || 'Not specified'} (${formData.designation || 'Representative'})\nPhone: ${formData.phone || 'Not specified'}\nEmail: ${formData.email || 'Not specified'}\nSelected Package: ${activeOption.title} (${activeOption.dimensions})\nEstimated Cost: $${calculateTotal()} USD\nSector: ${getSectorLabel(formData.sector)}\n\nPlease share the available hall floorplan and allotment details on WhatsApp.`;
+    const text = `Hello Global Healthcare Expo Team,\n\nI want to register as an Exhibitor and book a booth for The Global Healthcare Expo 2027 in Bangkok, Thailand (India–ASEAN Global Confluence).\n\nCompany: ${formData.company || 'Not specified'}\nContact Person: ${formData.contactPerson || 'Not specified'} (${formData.designation || 'Representative'})\nPhone: ${formData.phone || 'Not specified'}\nEmail: ${formData.email || 'Not specified'}\nPreferred Format: ${activeOption.title} (${activeOption.dimensions})\nSector: ${getSectorLabel(formData.sector)}\nNotes: ${formData.notes || 'None'}\n\nPlease share the available hall floorplan and allotment details on WhatsApp.`;
     return getWhatsAppUrl('exhibitor', text);
   };
 
@@ -164,43 +128,26 @@ export default function BookStallPage({ onNotify }) {
           <span className="tag">
             <i className="fa-solid fa-calendar-days"></i> 21st &amp; 22nd January 2027 &bull; Bangkok, Thailand
           </span>
-          <h1>Exhibitor Registration &amp; Booth Booking</h1>
+          <h1>Exhibitor Registration</h1>
           <p className="page-header-lead">
             <strong>The Global Healthcare Expo 2027</strong> &bull; Organised Under the Aegis of <strong>India–ASEAN Global Confluence 2027</strong>
           </p>
           <p className="page-header-sub">
-            Position your company directly in front of 5,000+ international buyers, importers, hospital procurement leaders, and distributors.
-            Select your desired booth format, calculate exact package inclusions, and reserve your exhibition space.
+            Reserve exhibition space and showcase your pharmaceutical products, medical devices, and healthcare innovations
+            to 5,000+ international buyers and hospital procurement leaders in Bangkok, Thailand.
           </p>
         </div>
       </section>
 
       <section className="section py-4">
         <div className="container">
-          {/* Exhibitor Benefits Ribbon */}
-          <div className="exhibitor-benefits-banner mb-4">
-            <div className="benefits-banner-header">
-              <span className="badge-tag">Why Exhibit?</span>
-              <h3>Turn Exhibition Participation into Tangible Business Growth</h3>
-              <p>Exhibitors can leverage The Global Healthcare Expo 2027 in Bangkok to:</p>
-            </div>
-            <div className="benefits-grid-compact">
-              {exhibitorBenefits.slice(0, 6).map((benefit, i) => (
-                <div className="benefit-item" key={i}>
-                  <i className="fa-solid fa-circle-check text-primary"></i>
-                  <span>{benefit}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* WhatsApp Direct Stall Booking Banner */}
           <div className="whatsapp-page-banner">
             <div className="wa-banner-icon">
               <i className="fa-brands fa-whatsapp"></i>
             </div>
             <div className="wa-banner-info">
-              <h3>Direct Exhibitor Booking via WhatsApp</h3>
+              <h3>Fast-Track Stall Booking via WhatsApp</h3>
               <p>
                 Want real-time stall layout maps and instant allotment assistance? Message our floor allocation team directly on
                 WhatsApp (<strong>{CONTACT_CONFIG.exhibitor.display}</strong>) to lock your preferred corner or island space.
@@ -216,16 +163,8 @@ export default function BookStallPage({ onNotify }) {
             </a>
           </div>
 
-          {/* Step 1: Select Booth Size */}
-          <div className="section-subtitle-bar">
-            <div className="step-heading-row">
-              <span className="step-badge">Step 1</span>
-              <h3>Choose Booth Format &amp; Size</h3>
-            </div>
-            <span>All Shell Scheme booths include carpet, partition walls, electricals, furniture, and custom fascia lettering</span>
-          </div>
-
-          <div className="booth-options-grid">
+          {/* Booth Format Selection Cards (No Pricing) */}
+          <div className="booth-options-grid mb-4">
             {boothOptions.map((booth) => {
               const isSelected = selectedBooth === booth.id;
               return (
@@ -233,6 +172,7 @@ export default function BookStallPage({ onNotify }) {
                   key={booth.id}
                   className={`booth-option-card ${isSelected ? 'selected' : ''} ${booth.popular ? 'featured-booth' : ''}`}
                   onClick={() => setSelectedBooth(booth.id)}
+                  style={{ cursor: 'pointer' }}
                 >
                   {booth.popular && (
                     <div className="popular-badge">
@@ -245,11 +185,7 @@ export default function BookStallPage({ onNotify }) {
                       <i className="fa-solid fa-ruler-combined"></i> {booth.dimensions}
                     </span>
                   </div>
-                  <div className="booth-price">
-                    <strong>${booth.basePrice}</strong>
-                    <span className="inr-tag">{booth.priceInr}</span>
-                  </div>
-                  <p className="booth-desc">{booth.description}</p>
+                  <p className="booth-desc" style={{ marginTop: '0.5rem' }}>{booth.description}</p>
 
                   <div className="booth-inclusions">
                     <h5>Included Equipment &amp; Benefits:</h5>
@@ -269,10 +205,10 @@ export default function BookStallPage({ onNotify }) {
                   >
                     {isSelected ? (
                       <>
-                        <i className="fa-solid fa-circle-check"></i> Selected Package
+                        <i className="fa-solid fa-circle-check"></i> Selected Format
                       </>
                     ) : (
-                      'Choose This Stall'
+                      'Choose This Format'
                     )}
                   </button>
                 </div>
@@ -280,111 +216,12 @@ export default function BookStallPage({ onNotify }) {
             })}
           </div>
 
-          {/* Step 2: Calculator & Form Grid */}
-          <div className="section-subtitle-bar">
-            <div className="step-heading-row">
-              <span className="step-badge">Step 2</span>
-              <h3>Configure Add-ons &amp; Request Allotment</h3>
-            </div>
-            <span>Calculate live package investment and submit your official hall space reservation</span>
-          </div>
-
-          <div className="booth-config-grid">
-            {/* Addons & Live Cost Breakdown */}
-            <div className="cost-breakdown-card">
-              <h3>Custom Options &amp; Add-ons</h3>
-              <p>Enhance your visibility with premium booth enhancements:</p>
-
-              <div className="addons-list">
-                <label className={`addon-item ${addons.cornerStall ? 'selected-addon' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={addons.cornerStall}
-                    onChange={() => handleCheckboxChange('cornerStall')}
-                  />
-                  <div className="addon-info">
-                    <strong>Corner Stall (2-Side Open)</strong>
-                    <span>Maximum foot traffic &amp; corner branding (+10% base cost)</span>
-                  </div>
-                  <span className="addon-cost">
-                    +${Math.round(activeOption.basePrice * 0.1)}
-                  </span>
-                </label>
-
-                <label className={`addon-item ${addons.extraPower ? 'selected-addon' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={addons.extraPower}
-                    onChange={() => handleCheckboxChange('extraPower')}
-                  />
-                  <div className="addon-info">
-                    <strong>Heavy 3-Phase Power Feed (10 kW)</strong>
-                    <span>For running hospital equipment / active processing machinery</span>
-                  </div>
-                  <span className="addon-cost">+$250</span>
-                </label>
-
-                <label className={`addon-item ${addons.leadApp ? 'selected-addon' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={addons.leadApp}
-                    onChange={() => handleCheckboxChange('leadApp')}
-                  />
-                  <div className="addon-info">
-                    <strong>Digital Lead Scanner (2 Mobile Licenses)</strong>
-                    <span>Scan visitor &amp; buyer badges directly for CRM export</span>
-                  </div>
-                  <span className="addon-cost">+$150</span>
-                </label>
-
-                <label className={`addon-item ${addons.catalogueAd ? 'selected-addon' : ''}`}>
-                  <input
-                    type="checkbox"
-                    checked={addons.catalogueAd}
-                    onChange={() => handleCheckboxChange('catalogueAd')}
-                  />
-                  <div className="addon-info">
-                    <strong>Full-Page Official Show Directory Ad</strong>
-                    <span>Printed in attendee guidebooks &amp; digital show directory</span>
-                  </div>
-                  <span className="addon-cost">+$400</span>
-                </label>
-              </div>
-
-              <div className="cost-summary-box">
-                <div className="summary-row">
-                  <span>Selected Stall ({activeOption.dimensions}):</span>
-                  <strong>${activeOption.basePrice}</strong>
-                </div>
-                <div className="summary-row">
-                  <span>Add-ons Total:</span>
-                  <strong>${calculateTotal() - activeOption.basePrice}</strong>
-                </div>
-                <div className="summary-divider"></div>
-                <div className="summary-row total-row">
-                  <span>Estimated Total:</span>
-                  <span className="total-amount">${calculateTotal()} USD</span>
-                </div>
-                <small className="tax-note">* Taxes as applicable. Flexible payment schedule available (40% advance to lock booth).</small>
-              </div>
-
-              <div className="cost-whatsapp-shortcut">
-                <a
-                  href={getWhatsAppBookingUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-whatsapp btn-block"
-                >
-                  <i className="fa-brands fa-whatsapp"></i> Inquire This Config on WhatsApp
-                </a>
-              </div>
-            </div>
-
-            {/* Exhibitor Form */}
+          {/* Clean Form & Live Stall Preview (Identical Structure to Visitor Page) */}
+          <div className="registration-columns">
             <div className="reg-form-card">
               <div className="form-intro">
-                <h3>Submit Space Booking Request</h3>
-                <p>Lock in this configuration and receive the formal floorplan allotment map.</p>
+                <h3>Exhibitor Space Allocation</h3>
+                <p>Enter your corporate and contact details to submit your provisional space reservation under India–ASEAN Confluence 2027.</p>
               </div>
 
               <form onSubmit={handleSubmit}>
@@ -475,6 +312,20 @@ export default function BookStallPage({ onNotify }) {
                       ))}
                     </select>
                   </div>
+                  <div className="form-group">
+                    <label htmlFor="ex-booth-select">Selected Stall Format *</label>
+                    <select
+                      id="ex-booth-select"
+                      value={selectedBooth}
+                      onChange={(e) => setSelectedBooth(e.target.value)}
+                    >
+                      {boothOptions.map((booth) => (
+                        <option key={booth.id} value={booth.id}>
+                          {booth.title} ({booth.dimensions})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div className="form-group col-full">
                     <label htmlFor="ex-notes">Special Requests / Requirements</label>
                     <textarea
@@ -483,29 +334,117 @@ export default function BookStallPage({ onNotify }) {
                       rows="3"
                       value={formData.notes}
                       onChange={handleChange}
-                      placeholder="e.g. Near main pavilion entrance, corner requested, machinery demo planned..."
+                      placeholder="e.g. Near main pavilion entrance, corner requested, heavy machinery demo planned..."
                     ></textarea>
                   </div>
                 </div>
 
-                <div className="booking-summary-footer">
-                  <div className="footer-price-tag">
-                    <span>Package Estimate:</span>
-                    <strong>${calculateTotal()} USD</strong>
-                  </div>
-                  <button type="submit" className="btn btn-primary">
-                    <i className="fa-solid fa-file-contract"></i> Reserve Booth Space
+                <div className="form-actions-split">
+                  <button type="submit" className="btn btn-primary btn-block">
+                    <i className="fa-solid fa-store"></i> Submit Space Booking Request
                   </button>
                 </div>
               </form>
+            </div>
 
-              <div className="visitor-redirect-banner mt-4">
-                <h4>Attending as a Trade Visitor / Institutional Buyer Instead?</h4>
+            {/* Live Stall Reservation Mockup Card */}
+            <div className="badge-preview-side">
+              <div className="badge-preview-box">
+                <div className="badge-header">
+                  <div className="badge-logo-icon">
+                    <i className="fa-solid fa-hospital-user"></i>
+                  </div>
+                  <div>
+                    <h4>THE GLOBAL HEALTHCARE EXPO</h4>
+                    <span>INDIA–ASEAN GLOBAL CONFLUENCE &bull; BANGKOK 2027</span>
+                  </div>
+                </div>
+
+                <div className="badge-content">
+                  <div className="badge-avatar">
+                    <i className="fa-solid fa-building-circle-check"></i>
+                  </div>
+                  <h3 className="badge-attendee-name">
+                    {formData.company || 'Exhibiting Company'}
+                  </h3>
+                  <p className="badge-attendee-org">
+                    {formData.contactPerson
+                      ? `${formData.contactPerson} (${formData.designation || 'Representative'})`
+                      : 'Authorized Representative'}
+                  </p>
+                  <p className="badge-attendee-desig">
+                    {activeOption.title} &bull; {getSectorLabel(formData.sector)}
+                  </p>
+
+                  <div className="badge-qr-code">
+                    <i className="fa-solid fa-qrcode"></i>
+                    <span>
+                      {submittedStall ? submittedStall.code : 'IGHE-EXH-2027-PREVIEW'}
+                    </span>
+                  </div>
+
+                  <div className="badge-tier-tag">
+                    EXHIBITOR SPACE ALLOTMENT
+                  </div>
+                </div>
+
+                <div className="badge-footer">
+                  <small>Bangkok, Thailand &bull; GTTCI Accredited &bull; Reserved Space</small>
+                </div>
+              </div>
+
+              {submittedStall && (
+                <div className="pass-success-note">
+                  <i className="fa-solid fa-circle-check text-primary"></i>
+                  <div>
+                    <strong>Space Request Submitted!</strong>
+                    <p>Reference: {submittedStall.code}. Your space booking request for "{formData.company}" has been logged. Our floor manager will email the formal hall floorplan and allotment details to {formData.email}.</p>
+                    <a
+                      href={getWhatsAppBookingUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-sm btn-whatsapp mt-2"
+                    >
+                      <i className="fa-brands fa-whatsapp"></i> Confirm on WhatsApp
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              <div className="exhibitor-redirect-banner mt-4">
+                <h4>Attending as a Trade Visitor / Buyer Instead?</h4>
                 <p>Register for a complimentary trade pass to browse pavilions and attend sessions.</p>
                 <Link to="/visitor-registration" className="btn btn-outline btn-sm">
                   <i className="fa-solid fa-id-card"></i> Switch to Visitor Registration
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Exhibitor Essential Information */}
+      <section className="section bg-light-surface">
+        <div className="container">
+          <div className="section-header">
+            <span className="tag">India–ASEAN 2027 Exhibitor Notice</span>
+            <h2>Exhibitor Essential Information</h2>
+          </div>
+          <div className="grid-3-cols">
+            <div className="info-card">
+              <div className="info-card-icon"><i className="fa-solid fa-cubes"></i></div>
+              <h3>Turnkey Pavilion Engineering</h3>
+              <p>Standard Shell Scheme booths come fully fitted with modular walls, spotlights, furniture, and customized company fascia nameplates.</p>
+            </div>
+            <div className="info-card">
+              <div className="info-card-icon"><i className="fa-solid fa-handshake"></i></div>
+              <h3>Buyer Matchmaking &amp; Corridors</h3>
+              <p>Direct pre-scheduled B2B buyer meetings with hospital procurement heads, pharmacy chain distributors, and ASEAN trade delegations.</p>
+            </div>
+            <div className="info-card">
+              <div className="info-card-icon"><i className="fa-brands fa-whatsapp"></i></div>
+              <h3>Direct Exhibitor WhatsApp Desk</h3>
+              <p>Real-time stall layout maps, corner hold requests, and priority allocation via our dedicated exhibitor WhatsApp helpline: <strong>{CONTACT_CONFIG.exhibitor.display}</strong>.</p>
             </div>
           </div>
         </div>

@@ -58,10 +58,10 @@ export default function Hero() {
               <i className="fa-solid fa-id-card"></i> Visitor Registration
             </Link>
             <Link
-              to="/exhibitor-registration"
+              to="/schedule"
               className="btn btn-outline btn-lg"
             >
-              <i className="fa-solid fa-store"></i> Exhibitor Registration
+              <i className="fa-solid fa-calendar-days"></i> See Schedule
             </Link>
           </div>
 
@@ -97,11 +97,11 @@ export default function Hero() {
                 <span><i className="fa-solid fa-location-dot text-primary"></i> Bangkok, Thailand</span>
               </div>
               <div className="partner-card-actions">
-                <Link to="/exhibitor-registration" className="btn btn-sm btn-primary">
-                  <i className="fa-solid fa-store"></i> Book Stall
-                </Link>
-                <Link to="/visitor-registration" className="btn btn-sm btn-outline">
+                <Link to="/visitor-registration" className="btn btn-sm btn-primary">
                   <i className="fa-solid fa-id-card"></i> Visitor Pass
+                </Link>
+                <Link to="/schedule" className="btn btn-sm btn-outline">
+                  <i className="fa-solid fa-calendar-days"></i> See Schedule
                 </Link>
               </div>
             </div>

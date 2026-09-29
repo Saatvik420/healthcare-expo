@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 export default function OpportunitiesSection() {
   const opportunities = [
     {
@@ -93,25 +91,6 @@ export default function OpportunitiesSection() {
               <p className="opp-desc">{item.desc}</p>
             </div>
           ))}
-        </div>
-
-        {/* High-Impact CTA Box */}
-        <div className="opportunities-cta-banner">
-          <div className="opp-cta-content">
-            <span className="opp-badge">Exhibitor Bookings Open</span>
-            <h3>Ready to Scale Your Healthcare Enterprise Across ASEAN?</h3>
-            <p>
-              Secure prime pavilion space in Bangkok. Connect directly with 5,000+ trade buyers and institutional decision-makers.
-            </p>
-          </div>
-          <div className="opp-cta-actions">
-            <Link to="/exhibitor-registration" className="btn btn-primary btn-lg">
-              <i className="fa-solid fa-store"></i> Exhibitor Registration
-            </Link>
-            <Link to="/contact" className="btn btn-outline btn-lg">
-              <i className="fa-solid fa-headset"></i> Talk to Floor Manager
-            </Link>
-          </div>
         </div>
       </div>
     </section>

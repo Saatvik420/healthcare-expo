@@ -96,16 +96,6 @@ export default function Navbar() {
             </li>
             <li>
               <NavLink
-                to="/schedule"
-                className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
-                onClick={closeMenu}
-              >
-                <i className="fa-solid fa-calendar-days nav-item-icon"></i>
-                <span>Schedule</span>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
                 to="/awards"
                 className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
                 onClick={closeMenu}
@@ -144,17 +134,17 @@ export default function Navbar() {
               <div className="mobile-actions-stack">
                 <Link
                   to="/visitor-registration"
-                  className="btn btn-outline btn-block"
+                  className="btn btn-primary btn-block"
                   onClick={closeMenu}
                 >
                   <i className="fa-solid fa-id-card"></i> Visitor Registration
                 </Link>
                 <Link
-                  to="/exhibitor-registration"
-                  className="btn btn-primary btn-block"
+                  to="/schedule"
+                  className="btn btn-outline btn-block"
                   onClick={closeMenu}
                 >
-                  <i className="fa-solid fa-store"></i> Book Exhibitor Stall
+                  <i className="fa-solid fa-calendar-days"></i> See Schedule
                 </Link>
                 <a
                   href={getWhatsAppUrl('general')}
@@ -194,8 +184,8 @@ export default function Navbar() {
                 <Link to="/login" className="btn btn-link-nav" onClick={closeMenu}>
                   <i className="fa-regular fa-user"></i> Log In
                 </Link>
-                <Link to="/exhibitor-registration" className="btn btn-primary btn-nav-cta" onClick={closeMenu}>
-                  Book Stall
+                <Link to="/visitor-registration" className="btn btn-primary btn-nav-cta" onClick={closeMenu}>
+                  Visitor Pass
                 </Link>
               </>
             )}

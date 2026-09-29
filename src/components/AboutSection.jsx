@@ -1,5 +1,3 @@
-import { Link } from 'react-router-dom';
-
 export default function AboutSection() {
   return (
     <section className="section bg-light-surface" id="about-expo">
@@ -87,11 +85,6 @@ export default function AboutSection() {
                 </div>
               </div>
             </div>
-            <div className="about-card-cta">
-              <Link to="/visitor-registration" className="btn btn-outline btn-sm">
-                <i className="fa-solid fa-id-card"></i> Register as Visitor
-              </Link>
-            </div>
           </div>
 
           {/* Column 2: Why Bangkok? */}
@@ -126,11 +119,6 @@ export default function AboutSection() {
                   <span>Rapidly modernizing healthcare systems seeking quality formulations &amp; medical devices</span>
                 </div>
               </div>
-            </div>
-            <div className="about-card-cta">
-              <Link to="/exhibitor-registration" className="btn btn-primary btn-sm">
-                <i className="fa-solid fa-store"></i> Register as Exhibitor
-              </Link>
             </div>
           </div>
         </div>
