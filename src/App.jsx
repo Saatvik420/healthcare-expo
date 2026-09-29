@@ -5,6 +5,9 @@ import TopBar from './components/TopBar';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import NotificationModal from './components/NotificationModal';
+import LoadingScreen from './components/LoadingScreen';
+import RouteTopLoader from './components/RouteTopLoader';
+import BackToTopButton from './components/BackToTopButton';
 
 // Context Providers
 import { AuthProvider } from './context/AuthContext';
@@ -47,7 +50,9 @@ function App() {
   return (
     <AuthProvider>
       <DataProvider>
+        <LoadingScreen />
         <BrowserRouter>
+          <RouteTopLoader />
           <ScrollToTop />
           <TopBar />
           <Navbar />
@@ -80,6 +85,7 @@ function App() {
             </Routes>
           </main>
           <Footer />
+          <BackToTopButton />
           <NotificationModal
             isOpen={notification.isOpen}
             title={notification.title}

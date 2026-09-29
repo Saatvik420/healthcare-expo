@@ -6537,3 +6537,624 @@ footer {
     text-align: center;
   }
 }
+
+/* ==========================================================================
+   UI EFFECTS: LOADING SCREENS, INTERACTIONS & ADVANCED RESPONSIVENESS
+   ========================================================================== */
+
+/* 1. Global Loading Screen */
+.global-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: radial-gradient(circle at center, #0f172a 0%, #06101e 100%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.5s ease;
+}
+
+.global-loading-screen.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-inner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 480px;
+  padding: 2rem;
+  animation: loaderScaleUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes loaderScaleUp {
+  0% {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.loader-logo-ring {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.loader-pulse-bubble {
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  background: rgba(5, 150, 105, 0.25);
+  animation: pulseGlow 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.35);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+}
+
+.loader-icon-box {
+  position: relative;
+  z-index: 2;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary) 0%, #10b981 100%);
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  font-size: 1.85rem;
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.45);
+}
+
+.loader-brand-details .loader-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.35rem;
+}
+
+.loader-brand-details .loader-subtitle {
+  display: block;
+  font-size: 0.78rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.loader-progress-track {
+  width: 220px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.loader-progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 50%, #10b981 100%);
+  border-radius: 4px;
+  animation: indeterminateBar 1.2s infinite ease-in-out;
+}
+
+@keyframes indeterminateBar {
+  0% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.loader-theme-caption {
+  font-size: 0.8rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* 2. Route Top Progress Bar */
+.route-top-loader-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  z-index: 99998;
+  pointer-events: none;
+}
+
+.route-top-loader-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary) 0%, #34d399 70%, #facc15 100%);
+  transition: width 0.25s ease-out, opacity 0.35s ease;
+  position: relative;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.7);
+}
+
+.route-top-loader-glow {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 80px;
+  box-shadow: 0 0 12px #34d399, 0 0 6px #10b981;
+}
+
+/* 3. Floating Back To Top Button */
+.floating-back-to-top {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent-navy);
+  color: var(--white);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  display: grid;
+  place-items: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 9990;
+  opacity: 0;
+  transform: translateY(20px) scale(0.9);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-back-to-top.show {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.floating-back-to-top:hover {
+  background: var(--primary);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 25px rgba(5, 150, 105, 0.35);
+}
+
+.floating-back-to-top:active {
+  transform: scale(0.95);
+}
+
+/* 4. Enhanced Mobile Menu Drawer & Overlay */
+.mobile-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1050;
+  animation: fadeIn 0.25s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.mobile-drawer-header {
+  display: none;
+}
+
+.nav-item-icon {
+  display: none;
+}
+
+.mobile-drawer-actions {
+  display: none;
+}
+
+/* 5. Clean UI Micro-Interactions */
+button, .btn {
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+button:active, .btn:active {
+  transform: scale(0.98);
+}
+
+/* Input Focus Rings */
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.18) !important;
+}
+
+/* Interactive Card Elevations */
+.opportunity-card,
+.who-exhibit-card,
+.conf-day-card,
+.award-cat-card,
+.pass-card,
+.booth-option-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
+}
+
+/* Smooth Tab Animations */
+.schedule-day-btn,
+.sector-filter-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 6. Comprehensive Responsive Breakpoints */
+@media (max-width: 1024px) {
+  /* Switch to mobile hamburger menu at 1024px */
+  .mobile-menu-btn {
+    display: block !important;
+    background: transparent;
+    border: none;
+    font-size: 1.35rem;
+    color: var(--accent-navy);
+    cursor: pointer;
+    padding: 0.4rem;
+    line-height: 1;
+  }
+
+  .nav-actions {
+    display: none; /* Inlined inside mobile drawer */
+  }
+
+  .nav-links {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: min(85vw, 360px);
+    background: #ffffff;
+    z-index: 1100;
+    flex-direction: column;
+    padding: 1.25rem 1.5rem;
+    gap: 0.5rem;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .nav-links.mobile-open {
+    display: flex;
+    transform: translateX(0);
+  }
+
+  /* Drawer Header */
+  .mobile-drawer-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .mobile-drawer-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--accent-navy);
+  }
+
+  .logo-symbol.mini {
+    width: 32px;
+    height: 32px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+  }
+
+  .mobile-drawer-close {
+    background: #f1f5f9;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .mobile-drawer-close:hover {
+    background: #e2e8f0;
+  }
+
+  .nav-links li {
+    width: 100%;
+  }
+
+  .nav-links a {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.85rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #334155;
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .nav-links a:hover,
+  .nav-links a.active-nav-link {
+    background: var(--primary-light);
+    color: var(--primary);
+  }
+
+  .active-nav-link::after {
+    display: none; /* Hide bottom border line in mobile drawer */
+  }
+
+  .nav-item-icon {
+    display: inline-block;
+    width: 20px;
+    font-size: 0.95rem;
+    color: var(--primary);
+    text-align: center;
+  }
+
+  /* Drawer Actions Footer */
+  .mobile-drawer-actions {
+    display: block;
+    margin-top: auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .mobile-actions-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  /* Hero adjustments for tablet */
+  .hero-container-layout {
+    grid-template-columns: 1fr !important;
+    gap: 2.5rem !important;
+  }
+
+  .hero-partner-card {
+    max-width: 520px;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  /* TopBar clean compact layout */
+  .top-bar-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.4rem;
+  }
+
+  .top-bar-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.65rem;
+  }
+
+  .top-bar-links a {
+    margin-left: 0;
+    font-size: 0.75rem;
+  }
+
+  /* Hero Headline & Actions */
+  .hero-main-heading {
+    font-size: 2rem !important;
+    line-height: 1.2;
+  }
+
+  .hero-lead-text {
+    font-size: 0.95rem;
+  }
+
+  .hero-ctas {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .hero-ctas .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero-action-motto {
+    justify-content: center;
+    gap: 0.85rem;
+  }
+
+  .hero-pillars-ribbon {
+    justify-content: center;
+  }
+
+  /* Schedule day tabs */
+  .schedule-day-tabs {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .schedule-day-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .schedule-day-theme-banner {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .saved-sessions-counter {
+    align-self: center;
+  }
+
+  /* Session cards on mobile */
+  .session-card {
+    grid-template-columns: 1fr !important;
+  }
+
+  .session-time-col {
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .session-bullet-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* Pass & Booth cards */
+  .pass-types-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .booth-options-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .booth-config-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .registration-columns {
+    grid-template-columns: 1fr !important;
+  }
+
+  .badge-preview-side {
+    position: static !important;
+    order: 2;
+  }
+
+  /* Awards Hero & Categories */
+  .awards-title {
+    font-size: 2rem !important;
+  }
+
+  .awards-date-strip {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .awards-hero-actions {
+    flex-direction: column;
+  }
+
+  .awards-hero-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .awards-categories-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .floating-back-to-top {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 42px;
+    height: 42px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-main-heading {
+    font-size: 1.65rem !important;
+  }
+
+  .brand-text h1 {
+    font-size: 1rem;
+  }
+
+  .about-overview-stats {
+    grid-template-columns: 1fr !important;
+  }
+
+  .opportunities-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .who-exhibit-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .who-card-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sector-filter-bar {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0.5rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sector-filter-btn {
+    white-space: nowrap;
+  }
+
+  .booking-summary-footer {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+
+  .booking-summary-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
