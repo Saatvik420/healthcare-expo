@@ -43,11 +43,20 @@ export default function Navbar() {
           </li>
           <li>
             <NavLink
-              to="/registration"
+              to="/visitor-registration"
               className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
               onClick={closeMenu}
             >
-              Registration
+              Visitor Registration
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/exhibitor-registration"
+              className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
+              onClick={closeMenu}
+            >
+              Exhibitor Registration
             </NavLink>
           </li>
           <li>
@@ -57,6 +66,15 @@ export default function Navbar() {
               onClick={closeMenu}
             >
               Schedule
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/awards"
+              className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
+              onClick={closeMenu}
+            >
+              Excellence Awards
             </NavLink>
           </li>
           <li>
@@ -109,7 +127,7 @@ export default function Navbar() {
               <Link to="/login" className="btn btn-link-nav" onClick={closeMenu}>
                 <i className="fa-regular fa-user"></i> Log In
               </Link>
-              <Link to="/book-stall" className="btn btn-primary btn-nav-cta" onClick={closeMenu}>
+              <Link to="/exhibitor-registration" className="btn btn-primary btn-nav-cta" onClick={closeMenu}>
                 Book Stall
               </Link>
             </>

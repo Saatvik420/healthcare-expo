@@ -61,22 +61,22 @@ export default function Footer() {
 
           {/* Registration & Participation Column */}
           <div className="footer-col">
-            <h4>Registration & Expo</h4>
+            <h4>Registration &amp; Summit</h4>
             <ul>
               <li>
-                <Link to="/registration">Registration Portal</Link>
+                <Link to="/visitor-registration">Visitor Registration</Link>
               </li>
               <li>
-                <Link to="/register-visitor">Trade Visitor Pass</Link>
+                <Link to="/exhibitor-registration">Exhibitor Registration</Link>
               </li>
               <li>
-                <Link to="/book-stall">Book an Exhibit Stall</Link>
+                <Link to="/schedule">Summit Agenda &amp; Schedule</Link>
               </li>
               <li>
-                <Link to="/schedule">Summit Agenda & Keynotes</Link>
+                <Link to="/awards">Global Excellence Awards 2027</Link>
               </li>
               <li>
-                <Link to="/contact">Contact Desk & Helpdesk</Link>
+                <Link to="/contact">Contact Desk &amp; Helpdesk</Link>
               </li>
             </ul>
           </div>

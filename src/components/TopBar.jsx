@@ -13,11 +13,17 @@ export default function TopBar() {
           </span>
         </div>
         <div className="top-bar-links">
-          <Link to="/registration">
-            <i className="fa-solid fa-id-card"></i> Registration
+          <Link to="/visitor-registration">
+            <i className="fa-solid fa-id-card"></i> Visitor Registration
+          </Link>
+          <Link to="/exhibitor-registration">
+            <i className="fa-solid fa-store"></i> Exhibitor Registration
           </Link>
           <Link to="/schedule">
             <i className="fa-solid fa-clock"></i> Schedule
+          </Link>
+          <Link to="/awards">
+            <i className="fa-solid fa-trophy"></i> Awards
           </Link>
           <Link to="/contact">
             <i className="fa-solid fa-envelope"></i> info@indiglobalexpo.com

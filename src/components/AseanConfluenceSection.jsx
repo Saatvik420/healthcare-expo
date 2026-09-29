@@ -120,10 +120,10 @@ export default function AseanConfluenceSection() {
               <a href="#sectors" className="btn btn-primary">
                 <i className="fa-solid fa-cubes"></i> Explore Product Pavilions
               </a>
-              <Link to="/book-stall" className="btn btn-outline">
+              <Link to="/exhibitor-registration" className="btn btn-outline">
                 <i className="fa-solid fa-store"></i> Reserve Exhibition Booth
               </Link>
-              <Link to="/register-visitor" className="btn btn-outline">
+              <Link to="/visitor-registration" className="btn btn-outline">
                 <i className="fa-solid fa-id-card"></i> Visitor Trade Pass
               </Link>
             </div>

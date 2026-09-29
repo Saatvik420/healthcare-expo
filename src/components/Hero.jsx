@@ -12,50 +12,64 @@ export default function Hero() {
             </span>
             <div className="hero-expo-spotlight-badge">
               <span className="hero-expo-title-highlight">
-                <i className="fa-solid fa-hospital-user"></i> The Global Healthcare Expo 2027
+                <i className="fa-solid fa-location-dot"></i> Bangkok, Thailand
               </span>
               <span className="hero-expo-collab-text">
-                In collaboration with GTTCI & Asepsis Marketing
+                Under the Aegis of India–ASEAN Global Confluence 2027
               </span>
             </div>
           </div>
 
-          <h1>
-            Connecting <span>Healthcare Facilities</span>, Medical Tech & Pharma Supply Chains.
+          <h1 className="hero-main-heading">
+            Your Gateway to <span>Global Healthcare Markets</span>, Partnerships &amp; Growth.
           </h1>
 
-          <p>
-            An exclusive flagship vertical of <strong>IndiGlobal Expo</strong> (<em>Connect &bull; Collaborate &bull; Grow</em>)
-            held under the prestigious <strong>India-ASEAN Global Confluence 2027</strong> in collaboration with <strong>GTTCI</strong>.
-            Bringing together hospital administrators, healthcare facility developers, clinical technology innovators,
-            and pharmaceutical leaders across 40+ countries.
+          <p className="hero-lead-text">
+            <strong>The Global Healthcare Expo 2027</strong> is an international healthcare and pharmaceutical exhibition
+            organised under the aegis of the <strong>India–ASEAN Global Confluence 2027</strong> in <strong>Bangkok, Thailand</strong> —
+            a strategic gateway to the rapidly expanding ASEAN healthcare market.
           </p>
+
+          {/* Event Pillars Ribbon */}
+          <div className="hero-pillars-ribbon">
+            <span className="pillar-tag"><i className="fa-solid fa-building"></i> Exhibition</span>
+            <span className="pillar-divider">&bull;</span>
+            <span className="pillar-tag"><i className="fa-solid fa-microphone"></i> Conference</span>
+            <span className="pillar-divider">&bull;</span>
+            <span className="pillar-tag"><i className="fa-solid fa-handshake"></i> B2B Meetings</span>
+            <span className="pillar-divider">&bull;</span>
+            <span className="pillar-tag"><i className="fa-solid fa-globe"></i> International Networking</span>
+            <span className="pillar-divider">&bull;</span>
+            <span className="pillar-tag"><i className="fa-solid fa-trophy"></i> Awards &amp; Gala Dinner</span>
+          </div>
+
+          <div className="hero-theme-pill-box">
+            <i className="fa-solid fa-lightbulb text-primary"></i>
+            <span>
+              <strong>Conference Theme:</strong> &ldquo;Connecting Healthcare Markets. Driving Innovation. Expanding Global Opportunities.&rdquo;
+            </span>
+          </div>
 
           <div className="hero-ctas">
             <Link
-              to="/registration?tab=visitor"
-              className="btn btn-primary"
+              to="/visitor-registration"
+              className="btn btn-primary btn-lg"
             >
               <i className="fa-solid fa-id-card"></i> Visitor Registration
             </Link>
             <Link
-              to="/registration?tab=exhibitor"
-              className="btn btn-outline"
+              to="/exhibitor-registration"
+              className="btn btn-outline btn-lg"
             >
-              <i className="fa-solid fa-store"></i> Book Exhibitor Stall
+              <i className="fa-solid fa-store"></i> Exhibitor Registration
             </Link>
           </div>
 
-          <div className="hero-key-highlights">
-            <div className="highlight-tag">
-              <i className="fa-solid fa-hospital"></i> Healthcare & Hospital Facilities
-            </div>
-            <div className="highlight-tag">
-              <i className="fa-solid fa-handshake"></i> India-ASEAN Trade Corridor
-            </div>
-            <div className="highlight-tag">
-              <i className="fa-solid fa-flask-vial"></i> APIs, Formulations & Tech
-            </div>
+          <div className="hero-action-motto">
+            <span className="motto-item"><i className="fa-solid fa-circle-check text-primary"></i> Connect</span>
+            <span className="motto-item"><i className="fa-solid fa-circle-check text-primary"></i> Exhibit</span>
+            <span className="motto-item"><i className="fa-solid fa-circle-check text-primary"></i> Export</span>
+            <span className="motto-item"><i className="fa-solid fa-circle-check text-primary"></i> Expand</span>
           </div>
         </div>
 
@@ -63,8 +77,8 @@ export default function Hero() {
         <div className="hero-partner-card">
           <div className="partner-card-inner">
             <div className="partner-card-header">
-              <span className="partner-eyebrow">HELD UNDER THE AEGIS OF</span>
-              <h4>India-ASEAN Global Confluence 2027</h4>
+              <span className="partner-eyebrow">ORGANISED UNDER THE AEGIS OF</span>
+              <h4>India–ASEAN Global Confluence 2027</h4>
             </div>
             <div className="partner-logo-wrapper">
               <img
@@ -75,12 +89,20 @@ export default function Hero() {
             </div>
             <div className="partner-card-footer">
               <p>
-                <strong>Organised under IndiGlobal Expo</strong> in official association with the{' '}
-                <strong>Global Trade & Technology Council of India (GTTCI)</strong>.
+                <strong>The Global Healthcare Expo 2027</strong> is organized under <strong>IndiGlobal Expo</strong> in
+                official association with the <strong>Global Trade &amp; Technology Council of India (GTTCI)</strong>.
               </p>
               <div className="partner-meta-row">
-                <span><i className="fa-solid fa-calendar-check text-primary"></i> 21st & 22nd January 2027</span>
+                <span><i className="fa-solid fa-calendar-check text-primary"></i> 21st &amp; 22nd January 2027</span>
                 <span><i className="fa-solid fa-location-dot text-primary"></i> Bangkok, Thailand</span>
+              </div>
+              <div className="partner-card-actions">
+                <Link to="/exhibitor-registration" className="btn btn-sm btn-primary">
+                  <i className="fa-solid fa-store"></i> Book Stall
+                </Link>
+                <Link to="/visitor-registration" className="btn btn-sm btn-outline">
+                  <i className="fa-solid fa-id-card"></i> Visitor Pass
+                </Link>
               </div>
             </div>
           </div>

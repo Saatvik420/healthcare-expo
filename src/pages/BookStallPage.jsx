@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
+import { SECTOR_OPTIONS } from '../config/sectorsData';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 
 const boothOptions = [
@@ -11,7 +12,7 @@ const boothOptions = [
     dimensions: '3m x 3m',
     basePrice: 2600,
     priceInr: '₹2,15,000',
-    description: 'Our turnkey standard setup for mid-sized manufacturers, CDMOs, and medical suppliers.',
+    description: 'Turnkey standard setup for pharmaceuticals, medical device manufacturers, CDMOs, and healthcare innovators.',
     inclusions: [
       'Modular wall partition panels (2.5m H)',
       '1 Fascia board with company name & stall no.',
@@ -29,13 +30,13 @@ const boothOptions = [
     basePrice: 4200,
     priceInr: '₹3,45,000',
     popular: true,
-    description: 'Bespoke turnkey suite tailored for hospital chains, diagnostic networks, and healthcare technology showcases.',
+    description: 'Bespoke turnkey suite tailored for pharma leaders, hospital chains, diagnostic networks, and healthcare technology showcases.',
     inclusions: [
-      'Prime location in Hall 6 (Healthcare Pavilion)',
+      'Prime location in high-footfall pavilion',
       '1 Executive discussion lounge with 6 leather chairs',
       'LED display mounting bracket & reinforced walls',
       '2 High-capacity electrical feeds & Wi-Fi hub',
-      '3 VIP India-ASEAN Buyer Delegation passes',
+      '3 VIP India–ASEAN Buyer Delegation passes',
       'Feature profile in IndiGlobal Expo Directory',
     ],
   },
@@ -46,7 +47,7 @@ const boothOptions = [
     dimensions: 'Custom / Island',
     basePrice: 4800,
     priceInr: '₹3,95,000',
-    description: 'Bare ground space for bespoke double-decker hospital pavilions, machinery showcases, or custom corporate booths.',
+    description: 'Bare ground space for bespoke double-decker hospital pavilions, processing machinery showcases, or custom corporate booths.',
     inclusions: [
       'Custom 2-side or 4-side open island position',
       'Raw floor footprint with marking boundaries',
@@ -58,9 +59,22 @@ const boothOptions = [
   },
 ];
 
+const exhibitorBenefits = [
+  'Explore export & import opportunities across Thailand, ASEAN & international markets',
+  'Connect with importers, distributors, agents, wholesalers and institutional buyers',
+  'Identify potential distribution and market-entry partners for regional expansion',
+  'Showcase pharmaceutical products, medical technologies, healthcare solutions & innovations',
+  'Develop B2B partnerships, joint ventures, strategic alliances and technology collaborations',
+  'Explore contract manufacturing, licensing, private labelling and sourcing partnerships',
+  'Generate high-value qualified business leads and establish relationships with prospective buyers',
+  'Understand emerging healthcare-market requirements and identify localization opportunities',
+  'Build stronger commercial connections between Indian, ASEAN and global healthcare businesses',
+  'Position your brand for long-term international growth and regional market development',
+];
+
 export default function BookStallPage({ onNotify }) {
   const [searchParams] = useSearchParams();
-  const sectorParam = searchParams.get('sector') || 'healthcare-facilities';
+  const sectorParam = searchParams.get('sector') || 'pharmaceuticals';
   const { addExhibitor } = useData();
 
   const [selectedBooth, setSelectedBooth] = useState('healthcare-suite');
@@ -102,6 +116,11 @@ export default function BookStallPage({ onNotify }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const getSectorLabel = (sectorId) => {
+    const found = SECTOR_OPTIONS.find((s) => s.id === sectorId);
+    return found ? found.label : sectorId;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -112,25 +131,14 @@ export default function BookStallPage({ onNotify }) {
       email: formData.email,
       phone: formData.phone,
       stallType: activeOption.title,
-      hall:
-        formData.sector === 'healthcare-facilities'
-          ? 'Hall 6 (Healthcare Facilities & Hospitals)'
-          : formData.sector === 'diagnostics-surgicals'
-          ? 'Hall 5 (Diagnostics & Surgicals)'
-          : formData.sector === 'apis'
-          ? 'Hall 1 & 2 (APIs)'
-          : formData.sector === 'finished'
-          ? 'Hall 3 (Formulations)'
-          : formData.sector === 'machinery'
-          ? 'Hall 4 (Machinery)'
-          : 'Hall 5 (Packaging)',
+      hall: getSectorLabel(formData.sector),
       amount: `$${calculateTotal()}`,
-      notes: formData.notes || 'Booked via Online Stall Calculator.',
+      notes: formData.notes || 'Booked via Online Exhibitor Registration Portal.',
     });
 
     onNotify(
       'Space Booking Request Submitted!',
-      `Thank you, ${formData.contactPerson}. Your provisional stall booking for "${formData.company}" (${activeOption.title}) at India-ASEAN Global Confluence 2027 has been recorded. Our floor manager will email the official contract and hall layout to ${formData.email} within 24 hours.`
+      `Thank you, ${formData.contactPerson}. Your provisional stall booking for "${formData.company}" (${activeOption.title}) at The Global Healthcare Expo 2027 in Bangkok, Thailand has been recorded. Our floor manager will email the official contract and hall layout to ${formData.email} within 24 hours.`
     );
     setFormData({
       contactPerson: '',
@@ -139,13 +147,13 @@ export default function BookStallPage({ onNotify }) {
       email: '',
       phone: '',
       website: '',
-      sector: 'healthcare-facilities',
+      sector: 'pharmaceuticals',
       notes: '',
     });
   };
 
   const getWhatsAppBookingUrl = () => {
-    const text = `Hello IndiGlobal Healthcare Expo Team,\n\nI want to book an Exhibitor Stall / Healthcare Facility Space for India-ASEAN Global Confluence 2027.\n\nCompany: ${formData.company || 'Not specified'}\nContact Person: ${formData.contactPerson || 'Not specified'} (${formData.designation || 'Representative'})\nPhone: ${formData.phone || 'Not specified'}\nEmail: ${formData.email || 'Not specified'}\nSelected Package: ${activeOption.title} (${activeOption.dimensions})\nEstimated Cost: $${calculateTotal()} USD\nSector: ${formData.sector}\n\nPlease share the available hall floorplan and allotment details on WhatsApp.`;
+    const text = `Hello Global Healthcare Expo Team,\n\nI want to register as an Exhibitor and book a booth for The Global Healthcare Expo 2027 in Bangkok, Thailand (India–ASEAN Global Confluence).\n\nCompany: ${formData.company || 'Not specified'}\nContact Person: ${formData.contactPerson || 'Not specified'} (${formData.designation || 'Representative'})\nPhone: ${formData.phone || 'Not specified'}\nEmail: ${formData.email || 'Not specified'}\nSelected Package: ${activeOption.title} (${activeOption.dimensions})\nEstimated Cost: $${calculateTotal()} USD\nSector: ${getSectorLabel(formData.sector)}\n\nPlease share the available hall floorplan and allotment details on WhatsApp.`;
     return getWhatsAppUrl('exhibitor', text);
   };
 
@@ -154,18 +162,38 @@ export default function BookStallPage({ onNotify }) {
       <section className="page-header">
         <div className="container">
           <span className="tag">
-            <i className="fa-solid fa-calendar-days"></i> 21st & 22nd January 2027 &bull; Exhibitor Portal
+            <i className="fa-solid fa-calendar-days"></i> 21st &amp; 22nd January 2027 &bull; Bangkok, Thailand
           </span>
-          <h1>Book Your Healthcare Facility & Pharma Stall</h1>
-          <p>
-            An initiative of <strong>IndiGlobal Expo</strong> under the <strong>India-ASEAN Global Confluence 2027</strong> (GTTCI).
-            Select your desired booth format, calculate exact package inclusions, and secure prime exhibition positioning.
+          <h1>Exhibitor Registration &amp; Booth Booking</h1>
+          <p className="page-header-lead">
+            <strong>The Global Healthcare Expo 2027</strong> &bull; Organised Under the Aegis of <strong>India–ASEAN Global Confluence 2027</strong>
+          </p>
+          <p className="page-header-sub">
+            Position your company directly in front of 5,000+ international buyers, importers, hospital procurement leaders, and distributors.
+            Select your desired booth format, calculate exact package inclusions, and reserve your exhibition space.
           </p>
         </div>
       </section>
 
       <section className="section py-4">
         <div className="container">
+          {/* Exhibitor Benefits Ribbon */}
+          <div className="exhibitor-benefits-banner mb-4">
+            <div className="benefits-banner-header">
+              <span className="badge-tag">Why Exhibit?</span>
+              <h3>Turn Exhibition Participation into Tangible Business Growth</h3>
+              <p>Exhibitors can leverage The Global Healthcare Expo 2027 in Bangkok to:</p>
+            </div>
+            <div className="benefits-grid-compact">
+              {exhibitorBenefits.slice(0, 6).map((benefit, i) => (
+                <div className="benefit-item" key={i}>
+                  <i className="fa-solid fa-circle-check text-primary"></i>
+                  <span>{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* WhatsApp Direct Stall Booking Banner */}
           <div className="whatsapp-page-banner">
             <div className="wa-banner-icon">
@@ -192,9 +220,9 @@ export default function BookStallPage({ onNotify }) {
           <div className="section-subtitle-bar">
             <div className="step-heading-row">
               <span className="step-badge">Step 1</span>
-              <h3>Choose Booth Format & Size</h3>
+              <h3>Choose Booth Format &amp; Size</h3>
             </div>
-            <span>All Shell Scheme booths include carpet, partition walls, electricals, and custom fascia lettering</span>
+            <span>All Shell Scheme booths include carpet, partition walls, electricals, furniture, and custom fascia lettering</span>
           </div>
 
           <div className="booth-options-grid">
@@ -224,7 +252,7 @@ export default function BookStallPage({ onNotify }) {
                   <p className="booth-desc">{booth.description}</p>
 
                   <div className="booth-inclusions">
-                    <h5>Included Equipment & Benefits:</h5>
+                    <h5>Included Equipment &amp; Benefits:</h5>
                     <ul>
                       {booth.inclusions.map((item, idx) => (
                         <li key={idx}>
@@ -256,7 +284,7 @@ export default function BookStallPage({ onNotify }) {
           <div className="section-subtitle-bar">
             <div className="step-heading-row">
               <span className="step-badge">Step 2</span>
-              <h3>Configure Add-ons & Request Allotment</h3>
+              <h3>Configure Add-ons &amp; Request Allotment</h3>
             </div>
             <span>Calculate live package investment and submit your official hall space reservation</span>
           </div>
@@ -264,7 +292,7 @@ export default function BookStallPage({ onNotify }) {
           <div className="booth-config-grid">
             {/* Addons & Live Cost Breakdown */}
             <div className="cost-breakdown-card">
-              <h3>Custom Options & Add-ons</h3>
+              <h3>Custom Options &amp; Add-ons</h3>
               <p>Enhance your visibility with premium booth enhancements:</p>
 
               <div className="addons-list">
@@ -276,7 +304,7 @@ export default function BookStallPage({ onNotify }) {
                   />
                   <div className="addon-info">
                     <strong>Corner Stall (2-Side Open)</strong>
-                    <span>Maximum foot traffic & corner branding (+10% base cost)</span>
+                    <span>Maximum foot traffic &amp; corner branding (+10% base cost)</span>
                   </div>
                   <span className="addon-cost">
                     +${Math.round(activeOption.basePrice * 0.1)}
@@ -304,7 +332,7 @@ export default function BookStallPage({ onNotify }) {
                   />
                   <div className="addon-info">
                     <strong>Digital Lead Scanner (2 Mobile Licenses)</strong>
-                    <span>Scan visitor & buyer badges directly for CRM export</span>
+                    <span>Scan visitor &amp; buyer badges directly for CRM export</span>
                   </div>
                   <span className="addon-cost">+$150</span>
                 </label>
@@ -316,8 +344,8 @@ export default function BookStallPage({ onNotify }) {
                     onChange={() => handleCheckboxChange('catalogueAd')}
                   />
                   <div className="addon-info">
-                    <strong>Full-Page IndiGlobal Show Directory Ad</strong>
-                    <span>Printed in 25,000+ attendee guidebooks & PDF catalog</span>
+                    <strong>Full-Page Official Show Directory Ad</strong>
+                    <span>Printed in attendee guidebooks &amp; digital show directory</span>
                   </div>
                   <span className="addon-cost">+$400</span>
                 </label>
@@ -337,7 +365,7 @@ export default function BookStallPage({ onNotify }) {
                   <span>Estimated Total:</span>
                   <span className="total-amount">${calculateTotal()} USD</span>
                 </div>
-                <small className="tax-note">* Taxes as applicable. Flexible payment schedule available (40% advance).</small>
+                <small className="tax-note">* Taxes as applicable. Flexible payment schedule available (40% advance to lock booth).</small>
               </div>
 
               <div className="cost-whatsapp-shortcut">
@@ -355,7 +383,7 @@ export default function BookStallPage({ onNotify }) {
             {/* Exhibitor Form */}
             <div className="reg-form-card">
               <div className="form-intro">
-                <h3>Submit Space Booking Contract Request</h3>
+                <h3>Submit Space Booking Request</h3>
                 <p>Lock in this configuration and receive the formal floorplan allotment map.</p>
               </div>
 
@@ -385,14 +413,14 @@ export default function BookStallPage({ onNotify }) {
                     />
                   </div>
                   <div className="form-group col-full">
-                    <label htmlFor="ex-comp">Exhibiting Hospital / Company Legal Name *</label>
+                    <label htmlFor="ex-comp">Exhibiting Company / Institution Legal Name *</label>
                     <input
                       type="text"
                       id="ex-comp"
                       name="company"
                       value={formData.company}
                       onChange={handleChange}
-                      placeholder="e.g. MedTech Global / Apex Health Group"
+                      placeholder="e.g. MedTech Global / Apex Pharma Group"
                       required
                     />
                   </div>
@@ -404,7 +432,7 @@ export default function BookStallPage({ onNotify }) {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="expo@medtechglobal.com"
+                      placeholder="expo@apexpharma.com"
                       required
                     />
                   </div>
@@ -428,11 +456,11 @@ export default function BookStallPage({ onNotify }) {
                       name="website"
                       value={formData.website}
                       onChange={handleChange}
-                      placeholder="https://www.medtechglobal.com"
+                      placeholder="https://www.apexpharma.com"
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="ex-sector">Pavilion Hall Preference *</label>
+                    <label htmlFor="ex-sector">Industry Sector (19 Sectors) *</label>
                     <select
                       id="ex-sector"
                       name="sector"
@@ -440,41 +468,44 @@ export default function BookStallPage({ onNotify }) {
                       onChange={handleChange}
                       required
                     >
-                      <option value="healthcare-facilities">Hall 6: Healthcare Facilities & Hospital Infrastructure (Featured)</option>
-                      <option value="diagnostics-surgicals">Hall 5: Diagnostics and Surgicals (New)</option>
-                      <option value="apis">Hall 1-2: APIs & Fine Chemicals</option>
-                      <option value="finished">Hall 3: Finished Dosages & Formulations</option>
-                      <option value="machinery">Hall 4: Pharma Machinery & Cleanroom</option>
-                      <option value="packaging">Hall 5: Packaging & Delivery Systems</option>
+                      {SECTOR_OPTIONS.map((sec) => (
+                        <option key={sec.id} value={sec.id}>
+                          {sec.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                   <div className="form-group col-full">
-                    <label htmlFor="ex-notes">Stall Positioning & Technical Requirements</label>
+                    <label htmlFor="ex-notes">Special Requests / Requirements</label>
                     <textarea
                       id="ex-notes"
                       name="notes"
-                      rows={3}
+                      rows="3"
                       value={formData.notes}
                       onChange={handleChange}
-                      placeholder="Hospital equipment setup requirements, heavy machinery power, corner preference, etc."
+                      placeholder="e.g. Near main pavilion entrance, corner requested, machinery demo planned..."
                     ></textarea>
                   </div>
                 </div>
 
-                <div className="form-actions-split">
-                  <button type="submit" className="btn btn-primary btn-block">
-                    <i className="fa-solid fa-file-signature"></i> Request Formal Allotment & Invoice
+                <div className="booking-summary-footer">
+                  <div className="footer-price-tag">
+                    <span>Package Estimate:</span>
+                    <strong>${calculateTotal()} USD</strong>
+                  </div>
+                  <button type="submit" className="btn btn-primary">
+                    <i className="fa-solid fa-file-contract"></i> Reserve Booth Space
                   </button>
-                  <a
-                    href={getWhatsAppBookingUrl()}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-whatsapp btn-block"
-                  >
-                    <i className="fa-brands fa-whatsapp"></i> Book via WhatsApp
-                  </a>
                 </div>
               </form>
+
+              <div className="visitor-redirect-banner mt-4">
+                <h4>Attending as a Trade Visitor / Institutional Buyer Instead?</h4>
+                <p>Register for a complimentary trade pass to browse pavilions and attend sessions.</p>
+                <Link to="/visitor-registration" className="btn btn-outline btn-sm">
+                  <i className="fa-solid fa-id-card"></i> Switch to Visitor Registration
+                </Link>
+              </div>
             </div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
+import { getWhatsAppUrl } from '../config/contactConfig';
 
 export default function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false);

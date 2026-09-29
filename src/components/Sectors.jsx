@@ -222,7 +222,7 @@ export default function Sectors() {
                     <i className="fa-solid fa-circle-info"></i> View Details
                   </button>
                   <Link
-                    to={`/book-stall?sector=${sector.id}`}
+                    to={`/exhibitor-registration?sector=${sector.id}`}
                     className="btn btn-primary btn-sm sector-quick-book-btn"
                   >
                     Book Stall <i className="fa-solid fa-arrow-right"></i>
@@ -306,14 +306,14 @@ export default function Sectors() {
 
             <div className="sector-modal-footer">
               <Link
-                to={`/book-stall?sector=${selectedSector.id}`}
+                to={`/exhibitor-registration?sector=${selectedSector.id}`}
                 className="btn btn-primary"
                 onClick={() => setSelectedSector(null)}
               >
                 <i className="fa-solid fa-store"></i> Book Stall in this Pavilion
               </Link>
               <Link
-                to="/registration?tab=visitor"
+                to="/visitor-registration"
                 className="btn btn-outline"
                 onClick={() => setSelectedSector(null)}
               >

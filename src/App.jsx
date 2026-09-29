@@ -15,6 +15,7 @@ import HomePage from './pages/HomePage';
 import VisitorPassPage from './pages/VisitorPassPage';
 import BookStallPage from './pages/BookStallPage';
 import SchedulePage from './pages/SchedulePage';
+import AwardsPage from './pages/AwardsPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
@@ -53,11 +54,23 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<HomePage onNotify={handleNotify} />} />
+              {/* Dedicated Visitor Registration Routes */}
+              <Route path="/visitor-registration" element={<VisitorPassPage onNotify={handleNotify} />} />
+              <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
+
+              {/* Dedicated Exhibitor Registration Routes */}
+              <Route path="/exhibitor-registration" element={<BookStallPage onNotify={handleNotify} />} />
+              <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />
+
+              {/* Conference, Schedule & Awards */}
+              <Route path="/schedule" element={<SchedulePage />} />
+              <Route path="/awards" element={<AwardsPage />} />
+
+              {/* General Registration Gateway */}
               <Route path="/registration" element={<RegistrationPage onNotify={handleNotify} />} />
               <Route path="/register" element={<RegistrationPage onNotify={handleNotify} />} />
-              <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
-              <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />
-              <Route path="/schedule" element={<SchedulePage />} />
+
+              {/* Other Pages */}
               <Route path="/contact" element={<ContactPage onNotify={handleNotify} />} />
               <Route path="/login" element={<LoginPage onNotify={handleNotify} />} />
               <Route path="/signup" element={<SignupPage onNotify={handleNotify} />} />
