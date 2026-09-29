@@ -14,8 +14,8 @@ export default function Footer() {
                 <i className="fa-solid fa-hospital-user"></i>
               </div>
               <div className="brand-text">
-                <h1 style={{ color: 'white' }}>IndiGlobal Healthcare Expo</h1>
-                <span style={{ color: '#34d399' }}>India-ASEAN Confluence 2027</span>
+                <h1 style={{ color: 'white' }}>The Global Healthcare Expo</h1>
+                <span style={{ color: '#34d399' }} className="brand-domain-subtext">Part of IndiGlobalExpo.com</span>
               </div>
             </Link>
             <p>
@@ -60,6 +60,9 @@ export default function Footer() {
           <div className="footer-col">
             <h4>Registration & Expo</h4>
             <ul>
+              <li>
+                <Link to="/registration">Registration Portal</Link>
+              </li>
               <li>
                 <Link to="/register-visitor">Trade Visitor Pass</Link>
               </li>

@@ -1,6 +1,7 @@
+import { Link } from 'react-router-dom';
 import aseanLogo from '../assets/Indian Asean Global Confluence Logo with GTTCI Logo.png';
 
-export default function Hero({ onOpenPortal }) {
+export default function Hero() {
   return (
     <section className="hero" id="about">
       <div className="container hero-container-layout">
@@ -26,20 +27,18 @@ export default function Hero({ onOpenPortal }) {
           </p>
 
           <div className="hero-ctas">
-            <button
-              type="button"
+            <Link
+              to="/registration?tab=visitor"
               className="btn btn-primary"
-              onClick={() => onOpenPortal('visitor')}
             >
               <i className="fa-solid fa-id-card"></i> Visitor Registration
-            </button>
-            <button
-              type="button"
+            </Link>
+            <Link
+              to="/registration?tab=exhibitor"
               className="btn btn-outline"
-              onClick={() => onOpenPortal('exhibitor')}
             >
               <i className="fa-solid fa-store"></i> Book Exhibitor Stall
-            </button>
+            </Link>
           </div>
 
           <div className="hero-key-highlights">
@@ -76,7 +75,7 @@ export default function Hero({ onOpenPortal }) {
               </p>
               <div className="partner-meta-row">
                 <span><i className="fa-solid fa-calendar-check text-primary"></i> 2027 Edition</span>
-                <span><i className="fa-solid fa-location-dot text-primary"></i> New Delhi, India</span>
+                <span><i className="fa-solid fa-location-dot text-primary"></i> Bangkok, Thailand</span>
               </div>
             </div>
           </div>

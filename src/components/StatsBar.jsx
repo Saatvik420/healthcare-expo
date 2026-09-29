@@ -1,9 +1,9 @@
 export default function StatsBar() {
   const stats = [
-    { value: '600+', label: 'Exhibiting Brands' },
-    { value: '25,000+', label: 'Trade Attendees' },
-    { value: '45+', label: 'Global Delegations' },
-    { value: '20,000 m²', label: 'Exhibition Floor' },
+    { value: '100+', label: 'Exhibiting Brands' },
+    { value: '5000+', label: 'Trade Attendees' },
+    { value: '15+', label: 'Global Delegations' },
+    { value: 'Upto 10,000 m²', label: 'Exhibition Area' },
   ];
 
   return (

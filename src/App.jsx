@@ -22,6 +22,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import RegistrationPage from './pages/RegistrationPage';
 
 import './App.css';
 
@@ -54,6 +55,8 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<HomePage onNotify={handleNotify} />} />
+              <Route path="/registration" element={<RegistrationPage onNotify={handleNotify} />} />
+              <Route path="/register" element={<RegistrationPage onNotify={handleNotify} />} />
               <Route path="/sectors" element={<SectorsPage />} />
               <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
               <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />

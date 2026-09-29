@@ -28,7 +28,7 @@ export const CONTACT_CONFIG = {
     email: 'info@indiglobalexpo.com',
     visitorEmail: 'visitor@globalhealthcareexpo.com',
     exhibitorEmail: 'stalls@globalhealthcareexpo.com',
-    venue: 'Pragati Maidan / IECC, New Delhi, India',
+    venue: 'Bangkok, Thailand',
     officeAddress: 'C/O GTTCI, Areness House, 5, Sardar Patel Marg, Diplomatic Enclave, Chanakyapuri, New Delhi - 110021',
   },
 };

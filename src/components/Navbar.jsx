@@ -25,8 +25,8 @@ export default function Navbar() {
             <i className="fa-solid fa-hospital-user"></i>
           </div>
           <div className="brand-text">
-            <h1>IndiGlobal Healthcare Expo</h1>
-            <span>Part of IndiGlobalExpo.com</span>
+            <h1>The Global Healthcare Expo</h1>
+            <span className="brand-domain-subtext">Part of IndiGlobalExpo.com</span>
           </div>
         </Link>
 
@@ -39,6 +39,15 @@ export default function Navbar() {
               end
             >
               Home
+            </NavLink>
+          </li>
+          <li>
+            <NavLink
+              to="/registration"
+              className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
+              onClick={closeMenu}
+            >
+              Registration
             </NavLink>
           </li>
           <li>

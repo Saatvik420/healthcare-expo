@@ -1,4 +1,6 @@
-export default function Sectors({ onOpenPortal }) {
+import { Link } from 'react-router-dom';
+
+export default function Sectors() {
   const sectors = [
     {
       id: 'healthcare-facilities',
@@ -63,13 +65,12 @@ export default function Sectors({ onOpenPortal }) {
               <div className="sector-content">
                 <h3>{sector.title}</h3>
                 <p>{sector.description}</p>
-                <button
-                  type="button"
+                <Link
+                  to={`/book-stall?sector=${sector.id}`}
                   className="sector-link"
-                  onClick={() => onOpenPortal('exhibitor')}
                 >
                   Exhibit in this zone <i className="fa-solid fa-arrow-right"></i>
-                </button>
+                </Link>
               </div>
             </div>
           ))}

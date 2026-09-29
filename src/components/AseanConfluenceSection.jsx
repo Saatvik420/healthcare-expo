@@ -43,7 +43,7 @@ export default function AseanConfluenceSection() {
                 <i className="fa-solid fa-location-dot text-primary"></i>
                 <div>
                   <strong>Official Venue</strong>
-                  <span>Pragati Maidan / IECC, New Delhi, India</span>
+                  <span>Bangkok, Thailand</span>
                 </div>
               </div>
               <div className="confluence-meta-item">
