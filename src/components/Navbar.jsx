@@ -51,29 +51,12 @@ export default function Navbar() {
             </NavLink>
           </li>
           <li>
-            <a
-              href="/#sectors"
-              onClick={closeMenu}
-            >
-              Pavilions
-            </a>
-          </li>
-          <li>
             <NavLink
               to="/schedule"
               className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
               onClick={closeMenu}
             >
               Schedule
-            </NavLink>
-          </li>
-          <li>
-            <NavLink
-              to="/sponsorship"
-              className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
-              onClick={closeMenu}
-            >
-              Sponsorship
             </NavLink>
           </li>
           <li>

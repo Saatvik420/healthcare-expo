@@ -187,7 +187,7 @@ export default function UserDashboardPage({ onNotify }) {
                       <i className="fa-solid fa-headset"></i>
                       <div>
                         <strong>Visitor Helpdesk</strong>
-                        <small>Assistance with visa letters, hotels, and parking</small>
+                        <small>Connect directly with our organizing secretariat</small>
                       </div>
                       <i className="fa-solid fa-chevron-right arrow-icon"></i>
                     </Link>

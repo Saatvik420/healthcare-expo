@@ -13,9 +13,9 @@ export default function TopBar() {
           </span>
         </div>
         <div className="top-bar-links">
-          <a href="/#sectors">
-            <i className="fa-solid fa-hospital"></i> Healthcare Pavilions
-          </a>
+          <Link to="/registration">
+            <i className="fa-solid fa-id-card"></i> Registration
+          </Link>
           <Link to="/schedule">
             <i className="fa-solid fa-clock"></i> Schedule
           </Link>

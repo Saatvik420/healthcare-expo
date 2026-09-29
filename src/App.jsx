@@ -14,7 +14,6 @@ import { DataProvider } from './context/DataContext';
 import HomePage from './pages/HomePage';
 import VisitorPassPage from './pages/VisitorPassPage';
 import BookStallPage from './pages/BookStallPage';
-import SponsorshipPage from './pages/SponsorshipPage';
 import SchedulePage from './pages/SchedulePage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
@@ -58,7 +57,6 @@ function App() {
               <Route path="/register" element={<RegistrationPage onNotify={handleNotify} />} />
               <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
               <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />
-              <Route path="/sponsorship" element={<SponsorshipPage onNotify={handleNotify} />} />
               <Route path="/schedule" element={<SchedulePage />} />
               <Route path="/contact" element={<ContactPage onNotify={handleNotify} />} />
               <Route path="/login" element={<LoginPage onNotify={handleNotify} />} />

@@ -16,20 +16,20 @@ export default function ContactPage({ onNotify }) {
 
   const contactFaqs = [
     {
-      q: 'Do international exhibitors and visitors get an official Visa Invitation Letter?',
-      a: 'Yes. Once your booth booking agreement or VIP delegate pass is confirmed, our Secretariat issues an official Ministry-approved Indian Conference Visa Invitation Letter along with necessary clearance certificates.',
+      q: 'How do I register for an official trade visitor badge?',
+      a: 'Trade visitors can pre-register online via our Registration Portal or register directly in 1-click through our official WhatsApp helpdesk (+91 7357590375) to receive an e-badge.',
     },
     {
-      q: 'Is there parking available inside Pragati Maidan complex?',
-      a: 'Yes, multi-level basement car parking with direct escalator access to Halls 1–5 is accessible via Gate 4 and Gate 10. Designated parking passes are provided to all exhibiting companies.',
+      q: 'How can our company book an exhibition booth or pavilion space?',
+      a: 'Exhibitors can reserve standard shell scheme booths or custom bare pavilion spaces through our Book Stall portal or by contacting the Exhibitor Secretariat at info@indiglobalexpo.com.',
     },
     {
-      q: 'Can our company ship machinery and booth materials prior to the setup date?',
-      a: 'Our official on-site logistics and freight forwarder provides bonded warehousing and customs clearance right inside Pragati Maidan starting 10 days before the setup window.',
+      q: 'Are speaking and panel presentation opportunities available at the conference?',
+      a: 'Yes. Healthcare leaders, hospital administrators, medical technologists, and clinical researchers interested in keynote or panel speaking opportunities can submit an inquiry directly to our Secretariat.',
     },
     {
-      q: 'Are wheelchairs and special accessibility accommodations provided?',
-      a: 'Yes, Pragati Maidan is fully barrier-free. Wheelchairs and buggy shuttle carts between gates and exhibition halls are provided complimentary at Helpdesk Gate 4.',
+      q: 'What are the official dates and venue for The Global Healthcare Expo 2027?',
+      a: 'The Global Healthcare Expo 2027 will take place on 21st and 22nd January 2027 in Bangkok, Thailand, held under the prestigious India-ASEAN Global Confluence in collaboration with GTTCI & Asepsis Marketing.',
     },
   ];
 
@@ -42,7 +42,7 @@ export default function ContactPage({ onNotify }) {
     e.preventDefault();
     onNotify(
       'Message Received!',
-      `Thank you, ${formData.name}. Your inquiry regarding "${formData.subject || 'Expo Participation'}" has been forwarded to the appropriate desk. A representative will contact you at ${formData.email} within 24 hours.`
+      `Thank you, ${formData.name}. Your inquiry regarding "${formData.subject || 'Expo Participation'}" has been forwarded to our Secretariat. A representative will contact you at ${formData.email} within 24 hours.`
     );
     setFormData({
       name: '',
@@ -60,9 +60,11 @@ export default function ContactPage({ onNotify }) {
       <section className="page-header">
         <div className="container">
           <span className="tag">Support & Assistance</span>
-          <h1>Contact Desk & Expo Secretariat</h1>
+          <h1>Contact Desk</h1>
           <p>
-            Have inquiries regarding booth allocation, visitor trade passes, or event participation?
+            Have inquiries regarding booth allocation, visiting the exhibition, conference participation and speaking opportunities?
+          </p>
+          <p>
             Our organizing secretariat and dedicated helpdesk teams are at your disposal.
           </p>
         </div>
@@ -77,14 +79,14 @@ export default function ContactPage({ onNotify }) {
                 <i className="fa-solid fa-building-columns"></i>
               </div>
               <h3>Exhibitor Secretariat</h3>
-              <p>For stall bookings, floorplan layout allotments, and sponsorship packages.</p>
+              <p>For stall bookings, floorplan layout allotments, and exhibition packages.</p>
               <div className="contact-meta">
                 <div><i className="fa-solid fa-envelope"></i> info@indiglobalexpo.com</div>
                 <div><i className="fa-solid fa-phone"></i> +91 7357590375</div>
               </div>
               <div style={{ marginTop: '1.25rem' }}>
                 <a
-                  href={getWhatsAppUrl('exhibitor', 'Hello IndiGlobal Exhibitor Secretariat, I am interested in booking an exhibitor stall for India-ASEAN Global Confluence 2027.')}
+                  href={getWhatsAppUrl('exhibitor', 'Hello IndiGlobal Exhibitor Secretariat, I am interested in booking an exhibitor stall for India-ASEAN Global Confluence 2027 in Bangkok, Thailand.')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-sm btn-whatsapp btn-block"
@@ -106,7 +108,7 @@ export default function ContactPage({ onNotify }) {
               </div>
               <div style={{ marginTop: '1.25rem' }}>
                 <a
-                  href={getWhatsAppUrl('visitor', 'Hello IndiGlobal Visitor Desk, I need assistance regarding my trade visitor pass for India-ASEAN Global Confluence 2027.')}
+                  href={getWhatsAppUrl('visitor', 'Hello IndiGlobal Visitor Desk, I need assistance regarding my trade visitor pass for India-ASEAN Global Confluence 2027 in Bangkok, Thailand.')}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-sm btn-whatsapp btn-block"
@@ -148,7 +150,7 @@ export default function ContactPage({ onNotify }) {
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="rachel@biovance.com"
+                      placeholder="rachel@hospitalgroup.com"
                       required
                     />
                   </div>
@@ -171,7 +173,7 @@ export default function ContactPage({ onNotify }) {
                       name="organization"
                       value={formData.organization}
                       onChange={handleChange}
-                      placeholder="e.g. Biovance Laboratories"
+                      placeholder="e.g. Medical Care Solutions"
                     />
                   </div>
                   <div className="form-group">
@@ -185,8 +187,7 @@ export default function ContactPage({ onNotify }) {
                       <option value="general">General Information</option>
                       <option value="stall">Exhibit Stall Allotment</option>
                       <option value="visitor">Visitor Pass & Badges</option>
-                      <option value="sponsor">Sponsorship & Advertising</option>
-                      <option value="visa">Visa Invitation Letter</option>
+                      <option value="speaking">Conference & Speaking Opportunities</option>
                       <option value="press">Press & Media Accreditation</option>
                     </select>
                   </div>
@@ -198,7 +199,7 @@ export default function ContactPage({ onNotify }) {
                       name="subject"
                       value={formData.subject}
                       onChange={handleChange}
-                      placeholder="e.g. Visa request for 4 delegates"
+                      placeholder="e.g. Booth booking inquiry or speaking opportunity"
                       required
                     />
                   </div>
@@ -222,59 +223,47 @@ export default function ContactPage({ onNotify }) {
               </form>
             </div>
 
-            {/* Venue Location & Transport Guide */}
+            {/* Event Location & Secretariat Guide */}
             <div className="venue-guide-card">
               <div className="venue-guide-header">
                 <i className="fa-solid fa-location-dot venue-pin-icon"></i>
                 <div>
-                  <h3>Exhibition Center & Venue</h3>
-                  <p>International Exhibition-cum-Convention Centre (IECC), Pragati Maidan</p>
+                  <h3>Official Venue & Dates</h3>
+                  <p>Bangkok, Thailand &bull; 21st & 22nd January 2027</p>
                 </div>
               </div>
 
               <div className="venue-address-box">
-                <strong>Address:</strong>
-                <p>Pragati Maidan, Mathura Road, New Delhi, Delhi 110002, India</p>
-                <div className="venue-halls-tag">Halls 1, 2, 3, 4, 5 (Integrated Ground Floor)</div>
+                <strong>Event Location:</strong>
+                <p>Bangkok, Thailand</p>
+                <div className="venue-halls-tag">Under India-ASEAN Global Confluence 2027</div>
               </div>
 
               <div className="transport-options">
-                <h4>Transit & Commute Directions:</h4>
+                <h4>Expo Secretariat Details:</h4>
                 <div className="transit-item">
-                  <i className="fa-solid fa-train-subway transit-icon"></i>
+                  <i className="fa-solid fa-envelope transit-icon"></i>
                   <div>
-                    <strong>Delhi Metro (Fastest):</strong>
-                    <p>Supreme Court Station (Blue Line) - Direct skywalk access to Gate 10.</p>
+                    <strong>Official Email:</strong>
+                    <p>info@indiglobalexpo.com</p>
                   </div>
                 </div>
 
                 <div className="transit-item">
-                  <i className="fa-solid fa-plane-up transit-icon"></i>
+                  <i className="fa-solid fa-phone transit-icon"></i>
                   <div>
-                    <strong>From Indira Gandhi Intl Airport (DEL):</strong>
-                    <p>18 km (approx. 35 mins via Airport Express Metro or Pre-paid Taxi).</p>
+                    <strong>Direct Helpline / WhatsApp:</strong>
+                    <p>+91 7357590375</p>
                   </div>
                 </div>
 
                 <div className="transit-item">
-                  <i className="fa-solid fa-hotel transit-icon"></i>
+                  <i className="fa-solid fa-handshake transit-icon"></i>
                   <div>
-                    <strong>Official Accommodation Partners:</strong>
-                    <p>Shangri-La Eros, The Lalit, and Taj Mahal Hotel offer dedicated expo shuttle buses.</p>
+                    <strong>Organized & Presented In Collaboration With:</strong>
+                    <p>GTTCI (Global Trade & Technology Council of India) & Asepsis Marketing</p>
                   </div>
                 </div>
-              </div>
-
-              <div className="venue-map-preview">
-                <iframe
-                  title="Pragati Maidan Location"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14010.536762391696!2d77.23547849688172!3d28.618244249117366!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce32a39281a81%3A0xe2dc8ef7c703b4ee!2sBharat%20Mandapam%20(IECC)!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-                  width="100%"
-                  height="180"
-                  style={{ border: 0, borderRadius: '8px' }}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
               </div>
             </div>
           </div>
@@ -282,8 +271,8 @@ export default function ContactPage({ onNotify }) {
           {/* Contact FAQs */}
           <div className="contact-faqs-section">
             <div className="section-header">
-              <span className="tag">Logistics Help</span>
-              <h2>Venue & Accommodation FAQ</h2>
+              <span className="tag">Help & Information</span>
+              <h2>Frequently Asked Questions</h2>
             </div>
 
             <div className="faq-container">

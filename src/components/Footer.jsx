@@ -3,11 +3,11 @@ import aseanLogo from '../assets/Indian Asean Global Confluence Logo with GTTCI 
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 
 export default function Footer() {
-
   return (
     <footer>
       <div className="container">
         <div className="footer-grid">
+          {/* Brand Column */}
           <div className="footer-col footer-brand-col">
             <Link to="/" className="brand-logo" style={{ marginBottom: '1rem', textDecoration: 'none' }}>
               <div className="logo-symbol">
@@ -19,9 +19,7 @@ export default function Footer() {
               </div>
             </Link>
             <p>
-              An initiative of <strong>IndiGlobal Expo</strong> (<em>Connect &bull; Collaborate &bull; Grow</em>)
-              held under the aegis of <strong>India-ASEAN Global Confluence 2027</strong> in official association
-              with <strong>GTTCI</strong>.
+              The Global Healthcare Expo 2027 is designed as a business and market-expansion platform for pharmaceutical, health-tech, diagnostics providers & other healthcare companies looking to expand their presence across Thailand, ASEAN and international markets.
             </p>
 
             <div className="footer-partner-badge">
@@ -36,6 +34,7 @@ export default function Footer() {
             </div>
           </div>
 
+          {/* Exhibition Pavilions Column */}
           <div className="footer-col">
             <h4>Exhibition Pavilions</h4>
             <ul>
@@ -55,11 +54,12 @@ export default function Footer() {
                 <a href="/#sectors">Machinery & Cleanroom</a>
               </li>
               <li>
-                <a href="/#sectors">Packaging Systems</a>
+                <a href="/#sectors">Packaging & Delivery Systems</a>
               </li>
             </ul>
           </div>
 
+          {/* Registration & Participation Column */}
           <div className="footer-col">
             <h4>Registration & Expo</h4>
             <ul>
@@ -73,22 +73,24 @@ export default function Footer() {
                 <Link to="/book-stall">Book an Exhibit Stall</Link>
               </li>
               <li>
-                <Link to="/sponsorship">Sponsorship Deck</Link>
-              </li>
-              <li>
                 <Link to="/schedule">Summit Agenda & Keynotes</Link>
               </li>
               <li>
-                <Link to="/contact">Helpdesk & Venue Logistics</Link>
+                <Link to="/contact">Contact Desk & Helpdesk</Link>
               </li>
             </ul>
           </div>
 
+          {/* Contact Desk Column */}
           <div className="footer-col">
             <h4>Contact Desk</h4>
             <div className="footer-contact-item">
               <i className="fa-solid fa-envelope"></i>
               <span>{CONTACT_CONFIG.general.email}</span>
+            </div>
+            <div className="footer-contact-item">
+              <i className="fa-solid fa-phone"></i>
+              <span>{CONTACT_CONFIG.general.phone}</span>
             </div>
             <div className="footer-contact-item">
               <i className="fa-brands fa-whatsapp text-whatsapp"></i>
@@ -113,19 +115,15 @@ export default function Footer() {
               </a>
             </div>
             <div className="footer-contact-item">
-              <i className="fa-solid fa-phone"></i>
-              <span>{CONTACT_CONFIG.general.landline}</span>
-            </div>
-            <div className="footer-contact-item">
               <i className="fa-solid fa-location-dot"></i>
-              <span>{CONTACT_CONFIG.general.officeAddress}</span>
+              <span>Bangkok, Thailand (21st & 22nd January 2027)</span>
             </div>
           </div>
         </div>
 
         <div className="footer-bottom">
           <p>
-            &copy; 2027 IndiGlobal Healthcare Expo &bull; India-ASEAN Global Confluence &bull; Organised with GTTCI. All rights reserved.
+            &copy; 2027 The Global Healthcare Expo &bull; India-ASEAN Global Confluence &bull; In collaboration with GTTCI & Asepsis Marketing. All rights reserved.
           </p>
         </div>
       </div>
