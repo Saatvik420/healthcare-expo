@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { getWhatsAppUrl } from '../config/contactConfig';
+import { contactApi } from '../services/api';
 
 export default function ContactPage({ onNotify }) {
   const [formData, setFormData] = useState({
@@ -44,6 +45,12 @@ export default function ContactPage({ onNotify }) {
       'Message Received!',
       `Thank you, ${formData.name}. Your inquiry regarding "${formData.subject || 'Expo Participation'}" has been forwarded to our Secretariat. A representative will contact you at ${formData.email} within 24 hours.`
     );
+
+    // Asynchronously persist inquiry to backend
+    contactApi.submit(formData).catch(() => {
+      // Graceful offline fallback
+    });
+
     setFormData({
       name: '',
       email: '',

@@ -12,13 +12,13 @@ export default function LoginPage({ onNotify }) {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      const res = login(email, password);
+    try {
+      const res = await login(email, password);
       setLoading(false);
       if (res.success) {
         onNotify(
@@ -33,14 +33,17 @@ export default function LoginPage({ onNotify }) {
       } else {
         setError(res.message);
       }
-    }, 400);
+    } catch {
+      setLoading(false);
+      setError('An unexpected error occurred during login. Please try again.');
+    }
   };
 
-  const handleQuickLogin = (demoUser) => {
+  const handleQuickLogin = async (demoUser) => {
     setEmail(demoUser.email);
     setPassword(demoUser.password);
     setError('');
-    const res = login(demoUser.email, demoUser.password);
+    const res = await login(demoUser.email, demoUser.password);
     if (res.success) {
       onNotify(
         'Quick Login Successful!',

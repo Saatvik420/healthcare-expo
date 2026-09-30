@@ -28,7 +28,7 @@ export default function SignupPage({ onNotify }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -44,7 +44,7 @@ export default function SignupPage({ onNotify }) {
 
     setLoading(true);
 
-    setTimeout(() => {
+    try {
       const passCode = 'GHE-2026-' + Math.floor(100000 + Math.random() * 900000);
 
       const signupPayload = {
@@ -60,7 +60,7 @@ export default function SignupPage({ onNotify }) {
         password: formData.password,
       };
 
-      const result = signup(signupPayload);
+      const result = await signup(signupPayload);
       setLoading(false);
 
       if (result.success) {
@@ -107,7 +107,10 @@ export default function SignupPage({ onNotify }) {
       } else {
         setError(result.message);
       }
-    }, 400);
+    } catch {
+      setLoading(false);
+      setError('An error occurred during registration. Please try again.');
+    }
   };
 
   return (

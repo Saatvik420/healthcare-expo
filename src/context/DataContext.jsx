@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect } from 'react';
+import { visitorsApi, exhibitorsApi, sponsorshipsApi } from '../services/api';
 
 const DataContext = createContext();
 
@@ -196,6 +197,38 @@ export function DataProvider({ children }) {
     }
   });
 
+  // Sync with Spring Boot Backend on mount
+  useEffect(() => {
+    let isMounted = true;
+    const fetchBackendData = async () => {
+      try {
+        const [backendVisitors, backendExhibitors, backendSponsorships] = await Promise.all([
+          visitorsApi.getAll(),
+          exhibitorsApi.getAll(),
+          sponsorshipsApi.getAll(),
+        ]);
+        if (isMounted) {
+          if (backendVisitors && backendVisitors.length > 0) {
+            setVisitors(backendVisitors);
+          }
+          if (backendExhibitors && backendExhibitors.length > 0) {
+            setExhibitors(backendExhibitors);
+          }
+          if (backendSponsorships && backendSponsorships.length > 0) {
+            setSponsorships(backendSponsorships);
+          }
+        }
+      } catch {
+        // Backend not yet reachable; silently use local cached data
+      }
+    };
+
+    fetchBackendData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   useEffect(() => {
     localStorage.setItem('ghe_visitors', JSON.stringify(visitors));
   }, [visitors]);
@@ -208,69 +241,108 @@ export function DataProvider({ children }) {
     localStorage.setItem('ghe_sponsorships', JSON.stringify(sponsorships));
   }, [sponsorships]);
 
-  const addVisitor = (visitorData) => {
+  const addVisitor = async (visitorData) => {
     const newVisitor = {
       ...visitorData,
-      id: 'vis_' + Date.now(),
-      date: new Date().toLocaleDateString('en-US', {
+      id: visitorData.id || 'vis_' + Date.now(),
+      date: visitorData.date || new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
       }),
-      status: 'Confirmed',
+      status: visitorData.status || 'Confirmed',
     };
     setVisitors((prev) => [newVisitor, ...prev]);
+
+    // Send to backend
+    try {
+      await visitorsApi.create(newVisitor);
+    } catch {
+      // Retained in localStorage
+    }
     return newVisitor;
   };
 
-  const deleteVisitor = (id) => {
+  const deleteVisitor = async (id) => {
     setVisitors((prev) => prev.filter((v) => v.id !== id));
+    try {
+      await visitorsApi.delete(id);
+    } catch {
+      // Retained in localStorage
+    }
   };
 
-  const addExhibitor = (exhibitorData) => {
+  const addExhibitor = async (exhibitorData) => {
     const newExhibitor = {
       ...exhibitorData,
-      id: 'exh_' + Date.now(),
-      bookingDate: new Date().toLocaleDateString('en-US', {
+      id: exhibitorData.id || 'exh_' + Date.now(),
+      bookingDate: exhibitorData.bookingDate || new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
       }),
-      status: 'Pending Review',
+      status: exhibitorData.status || 'Pending Review',
     };
     setExhibitors((prev) => [newExhibitor, ...prev]);
+
+    try {
+      await exhibitorsApi.create(newExhibitor);
+    } catch {
+      // Retained in localStorage
+    }
     return newExhibitor;
   };
 
-  const updateExhibitorStatus = (id, newStatus) => {
+  const updateExhibitorStatus = async (id, newStatus) => {
     setExhibitors((prev) =>
       prev.map((e) => (e.id === id ? { ...e, status: newStatus } : e))
     );
+    try {
+      await exhibitorsApi.updateStatus(id, newStatus);
+    } catch {
+      // Retained in localStorage
+    }
   };
 
-  const deleteExhibitor = (id) => {
+  const deleteExhibitor = async (id) => {
     setExhibitors((prev) => prev.filter((e) => e.id !== id));
+    try {
+      await exhibitorsApi.delete(id);
+    } catch {
+      // Retained in localStorage
+    }
   };
 
-  const addSponsorship = (sponsorshipData) => {
+  const addSponsorship = async (sponsorshipData) => {
     const newSponsorship = {
       ...sponsorshipData,
-      id: 'sp_' + Date.now(),
-      date: new Date().toLocaleDateString('en-US', {
+      id: sponsorshipData.id || 'sp_' + Date.now(),
+      date: sponsorshipData.date || new Date().toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
       }),
-      status: 'In Discussion',
+      status: sponsorshipData.status || 'In Discussion',
     };
     setSponsorships((prev) => [newSponsorship, ...prev]);
+
+    try {
+      await sponsorshipsApi.create(newSponsorship);
+    } catch {
+      // Retained in localStorage
+    }
     return newSponsorship;
   };
 
-  const updateSponsorshipStatus = (id, newStatus) => {
+  const updateSponsorshipStatus = async (id, newStatus) => {
     setSponsorships((prev) =>
       prev.map((s) => (s.id === id ? { ...s, status: newStatus } : s))
     );
+    try {
+      await sponsorshipsApi.updateStatus(id, newStatus);
+    } catch {
+      // Retained in localStorage
+    }
   };
 
   const resetToDefaults = () => {
