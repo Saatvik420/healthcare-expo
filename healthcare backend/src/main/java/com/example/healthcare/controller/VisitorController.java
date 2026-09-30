@@ -11,7 +11,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/visitors")
-@CrossOrigin(origins = "*")
 public class VisitorController {
 
     private final VisitorRepository visitorRepository;

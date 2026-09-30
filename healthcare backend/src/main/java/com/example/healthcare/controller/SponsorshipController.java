@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/sponsorships")
-@CrossOrigin(origins = "*")
 public class SponsorshipController {
 
     private final SponsorshipRepository sponsorshipRepository;

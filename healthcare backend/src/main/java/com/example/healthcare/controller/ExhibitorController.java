@@ -12,7 +12,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/exhibitors")
-@CrossOrigin(origins = "*")
 public class ExhibitorController {
 
     private final ExhibitorRepository exhibitorRepository;
