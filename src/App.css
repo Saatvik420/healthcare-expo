@@ -113,7 +113,7 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.85rem 0;
+  padding: 0.65rem 0;
 }
 
 .brand-logo {
@@ -7227,18 +7227,18 @@ textarea:focus {
    OFFICIAL BRAND LOGO & POSTER STYLES
    ========================================================================== */
 .navbar-brand-logo-img {
-  height: 68px;
+  height: 84px;
   width: auto;
-  max-width: 320px;
+  max-width: 380px;
   object-fit: contain;
   display: block;
   transition: transform 0.2s ease;
 }
 
 .mobile-drawer-logo-img {
-  height: 52px;
+  height: 58px;
   width: auto;
-  max-width: 230px;
+  max-width: 260px;
   object-fit: contain;
   display: block;
 }
@@ -7334,8 +7334,8 @@ textarea:focus {
 
 @media (max-width: 768px) {
   .navbar-brand-logo-img {
-    height: 50px;
-    max-width: 220px;
+    height: 58px;
+    max-width: 260px;
   }
 }
 
