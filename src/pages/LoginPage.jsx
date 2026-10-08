@@ -6,6 +6,7 @@ export default function LoginPage({ onNotify }) {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState('visitor'); // 'visitor' | 'exhibitor'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -21,13 +22,17 @@ export default function LoginPage({ onNotify }) {
       const res = await login(email, password);
       setLoading(false);
       if (res.success) {
-        onNotify(
-          'Login Successful!',
-          `Welcome back, ${res.user.name}. You are logged in as ${res.user.role.toUpperCase()}.`
-        );
         if (res.user.role === 'admin') {
+          onNotify(
+            'Admin Authenticated!',
+            `Welcome Expo Director. The Admin Dashboard is now unlocked in your navigation.`
+          );
           navigate('/admin');
         } else {
+          onNotify(
+            'Login Successful!',
+            `Welcome back, ${res.user.name}. You are logged in as ${res.user.role.toUpperCase()}.`
+          );
           navigate('/dashboard');
         }
       } else {
@@ -39,22 +44,10 @@ export default function LoginPage({ onNotify }) {
     }
   };
 
-  const handleQuickLogin = async (demoUser) => {
-    setEmail(demoUser.email);
-    setPassword(demoUser.password);
+  const handleFillCredentials = (creds) => {
+    setEmail(creds.email);
+    setPassword(creds.password);
     setError('');
-    const res = await login(demoUser.email, demoUser.password);
-    if (res.success) {
-      onNotify(
-        'Quick Login Successful!',
-        `Logged in as ${res.user.name} (${res.user.role.toUpperCase()}).`
-      );
-      if (res.user.role === 'admin') {
-        navigate('/admin');
-      } else {
-        navigate('/dashboard');
-      }
-    }
   };
 
   return (
@@ -64,8 +57,7 @@ export default function LoginPage({ onNotify }) {
           <span className="tag">Portal Access</span>
           <h1>Sign In to Your Expo Account</h1>
           <p>
-            Access your verified trade credentials, exhibitor booth allocation agreements, or
-            organizer management controls.
+            Log in as a Trade Visitor, Exhibitor, or Exhibition Secretariat Administrator.
           </p>
         </div>
       </section>
@@ -74,12 +66,46 @@ export default function LoginPage({ onNotify }) {
         <div className="container">
           <div className="auth-box-container">
             <div className="auth-card">
+              {/* Role Selection Tabs: Visitor vs Exhibitor */}
+              <div className="login-role-tabs">
+                <button
+                  type="button"
+                  className={`login-role-tab ${activeTab === 'visitor' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('visitor');
+                    setError('');
+                  }}
+                >
+                  <i className="fa-regular fa-id-card"></i> Visitor Login
+                </button>
+                <button
+                  type="button"
+                  className={`login-role-tab ${activeTab === 'exhibitor' ? 'active' : ''}`}
+                  onClick={() => {
+                    setActiveTab('exhibitor');
+                    setError('');
+                  }}
+                >
+                  <i className="fa-solid fa-store"></i> Exhibitor Login
+                </button>
+              </div>
+
               <div className="auth-header">
                 <div className="auth-logo-badge">
-                  <i className="fa-solid fa-lock text-primary"></i>
+                  <i
+                    className={`fa-solid ${
+                      activeTab === 'visitor' ? 'fa-id-card' : 'fa-store'
+                    } text-primary`}
+                  ></i>
                 </div>
-                <h2>Account Sign In</h2>
-                <p>Enter your registered email and password to continue</p>
+                <h2>
+                  {activeTab === 'visitor' ? 'Trade Visitor Login' : 'Exhibitor Portal Login'}
+                </h2>
+                <p>
+                  {activeTab === 'visitor'
+                    ? 'Enter your visitor account credentials or administrator login.'
+                    : 'Enter your exhibitor booth account credentials or administrator login.'}
+                </p>
               </div>
 
               {error && (
@@ -91,7 +117,9 @@ export default function LoginPage({ onNotify }) {
 
               <form onSubmit={handleLoginSubmit} className="auth-form">
                 <div className="form-group">
-                  <label htmlFor="login-email">Email Address</label>
+                  <label htmlFor="login-email">
+                    {activeTab === 'visitor' ? 'Visitor / Admin Email' : 'Exhibitor / Admin Email'}
+                  </label>
                   <div className="input-with-icon">
                     <i className="fa-solid fa-envelope input-icon"></i>
                     <input
@@ -142,36 +170,54 @@ export default function LoginPage({ onNotify }) {
                     </>
                   ) : (
                     <>
-                      <i className="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+                      <i className="fa-solid fa-arrow-right-to-bracket"></i> Sign In to Portal
                     </>
                   )}
                 </button>
               </form>
 
-              {/* Quick Demo Credentials Assistant */}
+              {/* Secretariat Admin Access Callout */}
+              <div className="admin-access-hint-card">
+                <div className="hint-card-title">
+                  <i className="fa-solid fa-shield-halved text-primary"></i>
+                  <span>Secretariat Administrator Access</span>
+                </div>
+                <p className="hint-card-desc">
+                  Entering Admin credentials in <strong>either Visitor or Exhibitor login</strong> unlocks the hidden <strong>Admin Dashboard</strong> in the top navigation.
+                </p>
+                <div className="hint-creds-row">
+                  <span className="cred-chip">
+                    <strong>Admin ID:</strong> <code>{ADMIN_CREDENTIALS.email}</code>
+                  </span>
+                  <span className="cred-chip">
+                    <strong>Password:</strong> <code>{ADMIN_CREDENTIALS.password}</code>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-outline btn-xs admin-autofill-btn"
+                  onClick={() => handleFillCredentials(ADMIN_CREDENTIALS)}
+                >
+                  <i className="fa-solid fa-key"></i> Pre-fill Admin Credentials
+                </button>
+              </div>
+
+              {/* Fast Demo Logins */}
               <div className="quick-demo-accounts">
                 <div className="demo-header-tag">
-                  <i className="fa-solid fa-bolt text-primary"></i> 1-Click Fast Demo Logins:
+                  <i className="fa-solid fa-bolt text-primary"></i> Fast Account Selector:
                 </div>
                 <div className="demo-buttons-grid">
                   <button
                     type="button"
-                    className="demo-btn admin-demo"
-                    onClick={() => handleQuickLogin(ADMIN_CREDENTIALS)}
-                  >
-                    <div className="demo-btn-title">
-                      <i className="fa-solid fa-shield-halved"></i> Admin Portal
-                    </div>
-                    <small>{ADMIN_CREDENTIALS.email}</small>
-                  </button>
-
-                  <button
-                    type="button"
                     className="demo-btn"
-                    onClick={() => handleQuickLogin(DEMO_VISITOR)}
+                    onClick={() => {
+                      setActiveTab('visitor');
+                      handleFillCredentials(DEMO_VISITOR);
+                    }}
                   >
                     <div className="demo-btn-title">
-                      <i className="fa-regular fa-user"></i> Trade Visitor
+                      <i className="fa-regular fa-user"></i> Demo Visitor
                     </div>
                     <small>{DEMO_VISITOR.email}</small>
                   </button>
@@ -179,10 +225,13 @@ export default function LoginPage({ onNotify }) {
                   <button
                     type="button"
                     className="demo-btn"
-                    onClick={() => handleQuickLogin(DEMO_EXHIBITOR)}
+                    onClick={() => {
+                      setActiveTab('exhibitor');
+                      handleFillCredentials(DEMO_EXHIBITOR);
+                    }}
                   >
                     <div className="demo-btn-title">
-                      <i className="fa-solid fa-store"></i> Exhibitor Rep
+                      <i className="fa-solid fa-store"></i> Demo Exhibitor
                     </div>
                     <small>{DEMO_EXHIBITOR.email}</small>
                   </button>

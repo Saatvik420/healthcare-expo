@@ -114,18 +114,20 @@ export default function Navbar() {
                 <span>Contact Desk</span>
               </NavLink>
             </li>
-            <li>
-              <NavLink
-                to="/admin"
-                className={({ isActive }) =>
-                  isActive ? 'active-nav-link admin-nav-item' : 'admin-nav-item'
-                }
-                onClick={closeMenu}
-              >
-                <i className="fa-solid fa-shield-halved nav-item-icon"></i>
-                <span>Admin Dashboard</span>
-              </NavLink>
-            </li>
+            {isAdmin && (
+              <li>
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    isActive ? 'active-nav-link admin-nav-item' : 'admin-nav-item'
+                  }
+                  onClick={closeMenu}
+                >
+                  <i className="fa-solid fa-shield-halved nav-item-icon"></i>
+                  <span>Admin Dashboard</span>
+                </NavLink>
+              </li>
+            )}
 
             {/* Mobile Actions Drawer Footer */}
             <li className="mobile-drawer-actions">
@@ -144,13 +146,15 @@ export default function Navbar() {
                 >
                   <i className="fa-solid fa-calendar-days"></i> See Schedule
                 </Link>
-                <Link
-                  to="/admin"
-                  className="btn btn-outline btn-block"
-                  onClick={closeMenu}
-                >
-                  <i className="fa-solid fa-shield-halved"></i> Admin Console
-                </Link>
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="btn btn-outline btn-block"
+                    onClick={closeMenu}
+                  >
+                    <i className="fa-solid fa-shield-halved"></i> Admin Console
+                  </Link>
+                )}
                 <a
                   href={getWhatsAppUrl('general')}
                   target="_blank"
@@ -186,9 +190,6 @@ export default function Navbar() {
               </div>
             ) : (
               <>
-                <Link to="/admin" className="btn btn-link-nav nav-admin-quick-link" onClick={closeMenu} title="Admin Portal">
-                  <i className="fa-solid fa-shield-halved"></i> Admin
-                </Link>
                 <Link to="/login" className="btn btn-link-nav" onClick={closeMenu}>
                   <i className="fa-regular fa-user"></i> Log In
                 </Link>

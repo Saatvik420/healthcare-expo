@@ -8000,3 +8000,100 @@ textarea:focus {
   border-color: #ef4444;
   color: #ffffff;
 }
+
+/* Login Role Tabs & Admin Access Hint */
+.login-role-tabs {
+  display: flex;
+  background: #f1f5f9;
+  padding: 0.35rem;
+  border-radius: 12px;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+}
+
+.login-role-tab {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 9px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.login-role-tab:hover {
+  color: var(--accent-navy);
+}
+
+.login-role-tab.active {
+  background: #ffffff;
+  color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-access-hint-card {
+  margin-top: 1.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.1rem;
+  text-align: left;
+}
+
+.hint-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--accent-navy);
+  margin-bottom: 0.35rem;
+}
+
+.hint-card-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0 0 0.65rem;
+}
+
+.hint-creds-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.cred-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  color: #334155;
+}
+
+.cred-chip code {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.admin-autofill-btn {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.admin-lock-form {
+  width: 100%;
+}

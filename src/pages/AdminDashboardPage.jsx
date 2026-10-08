@@ -52,10 +52,25 @@ export default function AdminDashboardPage({ onNotify }) {
   const [isAddExhibitorOpen, setIsAddExhibitorOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Quick admin demo login
-  const handleQuickAdminLogin = async () => {
-    await login(ADMIN_CREDENTIALS.email, ADMIN_CREDENTIALS.password);
-    onNotify('Admin Authenticated', 'Root Administrator dashboard session initiated.');
+  // Admin authentication form state (for direct /admin visitors)
+  const [adminAuthInput, setAdminAuthInput] = useState({
+    email: '',
+    password: '',
+  });
+  const [adminAuthError, setAdminAuthError] = useState('');
+  const [adminAuthLoading, setAdminAuthLoading] = useState(false);
+
+  const handleAdminAuthSubmit = async (e) => {
+    e.preventDefault();
+    setAdminAuthError('');
+    setAdminAuthLoading(true);
+    const res = await login(adminAuthInput.email, adminAuthInput.password);
+    setAdminAuthLoading(false);
+    if (res.success && res.user.role === 'admin') {
+      onNotify('Admin Session Started', 'Welcome Expo Director. The Admin Console is now unlocked.');
+    } else {
+      setAdminAuthError(res.message || 'Invalid administrator credentials. Access denied.');
+    }
   };
 
   const handleAdminLogout = () => {
@@ -168,33 +183,98 @@ export default function AdminDashboardPage({ onNotify }) {
               </div>
               <h2>Exhibition Secretariat Console</h2>
               <p>
-                Authorized access for Exhibition Directors, Secretariat Officers, and Registration Desk Managers.
+                This executive console is restricted. Enter your administrator ID and password to unlock the dashboard.
               </p>
 
-              <div className="admin-credentials-reminder">
+              {adminAuthError && (
+                <div className="auth-error-banner mb-3" style={{ textAlign: 'left' }}>
+                  <i className="fa-solid fa-circle-exclamation"></i>
+                  <span>{adminAuthError}</span>
+                </div>
+              )}
+
+              <form onSubmit={handleAdminAuthSubmit} className="admin-lock-form mt-3">
+                <div className="form-group" style={{ textAlign: 'left' }}>
+                  <label htmlFor="admin-auth-email">Admin Login ID</label>
+                  <div className="input-with-icon">
+                    <i className="fa-solid fa-envelope input-icon"></i>
+                    <input
+                      type="email"
+                      id="admin-auth-email"
+                      required
+                      placeholder="admin@globalhealthcareexpo.com"
+                      value={adminAuthInput.email}
+                      onChange={(e) =>
+                        setAdminAuthInput((prev) => ({ ...prev, email: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ textAlign: 'left' }}>
+                  <label htmlFor="admin-auth-pass">Admin Password</label>
+                  <div className="input-with-icon">
+                    <i className="fa-solid fa-key input-icon"></i>
+                    <input
+                      type="password"
+                      id="admin-auth-pass"
+                      required
+                      placeholder="Enter admin password"
+                      value={adminAuthInput.password}
+                      onChange={(e) =>
+                        setAdminAuthInput((prev) => ({ ...prev, password: e.target.value }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-block btn-lg mt-3"
+                  disabled={adminAuthLoading}
+                >
+                  {adminAuthLoading ? (
+                    <>
+                      <i className="fa-solid fa-spinner fa-spin"></i> Authenticating...
+                    </>
+                  ) : (
+                    <>
+                      <i className="fa-solid fa-unlock"></i> Unlock Admin Dashboard
+                    </>
+                  )}
+                </button>
+              </form>
+
+              <div className="admin-credentials-reminder mt-4">
                 <div className="cred-badge">
-                  <i className="fa-solid fa-key text-primary"></i> Default Administrator Credentials:
+                  <i className="fa-solid fa-key text-primary"></i> Administrator Credentials:
                 </div>
                 <div className="cred-row">
-                  <span>Username / Email:</span>
+                  <span>Username / ID:</span>
                   <code>{ADMIN_CREDENTIALS.email}</code>
                 </div>
                 <div className="cred-row">
                   <span>Password:</span>
                   <code>{ADMIN_CREDENTIALS.password}</code>
                 </div>
-              </div>
-
-              <div className="admin-lock-actions">
                 <button
                   type="button"
-                  className="btn btn-primary btn-lg"
-                  onClick={handleQuickAdminLogin}
+                  className="btn btn-outline btn-xs mt-2"
+                  onClick={() => {
+                    setAdminAuthInput({
+                      email: ADMIN_CREDENTIALS.email,
+                      password: ADMIN_CREDENTIALS.password,
+                    });
+                    setAdminAuthError('');
+                  }}
                 >
-                  <i className="fa-solid fa-bolt"></i> 1-Click Instant Admin Access
+                  <i className="fa-solid fa-paste"></i> Pre-fill Admin Credentials
                 </button>
+              </div>
+
+              <div className="admin-lock-actions mt-3">
                 <Link to="/login" className="btn btn-outline">
-                  <i className="fa-solid fa-arrow-right-to-bracket"></i> Standard Login Screen
+                  <i className="fa-solid fa-arrow-left"></i> Go to Visitor / Exhibitor Login
                 </Link>
               </div>
             </div>

@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function TopBar() {
+  const { isAdmin } = useAuth();
+
   return (
     <div className="top-bar">
       <div className="container top-bar-content">
@@ -28,9 +31,11 @@ export default function TopBar() {
           <Link to="/contact">
             <i className="fa-solid fa-envelope"></i> info@indiglobalexpo.com
           </Link>
-          <Link to="/admin" className="topbar-admin-badge-link">
-            <i className="fa-solid fa-shield-halved"></i> Admin Portal
-          </Link>
+          {isAdmin && (
+            <Link to="/admin" className="topbar-admin-badge-link">
+              <i className="fa-solid fa-shield-halved"></i> Admin Portal
+            </Link>
+          )}
         </div>
       </div>
     </div>

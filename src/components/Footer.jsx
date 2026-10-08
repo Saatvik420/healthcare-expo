@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import logoImg from '../assets/logo.png';
 import posterImg from '../assets/poster.png';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 
 export default function Footer() {
+  const { isAdmin } = useAuth();
   return (
     <footer>
       <div className="container">
@@ -77,11 +79,13 @@ export default function Footer() {
               <li>
                 <Link to="/contact">Contact Desk &amp; Helpdesk</Link>
               </li>
-              <li>
-                <Link to="/admin">
-                  <i className="fa-solid fa-shield-halved"></i> Executive Admin Console
-                </Link>
-              </li>
+              {isAdmin && (
+                <li>
+                  <Link to="/admin">
+                    <i className="fa-solid fa-shield-halved"></i> Executive Admin Console
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
 
