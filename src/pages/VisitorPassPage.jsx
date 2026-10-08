@@ -148,7 +148,7 @@ export default function VisitorPassPage({ onNotify }) {
               <div className="pass-card-badge vip-badge">Executive Tier</div>
               <div className="pass-card-header">
                 <h3>VIP Delegate Pass</h3>
-                <div className="pass-price">Complimentary <span>/ Verified CXOs &amp; Directors</span></div>
+                <div className="pass-price">Special Package <span>/ Verified CXOs &amp; Directors</span></div>
                 <p>Reserved for Hospital CEOs, Medical Superintendents, Procurement Heads, Importers, and Ministry Officials.</p>
               </div>
               <ul className="pass-features">
