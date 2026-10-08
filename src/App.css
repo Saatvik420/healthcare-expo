@@ -7033,22 +7033,25 @@ textarea:focus {
 
 @media (max-width: 768px) {
   /* TopBar clean compact layout */
+  .top-bar {
+    padding: 0.35rem 0;
+  }
+
   .top-bar-content {
     flex-direction: column;
     text-align: center;
+    gap: 0.25rem;
+  }
+
+  .top-bar-info {
+    justify-content: center;
+    text-align: center;
+    font-size: 0.76rem;
     gap: 0.4rem;
   }
 
   .top-bar-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.65rem;
-  }
-
-  .top-bar-links a {
-    margin-left: 0;
-    font-size: 0.75rem;
+    display: none !important;
   }
 
   /* Hero Headline & Actions */
@@ -7334,8 +7337,12 @@ textarea:focus {
 
 @media (max-width: 768px) {
   .navbar-brand-logo-img {
-    height: 58px;
-    max-width: 260px;
+    height: 72px;
+    max-width: 290px;
+  }
+
+  .nav-container {
+    padding: 0.5rem 0;
   }
 }
 
