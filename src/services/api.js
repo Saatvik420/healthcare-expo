@@ -1,6 +1,6 @@
 /**
- * API Service for connecting the React frontend to the Spring Boot backend.
- * Provides smooth, resilient communication with automatic fallback.
+ * API Service for connecting the React frontend to the backend API.
+ * Provides resilient communication with automatic fallback.
  */
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
@@ -35,11 +35,22 @@ async function fetchWithTimeout(resource, options = {}) {
 export const healthApi = {
   check: async () => {
     try {
-      const res = await fetchWithTimeout(`${API_BASE}/health`, { timeout: 2000 });
-      return res.ok;
+      const res = await fetchWithTimeout(`${API_BASE}/health`, { timeout: 2500 });
+      if (!res.ok) return false;
+      const data = await res.json();
+      return { isOnline: true, ...data };
     } catch {
-      return false;
+      return { isOnline: false };
     }
+  },
+};
+
+// Analytics & Stats API
+export const statsApi = {
+  get: async () => {
+    const res = await fetchWithTimeout(`${API_BASE}/stats`);
+    if (!res.ok) throw new Error('Failed to fetch dashboard stats');
+    return await res.json();
   },
 };
 
@@ -76,12 +87,17 @@ export const visitorsApi = {
     const res = await fetchWithTimeout(`${API_BASE}/visitors`);
     if (!res.ok) throw new Error('Failed to fetch visitors');
     const data = await res.json();
-    // Normalize id mapping to match frontend expectations
     return data.map((v) => ({
       ...v,
       id: v.visitorCode || (v.id ? `vis_${v.id}` : `vis_${Date.now()}`),
       date: v.attendDate || v.date,
     }));
+  },
+
+  getById: async (id) => {
+    const res = await fetchWithTimeout(`${API_BASE}/visitors/${id}`);
+    if (!res.ok) throw new Error('Failed to fetch visitor details');
+    return await res.json();
   },
 
   create: async (visitorData) => {
@@ -92,12 +108,15 @@ export const visitorsApi = {
       phone: visitorData.phone,
       organization: visitorData.organization,
       designation: visitorData.designation,
+      country: visitorData.country || 'India',
       sector: visitorData.sector,
       sectorLabel: visitorData.sectorLabel,
       passType: visitorData.passType,
       passCode: visitorData.passCode,
       attendDate: visitorData.date,
+      attendDay: visitorData.attendDay || 'all',
       status: visitorData.status || 'Confirmed',
+      notes: visitorData.notes || '',
     };
 
     const res = await fetchWithTimeout(`${API_BASE}/visitors`, {
@@ -105,6 +124,15 @@ export const visitorsApi = {
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create visitor');
+    return await res.json();
+  },
+
+  update: async (id, visitorData) => {
+    const res = await fetchWithTimeout(`${API_BASE}/visitors/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(visitorData),
+    });
+    if (!res.ok) throw new Error('Failed to update visitor');
     return await res.json();
   },
 
@@ -128,6 +156,12 @@ export const exhibitorsApi = {
     }));
   },
 
+  getById: async (id) => {
+    const res = await fetchWithTimeout(`${API_BASE}/exhibitors/${id}`);
+    if (!res.ok) throw new Error('Failed to fetch exhibitor details');
+    return await res.json();
+  },
+
   create: async (exhibitorData) => {
     const payload = {
       exhibitorCode: exhibitorData.id || `exh_${Date.now()}`,
@@ -136,6 +170,7 @@ export const exhibitorsApi = {
       designation: exhibitorData.designation,
       email: exhibitorData.email,
       phone: exhibitorData.phone,
+      website: exhibitorData.website,
       stallType: exhibitorData.stallType,
       hall: exhibitorData.hall,
       amount: exhibitorData.amount,
@@ -149,6 +184,15 @@ export const exhibitorsApi = {
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create exhibitor booking');
+    return await res.json();
+  },
+
+  update: async (id, updateData) => {
+    const res = await fetchWithTimeout(`${API_BASE}/exhibitors/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+    if (!res.ok) throw new Error('Failed to update exhibitor');
     return await res.json();
   },
 
@@ -187,6 +231,7 @@ export const sponsorshipsApi = {
       company: sponsorshipData.company,
       contactPerson: sponsorshipData.contactPerson,
       email: sponsorshipData.email,
+      phone: sponsorshipData.phone,
       tier: sponsorshipData.tier,
       investment: sponsorshipData.investment,
       status: sponsorshipData.status || 'In Discussion',
@@ -209,6 +254,13 @@ export const sponsorshipsApi = {
     if (!res.ok) throw new Error('Failed to update sponsorship status');
     return await res.json();
   },
+
+  delete: async (id) => {
+    const res = await fetchWithTimeout(`${API_BASE}/sponsorships/${id}`, {
+      method: 'DELETE',
+    });
+    return res.ok;
+  },
 };
 
 // Contact Inquiry API
@@ -226,5 +278,12 @@ export const contactApi = {
     const res = await fetchWithTimeout(`${API_BASE}/contact`);
     if (!res.ok) throw new Error('Failed to fetch inquiries');
     return await res.json();
+  },
+
+  delete: async (id) => {
+    const res = await fetchWithTimeout(`${API_BASE}/contact/${id}`, {
+      method: 'DELETE',
+    });
+    return res.ok;
   },
 };

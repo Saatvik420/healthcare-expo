@@ -28,6 +28,9 @@ export default function TopBar() {
           <Link to="/contact">
             <i className="fa-solid fa-envelope"></i> info@indiglobalexpo.com
           </Link>
+          <Link to="/admin" className="topbar-admin-badge-link">
+            <i className="fa-solid fa-shield-halved"></i> Admin Portal
+          </Link>
         </div>
       </div>
     </div>

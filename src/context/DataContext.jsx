@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from 'react';
-import { visitorsApi, exhibitorsApi, sponsorshipsApi } from '../services/api';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, healthApi } from '../services/api';
 
 const DataContext = createContext();
 
@@ -8,16 +8,19 @@ const INITIAL_VISITORS = [
   {
     id: 'vis_101',
     name: 'Dr. Sarah Jenkins',
-    email: 'visitor@example.com',
+    email: 'sarah.jenkins@apexbio.com',
     phone: '+1 415 890 2341',
     organization: 'Apex BioLabs US',
     designation: 'Senior Formulation Scientist',
+    country: 'United States',
     sector: 'apis',
     sectorLabel: 'APIs & Fine Chemicals',
     passType: 'vip',
-    passCode: 'GHE-2026-881920',
-    date: 'Sep 24, 2026',
+    passCode: 'IGHE-2027-881920',
+    date: 'Jan 15, 2027',
     status: 'Confirmed',
+    attendDay: 'all',
+    notes: 'Interested in API sourcing partnerships and cold-chain compliance.',
   },
   {
     id: 'vis_102',
@@ -26,12 +29,15 @@ const INITIAL_VISITORS = [
     phone: '+91 98110 54321',
     organization: 'Singhania Pharma Dist.',
     designation: 'VP Global Procurement',
+    country: 'India',
     sector: 'finished',
     sectorLabel: 'Finished Formulations',
     passType: 'vip',
-    passCode: 'GHE-2026-443198',
-    date: 'Sep 25, 2026',
-    status: 'Confirmed',
+    passCode: 'IGHE-2027-443198',
+    date: 'Jan 16, 2027',
+    status: 'Checked-in',
+    attendDay: 'all',
+    notes: 'Leading high-level delegation for hospital supply contracts.',
   },
   {
     id: 'vis_103',
@@ -40,12 +46,15 @@ const INITIAL_VISITORS = [
     phone: '+49 30 901820',
     organization: 'EuroSterile Systems GmbH',
     designation: 'Cleanroom Engineering Lead',
+    country: 'Germany',
     sector: 'machinery',
     sectorLabel: 'Pharma Machinery',
     passType: 'standard',
-    passCode: 'GHE-2026-620184',
-    date: 'Sep 26, 2026',
+    passCode: 'IGHE-2027-620184',
+    date: 'Jan 17, 2027',
     status: 'Confirmed',
+    attendDay: 'Day 1',
+    notes: 'Evaluating modular cleanroom suppliers across ASEAN.',
   },
   {
     id: 'vis_104',
@@ -54,12 +63,15 @@ const INITIAL_VISITORS = [
     phone: '+971 50 123 4567',
     organization: 'Gulf Health Logistics',
     designation: 'Cold-Chain Operations Director',
+    country: 'United Arab Emirates',
     sector: 'packaging',
     sectorLabel: 'Packaging & Delivery',
     passType: 'standard',
-    passCode: 'GHE-2026-771239',
-    date: 'Sep 27, 2026',
+    passCode: 'IGHE-2027-771239',
+    date: 'Jan 18, 2027',
     status: 'Confirmed',
+    attendDay: 'Day 2',
+    notes: 'Looking for temperature-controlled pharma packaging distributors.',
   },
   {
     id: 'vis_105',
@@ -68,12 +80,32 @@ const INITIAL_VISITORS = [
     phone: '+81 3 5555 0192',
     organization: 'Kyoto Peptide Synthesis Corp',
     designation: 'R&D Director',
+    country: 'Japan',
     sector: 'apis',
     sectorLabel: 'APIs & Fine Chemicals',
     passType: 'vip',
-    passCode: 'GHE-2026-905412',
-    date: 'Sep 27, 2026',
+    passCode: 'IGHE-2027-905412',
+    date: 'Jan 19, 2027',
     status: 'Confirmed',
+    attendDay: 'all',
+    notes: 'Attending India-ASEAN biotech research keynote sessions.',
+  },
+  {
+    id: 'vis_106',
+    name: 'Somchai Prasert',
+    email: 'somchai.p@bangkokmedtech.th',
+    phone: '+66 2 543 9801',
+    organization: 'Bangkok MedTech Alliance',
+    designation: 'Managing Director',
+    country: 'Thailand',
+    sector: 'devices',
+    sectorLabel: 'Medical Devices & Diagnostics',
+    passType: 'vip',
+    passCode: 'IGHE-2027-310488',
+    date: 'Jan 20, 2027',
+    status: 'Confirmed',
+    attendDay: 'all',
+    notes: 'Local host liaison and medical devices buyer panelist.',
   },
 ];
 
@@ -83,28 +115,30 @@ const INITIAL_EXHIBITORS = [
     company: 'NovaForm Chem Ltd',
     contactPerson: 'Marcus Sterling',
     designation: 'VP International Sales',
-    email: 'exhibitor@apexbio.com',
+    email: 'marcus@novaformchem.com',
     phone: '+44 20 7946 0912',
-    stallType: '12 sq.m Prime Scheme',
+    website: 'https://novaformchem.com',
+    stallType: '15 sq.m Healthcare Suite',
     hall: 'Hall 1 & 2 (APIs)',
-    amount: '$3,740',
+    amount: '$4,250',
     status: 'Approved',
-    bookingDate: 'Sep 20, 2026',
-    notes: 'Requires 2 corner spotlights and priority proximity to buyer lounge.',
+    bookingDate: 'Jan 10, 2027',
+    notes: 'Requires 2 corner spotlights, 10kW 3-phase line, and buyer lounge proximity.',
   },
   {
     id: 'exh_202',
     company: 'SynthoMech Machinery Works',
     contactPerson: 'Klaus Reinhardt',
     designation: 'Managing Director',
-    email: 'klaus@synthomech.com',
+    email: 'klaus@synthomech.de',
     phone: '+49 89 2314 55',
+    website: 'https://synthomech.de',
     stallType: '18+ sq.m Raw Bare Space',
     hall: 'Hall 4 (Machinery)',
-    amount: '$5,200',
+    amount: '$5,800',
     status: 'Approved',
-    bookingDate: 'Sep 22, 2026',
-    notes: 'Heavy rotary press display. Heavy 3-phase 10 kW electrical hookup required.',
+    bookingDate: 'Jan 12, 2027',
+    notes: 'Heavy rotary tablet press display. Requires freight elevator and reinforced floor load.',
   },
   {
     id: 'exh_203',
@@ -113,12 +147,13 @@ const INITIAL_EXHIBITORS = [
     designation: 'Head of Business Development',
     email: 'meera@aerosealpack.com',
     phone: '+91 99201 88472',
+    website: 'https://aerosealpack.com',
     stallType: '9 sq.m Shell Scheme',
     hall: 'Hall 5 (Packaging)',
     amount: '$2,750',
     status: 'Pending Review',
-    bookingDate: 'Sep 26, 2026',
-    notes: 'Requesting corner booth near the primary visitor entrance avenue.',
+    bookingDate: 'Jan 16, 2027',
+    notes: 'Requesting corner booth near the primary visitor registration entrance.',
   },
   {
     id: 'exh_204',
@@ -127,12 +162,28 @@ const INITIAL_EXHIBITORS = [
     designation: 'Regional Commercial Director',
     email: 'carlos@biogenix-rx.es',
     phone: '+34 91 123 4567',
-    stallType: '6 sq.m Shell Scheme',
+    website: 'https://biogenix-rx.es',
+    stallType: '15 sq.m Healthcare Suite',
     hall: 'Hall 1 & 2 (APIs)',
-    amount: '$1,800',
+    amount: '$4,250',
     status: 'Contract Dispatched',
-    bookingDate: 'Sep 27, 2026',
-    notes: 'Provisional advance received. Waiting for signed exhibitor indemnity clause.',
+    bookingDate: 'Jan 18, 2027',
+    notes: 'Provisional advance received. Waiting for signed exhibitor contract indemnity clause.',
+  },
+  {
+    id: 'exh_205',
+    company: 'Siam BioHealth Tech',
+    contactPerson: 'Anong Chokchai',
+    designation: 'Chief Technology Officer',
+    email: 'anong@siambiohealth.co.th',
+    phone: '+66 2 899 4432',
+    website: 'https://siambiohealth.co.th',
+    stallType: '9 sq.m Shell Scheme',
+    hall: 'Hall 3 (Formulations)',
+    amount: '$2,750',
+    status: 'Approved',
+    bookingDate: 'Jan 19, 2027',
+    notes: 'Thai national healthcare innovation pavilion co-sponsor.',
   },
 ];
 
@@ -142,30 +193,60 @@ const INITIAL_SPONSORSHIPS = [
     company: 'Alliance BioTech International',
     contactPerson: 'Dr. Gregory House',
     email: 'ghouse@alliancebio.com',
+    phone: '+1 212 555 0144',
     tier: 'Platinum Partner',
     investment: '$18,000',
     status: 'Agreement Signed',
-    date: 'Sep 18, 2026',
+    date: 'Jan 05, 2027',
   },
   {
     id: 'sp_302',
     company: 'Pharmatronic Automation Group',
     contactPerson: 'Helen Wu',
     email: 'helen.wu@pharmatronic.sg',
+    phone: '+65 6789 0123',
     tier: 'Gold Partner',
     investment: '$11,000',
     status: 'In Discussion',
-    date: 'Sep 25, 2026',
+    date: 'Jan 12, 2027',
   },
   {
     id: 'sp_303',
     company: 'Veloce Therapeutics Global',
     contactPerson: 'Jean-Luc Picard',
     email: 'j.picard@veloce-tx.com',
+    phone: '+33 1 4268 5500',
     tier: 'Official Lanyard Sponsor',
     investment: '$8,500',
     status: 'Agreement Signed',
-    date: 'Sep 26, 2026',
+    date: 'Jan 14, 2027',
+  },
+];
+
+const INITIAL_INQUIRIES = [
+  {
+    id: 'inq_401',
+    name: 'Dr. Aris Thorne',
+    email: 'a.thorne@oxfordhealth.uk',
+    phone: '+44 1865 270000',
+    organization: 'Oxford Clinical Institute',
+    inquiryType: 'speaking',
+    subject: 'Keynote Panel Proposal on AI in Oncology Diagnostics',
+    message: 'We would like to propose a 30-minute keynote on automated diagnostic imaging for the India-ASEAN clinical conference track.',
+    date: 'Jan 19, 2027',
+    status: 'New',
+  },
+  {
+    id: 'inq_402',
+    name: 'Priya Nambiar',
+    email: 'priya.n@keralamed.org',
+    phone: '+91 94471 22334',
+    organization: 'Kerala State Health Board',
+    inquiryType: 'delegation',
+    subject: 'Official State Delegation Visit (12 Officers)',
+    message: 'Planning to bring a 12-member delegation of hospital administrators to study Southeast Asian pharmaceutical supply chains.',
+    date: 'Jan 20, 2027',
+    status: 'Replied',
   },
 ];
 
@@ -197,38 +278,112 @@ export function DataProvider({ children }) {
     }
   });
 
-  // Sync with Spring Boot Backend on mount
-  useEffect(() => {
-    let isMounted = true;
-    const fetchBackendData = async () => {
-      try {
-        const [backendVisitors, backendExhibitors, backendSponsorships] = await Promise.all([
+  const [inquiries, setInquiries] = useState(() => {
+    try {
+      const stored = localStorage.getItem('ghe_inquiries');
+      return stored ? JSON.parse(stored) : INITIAL_INQUIRIES;
+    } catch {
+      return INITIAL_INQUIRIES;
+    }
+  });
+
+  const [backendStatus, setBackendStatus] = useState({
+    isOnline: false,
+    checked: false,
+    database: null,
+  });
+
+  // Re-fetch everything from backend
+  const refreshData = useCallback(async () => {
+    try {
+      const health = await healthApi.check();
+      if (health && health.isOnline) {
+        setBackendStatus({
+          isOnline: true,
+          checked: true,
+          database: health.database || 'active',
+        });
+
+        const [bVisitors, bExhibitors, bSponsorships, bInquiries] = await Promise.allSettled([
           visitorsApi.getAll(),
           exhibitorsApi.getAll(),
           sponsorshipsApi.getAll(),
+          contactApi.getAll(),
         ]);
-        if (isMounted) {
-          if (backendVisitors && backendVisitors.length > 0) {
-            setVisitors(backendVisitors);
+
+        if (bVisitors.status === 'fulfilled' && bVisitors.value?.length > 0) {
+          setVisitors(bVisitors.value);
+        }
+        if (bExhibitors.status === 'fulfilled' && bExhibitors.value?.length > 0) {
+          setExhibitors(bExhibitors.value);
+        }
+        if (bSponsorships.status === 'fulfilled' && bSponsorships.value?.length > 0) {
+          setSponsorships(bSponsorships.value);
+        }
+        if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
+          setInquiries(bInquiries.value);
+        }
+        return true;
+      } else {
+        setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
+        return false;
+      }
+    } catch {
+      setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
+      return false;
+    }
+  }, []);
+
+  // Sync on mount
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const health = await healthApi.check();
+        if (!active) return;
+        if (health && health.isOnline) {
+          setBackendStatus({
+            isOnline: true,
+            checked: true,
+            database: health.database || 'active',
+          });
+
+          const [bVisitors, bExhibitors, bSponsorships, bInquiries] = await Promise.allSettled([
+            visitorsApi.getAll(),
+            exhibitorsApi.getAll(),
+            sponsorshipsApi.getAll(),
+            contactApi.getAll(),
+          ]);
+
+          if (!active) return;
+          if (bVisitors.status === 'fulfilled' && bVisitors.value?.length > 0) {
+            setVisitors(bVisitors.value);
           }
-          if (backendExhibitors && backendExhibitors.length > 0) {
-            setExhibitors(backendExhibitors);
+          if (bExhibitors.status === 'fulfilled' && bExhibitors.value?.length > 0) {
+            setExhibitors(bExhibitors.value);
           }
-          if (backendSponsorships && backendSponsorships.length > 0) {
-            setSponsorships(backendSponsorships);
+          if (bSponsorships.status === 'fulfilled' && bSponsorships.value?.length > 0) {
+            setSponsorships(bSponsorships.value);
           }
+          if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
+            setInquiries(bInquiries.value);
+          }
+        } else {
+          setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
         }
       } catch {
-        // Backend not yet reachable; silently use local cached data
+        if (active) {
+          setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
+        }
       }
-    };
+    })();
 
-    fetchBackendData();
     return () => {
-      isMounted = false;
+      active = false;
     };
   }, []);
 
+  // Persist local storage fallbacks
   useEffect(() => {
     localStorage.setItem('ghe_visitors', JSON.stringify(visitors));
   }, [visitors]);
@@ -241,6 +396,11 @@ export function DataProvider({ children }) {
     localStorage.setItem('ghe_sponsorships', JSON.stringify(sponsorships));
   }, [sponsorships]);
 
+  useEffect(() => {
+    localStorage.setItem('ghe_inquiries', JSON.stringify(inquiries));
+  }, [inquiries]);
+
+  // Visitor Operations
   const addVisitor = async (visitorData) => {
     const newVisitor = {
       ...visitorData,
@@ -254,13 +414,23 @@ export function DataProvider({ children }) {
     };
     setVisitors((prev) => [newVisitor, ...prev]);
 
-    // Send to backend
     try {
       await visitorsApi.create(newVisitor);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
     }
     return newVisitor;
+  };
+
+  const updateVisitor = async (id, updateData) => {
+    setVisitors((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, ...updateData } : v))
+    );
+    try {
+      await visitorsApi.update(id, updateData);
+    } catch {
+      // Saved in localStorage
+    }
   };
 
   const deleteVisitor = async (id) => {
@@ -268,10 +438,11 @@ export function DataProvider({ children }) {
     try {
       await visitorsApi.delete(id);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
     }
   };
 
+  // Exhibitor Operations
   const addExhibitor = async (exhibitorData) => {
     const newExhibitor = {
       ...exhibitorData,
@@ -288,9 +459,20 @@ export function DataProvider({ children }) {
     try {
       await exhibitorsApi.create(newExhibitor);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
     }
     return newExhibitor;
+  };
+
+  const updateExhibitor = async (id, updateData) => {
+    setExhibitors((prev) =>
+      prev.map((e) => (e.id === id ? { ...e, ...updateData } : e))
+    );
+    try {
+      await exhibitorsApi.update(id, updateData);
+    } catch {
+      // Saved in localStorage
+    }
   };
 
   const updateExhibitorStatus = async (id, newStatus) => {
@@ -300,7 +482,7 @@ export function DataProvider({ children }) {
     try {
       await exhibitorsApi.updateStatus(id, newStatus);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
     }
   };
 
@@ -309,10 +491,11 @@ export function DataProvider({ children }) {
     try {
       await exhibitorsApi.delete(id);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
     }
   };
 
+  // Sponsorship Operations
   const addSponsorship = async (sponsorshipData) => {
     const newSponsorship = {
       ...sponsorshipData,
@@ -329,7 +512,7 @@ export function DataProvider({ children }) {
     try {
       await sponsorshipsApi.create(newSponsorship);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
     }
     return newSponsorship;
   };
@@ -341,7 +524,26 @@ export function DataProvider({ children }) {
     try {
       await sponsorshipsApi.updateStatus(id, newStatus);
     } catch {
-      // Retained in localStorage
+      // Saved in localStorage
+    }
+  };
+
+  const deleteSponsorship = async (id) => {
+    setSponsorships((prev) => prev.filter((s) => s.id !== id));
+    try {
+      await sponsorshipsApi.delete(id);
+    } catch {
+      // Saved in localStorage
+    }
+  };
+
+  // Contact Inquiries Operations
+  const deleteInquiry = async (id) => {
+    setInquiries((prev) => prev.filter((i) => i.id !== id));
+    try {
+      await contactApi.delete(id);
+    } catch {
+      // Saved in localStorage
     }
   };
 
@@ -349,6 +551,7 @@ export function DataProvider({ children }) {
     setVisitors(INITIAL_VISITORS);
     setExhibitors(INITIAL_EXHIBITORS);
     setSponsorships(INITIAL_SPONSORSHIPS);
+    setInquiries(INITIAL_INQUIRIES);
   };
 
   return (
@@ -357,13 +560,20 @@ export function DataProvider({ children }) {
         visitors,
         exhibitors,
         sponsorships,
+        inquiries,
+        backendStatus,
+        refreshData,
         addVisitor,
+        updateVisitor,
         deleteVisitor,
         addExhibitor,
+        updateExhibitor,
         updateExhibitorStatus,
         deleteExhibitor,
         addSponsorship,
         updateSponsorshipStatus,
+        deleteSponsorship,
+        deleteInquiry,
         resetToDefaults,
       }}
     >

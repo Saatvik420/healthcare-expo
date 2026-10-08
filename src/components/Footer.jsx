@@ -77,6 +77,11 @@ export default function Footer() {
               <li>
                 <Link to="/contact">Contact Desk &amp; Helpdesk</Link>
               </li>
+              <li>
+                <Link to="/admin">
+                  <i className="fa-solid fa-shield-halved"></i> Executive Admin Console
+                </Link>
+              </li>
             </ul>
           </div>
 
