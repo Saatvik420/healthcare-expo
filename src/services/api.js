@@ -287,3 +287,50 @@ export const contactApi = {
     return res.ok;
   },
 };
+
+// Blogs API
+export const blogsApi = {
+  getAll: async (category) => {
+    const url = category && category.toLowerCase() !== 'all'
+      ? `${API_BASE}/blogs?category=${encodeURIComponent(category)}`
+      : `${API_BASE}/blogs`;
+    const res = await fetchWithTimeout(url);
+    if (!res.ok) throw new Error('Failed to fetch blogs');
+    return await res.json();
+  },
+
+  getByIdOrSlug: async (idOrSlug) => {
+    let res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(idOrSlug)}`);
+    if (!res.ok) {
+      res = await fetchWithTimeout(`${API_BASE}/blogs/slug/${encodeURIComponent(idOrSlug)}`);
+    }
+    if (!res.ok) throw new Error('Failed to fetch blog');
+    return await res.json();
+  },
+
+  create: async (blogData) => {
+    const res = await fetchWithTimeout(`${API_BASE}/blogs`, {
+      method: 'POST',
+      body: JSON.stringify(blogData),
+    });
+    if (!res.ok) throw new Error('Failed to create blog');
+    return await res.json();
+  },
+
+  update: async (id, blogData) => {
+    const res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(blogData),
+    });
+    if (!res.ok) throw new Error('Failed to update blog');
+    return await res.json();
+  },
+
+  delete: async (id) => {
+    const res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    return res.ok;
+  },
+};
+

@@ -8,6 +8,8 @@ import ExhibitorDetailModal from '../components/admin/ExhibitorDetailModal';
 import AddVisitorModal from '../components/admin/AddVisitorModal';
 import AddExhibitorModal from '../components/admin/AddExhibitorModal';
 import InquiryDetailModal from '../components/admin/InquiryDetailModal';
+import BlogModal from '../components/admin/BlogModal';
+import { getBlogSlug } from '../services/blogService';
 
 export default function AdminDashboardPage({ onNotify }) {
   const { currentUser, isAdmin, login, logout } = useAuth();
@@ -16,6 +18,7 @@ export default function AdminDashboardPage({ onNotify }) {
     exhibitors,
     sponsorships,
     inquiries = [],
+    blogs = [],
     backendStatus,
     refreshData,
     addVisitor,
@@ -26,6 +29,9 @@ export default function AdminDashboardPage({ onNotify }) {
     deleteExhibitor,
     updateSponsorshipStatus,
     deleteInquiry,
+    addBlog,
+    updateBlog,
+    deleteBlog,
     resetToDefaults,
   } = useData();
 
@@ -43,6 +49,12 @@ export default function AdminDashboardPage({ onNotify }) {
   // Search & Filters for Exhibitors
   const [exhibitorSearch, setExhibitorSearch] = useState('');
   const [exhibitorStatusFilter, setExhibitorStatusFilter] = useState('all');
+
+  // Search & Filters for Blogs
+  const [blogSearch, setBlogSearch] = useState('');
+  const [blogCategoryFilter, setBlogCategoryFilter] = useState('all');
+  const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
+  const [editingBlog, setEditingBlog] = useState(null);
 
   // Modals state
   const [selectedVisitor, setSelectedVisitor] = useState(null);
@@ -153,6 +165,21 @@ export default function AdminDashboardPage({ onNotify }) {
         `"${(i.message || '').replace(/"/g, '""')}"`,
       ]);
       csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    } else if (dataType === 'blogs') {
+      const headers = ['Title', 'Slug', 'Category', 'Author', 'Author Role', 'Read Time', 'Published Date', 'Featured', 'Tags', 'Excerpt'];
+      const rows = blogs.map((b) => [
+        `"${(b.title || '').replace(/"/g, '""')}"`,
+        `"${b.slug || ''}"`,
+        `"${b.category || ''}"`,
+        `"${b.author || ''}"`,
+        `"${b.authorRole || ''}"`,
+        `"${b.readTime || ''}"`,
+        `"${b.publishedDate || ''}"`,
+        `"${b.featured ? 'Yes' : 'No'}"`,
+        `"${Array.isArray(b.tags) ? b.tags.join('; ') : b.tags || ''}"`,
+        `"${(b.excerpt || '').replace(/"/g, '""')}"`,
+      ]);
+      csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
     } else {
       onNotify('Export Info', `Summary data compiled for ${dataType}.`);
       return;
@@ -169,6 +196,24 @@ export default function AdminDashboardPage({ onNotify }) {
     document.body.removeChild(link);
 
     onNotify('Export Downloaded', `${fileName} has been generated and downloaded.`);
+  };
+
+  const handleSaveBlog = async (blogData) => {
+    if (editingBlog) {
+      await updateBlog(editingBlog.id, blogData);
+      onNotify('Article Updated', `"${blogData.title}" has been updated.`);
+    } else {
+      await addBlog(blogData);
+      onNotify('Article Published', `"${blogData.title}" is now published.`);
+    }
+    setEditingBlog(null);
+  };
+
+  const handleDeleteBlog = async (id, title) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
+      await deleteBlog(id);
+      onNotify('Article Deleted', `"${title}" has been removed from the portal.`);
+    }
   };
 
   // Lock Screen if not Admin
@@ -441,6 +486,19 @@ export default function AdminDashboardPage({ onNotify }) {
               <small className="kpi-sub">Public Conference Inquiries</small>
             </div>
           </div>
+
+          <div className="kpi-card" onClick={() => setActiveTab('blogs')} style={{ cursor: 'pointer' }}>
+            <div className="kpi-icon kpi-indigo">
+              <i className="fa-solid fa-newspaper"></i>
+            </div>
+            <div className="kpi-details">
+              <span className="kpi-label">Blog Articles</span>
+              <h3 className="kpi-number">{blogs.length}</h3>
+              <small className="kpi-sub">
+                {blogs.filter((b) => b.featured).length} Featured Story &bull; Active Editorial
+              </small>
+            </div>
+          </div>
         </div>
 
         {/* Dashboard Navigation Tabs */}
@@ -472,6 +530,13 @@ export default function AdminDashboardPage({ onNotify }) {
             onClick={() => setActiveTab('inquiries')}
           >
             <i className="fa-solid fa-headset"></i> Contact Inquiries ({inquiries.length})
+          </button>
+          <button
+            type="button"
+            className={`admin-tab-btn ${activeTab === 'blogs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('blogs')}
+          >
+            <i className="fa-solid fa-newspaper"></i> Blog Articles ({blogs.length})
           </button>
           <button
             type="button"
@@ -1041,6 +1106,201 @@ export default function AdminDashboardPage({ onNotify }) {
             </div>
           </div>
         )}
+
+        {/* ============================================================== */}
+        {/* TAB 6: BLOG ARTICLES CRUD MANAGEMENT */}
+        {/* ============================================================== */}
+        {activeTab === 'blogs' && (
+          <div className="admin-table-container">
+            <div className="table-controls-bar">
+              <div className="table-search-box">
+                <i className="fa-solid fa-magnifying-glass"></i>
+                <input
+                  type="text"
+                  placeholder="Search articles by title, author, tag, or topic..."
+                  value={blogSearch}
+                  onChange={(e) => setBlogSearch(e.target.value)}
+                />
+              </div>
+
+              <div className="table-filters-group">
+                <select
+                  value={blogCategoryFilter}
+                  onChange={(e) => setBlogCategoryFilter(e.target.value)}
+                  className="table-filter-select"
+                >
+                  <option value="all">All Categories ({blogs.length})</option>
+                  <option value="Pharma & APIs">Pharma & APIs</option>
+                  <option value="Pharma Machinery">Pharma Machinery</option>
+                  <option value="Healthcare Policies">Healthcare Policies</option>
+                  <option value="Cold Chain & Logistics">Cold Chain & Logistics</option>
+                  <option value="Hospital Infrastructure">Hospital Infrastructure</option>
+                  <option value="Exhibition Strategy">Exhibition Strategy</option>
+                </select>
+
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm-admin"
+                  onClick={() => {
+                    setEditingBlog(null);
+                    setIsBlogModalOpen(true);
+                  }}
+                >
+                  <i className="fa-solid fa-plus"></i> Write Article
+                </button>
+              </div>
+            </div>
+
+            {/* Blogs Table */}
+            <div className="table-responsive">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Article</th>
+                    <th>Category</th>
+                    <th>Author & Role</th>
+                    <th>Published Date</th>
+                    <th>Status</th>
+                    <th style={{ textAlign: 'right' }}>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {blogs
+                    .filter((b) => {
+                      const matchesCategory =
+                        blogCategoryFilter === 'all' ||
+                        (b.category &&
+                          b.category.toLowerCase() === blogCategoryFilter.toLowerCase());
+                      const query = blogSearch.trim().toLowerCase();
+                      const matchesSearch =
+                        !query ||
+                        b.title?.toLowerCase().includes(query) ||
+                        b.excerpt?.toLowerCase().includes(query) ||
+                        b.author?.toLowerCase().includes(query) ||
+                        (Array.isArray(b.tags) &&
+                          b.tags.some((t) => t.toLowerCase().includes(query)));
+                      return matchesCategory && matchesSearch;
+                    })
+                    .map((blog) => (
+                      <tr key={blog.id || blog.slug}>
+                        <td>
+                          <div className="admin-blog-cell">
+                            <div className="admin-blog-thumb">
+                              <img
+                                src={blog.coverImage}
+                                alt={blog.title}
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            </div>
+                            <div className="admin-blog-info">
+                              <span className="admin-blog-title">{blog.title}</span>
+                              <small className="admin-blog-excerpt">
+                                {blog.excerpt?.slice(0, 85)}...
+                              </small>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <span className="badge badge-category">{blog.category}</span>
+                        </td>
+                        <td>
+                          <div className="admin-cell-user">
+                            <span className="user-name">{blog.author}</span>
+                            <small className="user-meta">{blog.authorRole}</small>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="admin-cell-date">
+                            <span>{blog.publishedDate}</span>
+                            <small>{blog.readTime || '5 min read'}</small>
+                          </div>
+                        </td>
+                        <td>
+                          {blog.featured ? (
+                            <span className="badge badge-featured">
+                              <i className="fa-solid fa-star"></i> Featured
+                            </span>
+                          ) : (
+                            <span className="badge badge-standard">Standard</span>
+                          )}
+                        </td>
+                        <td style={{ textAlign: 'right' }}>
+                          <div className="table-row-actions">
+                            <Link
+                              to={`/blogs/${blog.slug || getBlogSlug(blog)}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn-action-icon"
+                              title="Read Published Article"
+                            >
+                              <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                            </Link>
+                            <button
+                              type="button"
+                              className="btn-action-icon"
+                              title="Edit Article"
+                              onClick={() => {
+                                setEditingBlog(blog);
+                                setIsBlogModalOpen(true);
+                              }}
+                            >
+                              <i className="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button
+                              type="button"
+                              className="btn-action-icon text-danger"
+                              title="Delete Article"
+                              onClick={() => handleDeleteBlog(blog.id, blog.title)}
+                            >
+                              <i className="fa-solid fa-trash"></i>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  {blogs.filter((b) => {
+                    const matchesCategory =
+                      blogCategoryFilter === 'all' ||
+                      (b.category &&
+                        b.category.toLowerCase() === blogCategoryFilter.toLowerCase());
+                    const query = blogSearch.trim().toLowerCase();
+                    return (
+                      matchesCategory &&
+                      (!query ||
+                        b.title?.toLowerCase().includes(query) ||
+                        b.excerpt?.toLowerCase().includes(query) ||
+                        b.author?.toLowerCase().includes(query))
+                    );
+                  }).length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center py-4">
+                        <div className="empty-table-state">
+                          <i
+                            className="fa-solid fa-newspaper text-muted"
+                            style={{ fontSize: '2rem' }}
+                          ></i>
+                          <p className="mt-2 mb-1">No articles match your search criteria</p>
+                          <button
+                            type="button"
+                            className="btn btn-outline btn-xs mt-2"
+                            onClick={() => {
+                              setBlogSearch('');
+                              setBlogCategoryFilter('all');
+                            }}
+                          >
+                            Clear Filters
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* MODALS */}
@@ -1086,6 +1346,18 @@ export default function AdminDashboardPage({ onNotify }) {
           onClose={() => setIsAddExhibitorOpen(false)}
           onAdd={addExhibitor}
           onNotify={onNotify}
+        />
+      )}
+
+      {isBlogModalOpen && (
+        <BlogModal
+          isOpen={isBlogModalOpen}
+          onClose={() => {
+            setIsBlogModalOpen(false);
+            setEditingBlog(null);
+          }}
+          onSave={handleSaveBlog}
+          editingBlog={editingBlog}
         />
       )}
     </div>

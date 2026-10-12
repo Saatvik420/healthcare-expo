@@ -106,6 +106,16 @@ export default function Navbar() {
             </li>
             <li>
               <NavLink
+                to="/blogs"
+                className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
+                onClick={closeMenu}
+              >
+                <i className="fa-solid fa-newspaper nav-item-icon"></i>
+                <span>Insights &amp; Blogs</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/contact"
                 className={({ isActive }) => (isActive ? 'active-nav-link' : '')}
                 onClick={closeMenu}

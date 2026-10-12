@@ -10,6 +10,7 @@ import {
   INITIAL_SPONSORSHIPS,
   INITIAL_CONTACT_INQUIRIES,
   INITIAL_USERS,
+  INITIAL_BLOGS,
 } from './data/initialData.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -30,7 +31,19 @@ let db = {
   sponsorships: [],
   contactInquiries: [],
   users: [],
+  blogs: [],
 };
+
+// Helper for slug generation
+function generateSlug(title) {
+  if (!title) return 'blog-' + Date.now();
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+}
 
 // Load database from file or initialize
 function loadDatabase() {
@@ -38,6 +51,10 @@ function loadDatabase() {
     if (fs.existsSync(DB_FILE)) {
       const data = fs.readFileSync(DB_FILE, 'utf8');
       db = JSON.parse(data);
+      if (!Array.isArray(db.blogs) || db.blogs.length === 0) {
+        db.blogs = INITIAL_BLOGS;
+        saveDatabase();
+      }
       console.log('📦 Loaded existing database from disk');
     } else {
       console.log('🌱 Initializing database with seed data...');
@@ -47,6 +64,7 @@ function loadDatabase() {
         sponsorships: INITIAL_SPONSORSHIPS,
         contactInquiries: INITIAL_CONTACT_INQUIRIES,
         users: INITIAL_USERS,
+        blogs: INITIAL_BLOGS,
       };
       saveDatabase();
     }
@@ -58,6 +76,7 @@ function loadDatabase() {
       sponsorships: INITIAL_SPONSORSHIPS,
       contactInquiries: INITIAL_CONTACT_INQUIRIES,
       users: INITIAL_USERS,
+      blogs: INITIAL_BLOGS,
     };
   }
 }
@@ -86,6 +105,7 @@ app.get('/api/health', (req, res) => {
     database: 'persistent-json',
     visitorCount: db.visitors.length,
     exhibitorCount: db.exhibitors.length,
+    blogCount: (db.blogs || []).length,
     timestamp: new Date().toISOString(),
   });
 });
@@ -111,6 +131,7 @@ app.get('/api/stats', (req, res) => {
     totalSponsorships: db.sponsorships.length,
     totalSponsorshipValue,
     totalInquiries: db.contactInquiries.length,
+    totalBlogs: (db.blogs || []).length,
     floorOccupancy: '86.4%',
   });
 });
@@ -451,6 +472,150 @@ app.delete('/api/contact/:id', (req, res) => {
 });
 
 // -------------------------------------------------------------
+// Blogs API
+// -------------------------------------------------------------
+app.get(['/api/blogs', '/blogs', '/api/admin/blogs', '/admin/blogs'], (req, res) => {
+  const { category, q } = req.query;
+  let results = [...(db.blogs || [])];
+
+  if (category && category.toLowerCase() !== 'all') {
+    results = results.filter(
+      (b) => b.category && b.category.toLowerCase() === category.toLowerCase()
+    );
+  }
+
+  if (q) {
+    const query = q.toLowerCase();
+    results = results.filter(
+      (b) =>
+        (b.title && b.title.toLowerCase().includes(query)) ||
+        (b.excerpt && b.excerpt.toLowerCase().includes(query)) ||
+        (b.author && b.author.toLowerCase().includes(query)) ||
+        (Array.isArray(b.tags) && b.tags.some((t) => t.toLowerCase().includes(query)))
+    );
+  }
+
+  res.json(results);
+});
+
+app.get(['/api/blogs/slug/:slug', '/blogs/slug/:slug'], (req, res) => {
+  const blog = (db.blogs || []).find((b) => b.slug === req.params.slug);
+  if (!blog) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+  res.json(blog);
+});
+
+app.get(['/api/blogs/:id', '/blogs/:id'], (req, res) => {
+  const blog = (db.blogs || []).find(
+    (b) => b.id === req.params.id || b.slug === req.params.id
+  );
+  if (!blog) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+  res.json(blog);
+});
+
+app.post(['/api/blogs', '/blogs', '/api/admin/blogs', '/admin/blogs'], (req, res) => {
+  const data = req.body || {};
+  if (!data.title) {
+    return res.status(400).json({ error: 'Title is required' });
+  }
+
+  const slug = data.slug || generateSlug(data.title);
+  const now = new Date().toISOString();
+  const newBlog = {
+    id: data.id || 'blog_' + Date.now(),
+    title: data.title,
+    slug,
+    category: data.category || 'Pharma & APIs',
+    author: data.author || 'IndiGlobal Secretariat',
+    authorRole: data.authorRole || 'Healthcare Policy Analyst',
+    coverImage:
+      data.coverImage ||
+      'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
+    readTime: data.readTime || '5 min read',
+    publishedDate:
+      data.publishedDate ||
+      new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    featured: Boolean(data.featured),
+    excerpt: data.excerpt || '',
+    content: data.content || '',
+    tags: Array.isArray(data.tags)
+      ? data.tags
+      : (data.tags || '')
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+    createdAt: data.createdAt || now,
+    updatedAt: now,
+  };
+
+  if (!Array.isArray(db.blogs)) {
+    db.blogs = [];
+  }
+
+  db.blogs.unshift(newBlog);
+  saveDatabase();
+  res.status(201).json(newBlog);
+});
+
+app.put(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blogs/:id'], (req, res) => {
+  if (!Array.isArray(db.blogs)) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+
+  const index = db.blogs.findIndex(
+    (b) => b.id === req.params.id || b.slug === req.params.id
+  );
+  if (index === -1) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+
+  const current = db.blogs[index];
+  const updateData = req.body || {};
+
+  const tags = Array.isArray(updateData.tags)
+    ? updateData.tags
+    : typeof updateData.tags === 'string'
+    ? updateData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    : current.tags;
+
+  db.blogs[index] = {
+    ...current,
+    ...updateData,
+    slug: updateData.slug || (updateData.title ? generateSlug(updateData.title) : current.slug),
+    tags,
+    updatedAt: new Date().toISOString(),
+  };
+
+  saveDatabase();
+  res.json(db.blogs[index]);
+});
+
+app.delete(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blogs/:id'], (req, res) => {
+  if (!Array.isArray(db.blogs)) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+
+  const initialLen = db.blogs.length;
+  db.blogs = db.blogs.filter(
+    (b) => b.id !== req.params.id && b.slug !== req.params.id
+  );
+
+  if (db.blogs.length === initialLen) {
+    return res.status(404).json({ error: 'Blog not found' });
+  }
+
+  saveDatabase();
+  res.status(200).json({ success: true, message: 'Blog deleted successfully' });
+});
+
+// -------------------------------------------------------------
 // Start Server
 // -------------------------------------------------------------
 app.listen(PORT, () => {
@@ -459,4 +624,5 @@ app.listen(PORT, () => {
   console.log(`📊 Stats Endpoint: http://localhost:${PORT}/api/stats`);
   console.log(`👥 Visitors API: http://localhost:${PORT}/api/visitors`);
   console.log(`🏢 Exhibitors API: http://localhost:${PORT}/api/exhibitors`);
+  console.log(`📰 Blogs API: http://localhost:${PORT}/api/blogs`);
 });

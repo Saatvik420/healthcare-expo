@@ -1,6 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, healthApi } from '../services/api';
+import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, blogsApi, healthApi } from '../services/api';
+import { INITIAL_BLOGS, getBlogSlug } from '../services/blogService';
 
 const DataContext = createContext();
 
@@ -287,6 +288,15 @@ export function DataProvider({ children }) {
     }
   });
 
+  const [blogs, setBlogs] = useState(() => {
+    try {
+      const stored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
+      return stored ? JSON.parse(stored) : INITIAL_BLOGS;
+    } catch {
+      return INITIAL_BLOGS;
+    }
+  });
+
   const [backendStatus, setBackendStatus] = useState({
     isOnline: false,
     checked: false,
@@ -304,11 +314,12 @@ export function DataProvider({ children }) {
           database: health.database || 'active',
         });
 
-        const [bVisitors, bExhibitors, bSponsorships, bInquiries] = await Promise.allSettled([
+        const [bVisitors, bExhibitors, bSponsorships, bInquiries, bBlogs] = await Promise.allSettled([
           visitorsApi.getAll(),
           exhibitorsApi.getAll(),
           sponsorshipsApi.getAll(),
           contactApi.getAll(),
+          blogsApi.getAll(),
         ]);
 
         if (bVisitors.status === 'fulfilled' && bVisitors.value?.length > 0) {
@@ -322,6 +333,9 @@ export function DataProvider({ children }) {
         }
         if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
           setInquiries(bInquiries.value);
+        }
+        if (bBlogs.status === 'fulfilled' && bBlogs.value?.length > 0) {
+          setBlogs(bBlogs.value);
         }
         return true;
       } else {
@@ -348,11 +362,12 @@ export function DataProvider({ children }) {
             database: health.database || 'active',
           });
 
-          const [bVisitors, bExhibitors, bSponsorships, bInquiries] = await Promise.allSettled([
+          const [bVisitors, bExhibitors, bSponsorships, bInquiries, bBlogs] = await Promise.allSettled([
             visitorsApi.getAll(),
             exhibitorsApi.getAll(),
             sponsorshipsApi.getAll(),
             contactApi.getAll(),
+            blogsApi.getAll(),
           ]);
 
           if (!active) return;
@@ -367,6 +382,9 @@ export function DataProvider({ children }) {
           }
           if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
             setInquiries(bInquiries.value);
+          }
+          if (bBlogs.status === 'fulfilled' && bBlogs.value?.length > 0) {
+            setBlogs(bBlogs.value);
           }
         } else {
           setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
@@ -399,6 +417,11 @@ export function DataProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('ghe_inquiries', JSON.stringify(inquiries));
   }, [inquiries]);
+
+  useEffect(() => {
+    localStorage.setItem('ghe_blogs', JSON.stringify(blogs));
+    localStorage.setItem('ighe_blogs_cache', JSON.stringify(blogs));
+  }, [blogs]);
 
   // Visitor Operations
   const addVisitor = async (visitorData) => {
@@ -547,11 +570,69 @@ export function DataProvider({ children }) {
     }
   };
 
+  // Blog Operations
+  const addBlog = async (blogData) => {
+    const slug = blogData.slug || getBlogSlug(blogData);
+    const newBlog = {
+      ...blogData,
+      id: blogData.id || 'blog_' + Date.now(),
+      slug,
+      publishedDate:
+        blogData.publishedDate ||
+        new Date().toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    setBlogs((prev) => [newBlog, ...prev]);
+
+    try {
+      const created = await blogsApi.create(newBlog);
+      if (created) {
+        setBlogs((prev) =>
+          prev.map((b) => (b.id === newBlog.id ? created : b))
+        );
+        return created;
+      }
+    } catch {
+      // Saved in localStorage
+    }
+    return newBlog;
+  };
+
+  const updateBlog = async (id, updateData) => {
+    const updated = {
+      ...updateData,
+      updatedAt: new Date().toISOString(),
+    };
+    setBlogs((prev) =>
+      prev.map((b) => (b.id === id || b.slug === id ? { ...b, ...updated } : b))
+    );
+    try {
+      await blogsApi.update(id, updated);
+    } catch {
+      // Saved in localStorage
+    }
+  };
+
+  const deleteBlog = async (id) => {
+    setBlogs((prev) => prev.filter((b) => b.id !== id && b.slug !== id));
+    try {
+      await blogsApi.delete(id);
+    } catch {
+      // Saved in localStorage
+    }
+  };
+
   const resetToDefaults = () => {
     setVisitors(INITIAL_VISITORS);
     setExhibitors(INITIAL_EXHIBITORS);
     setSponsorships(INITIAL_SPONSORSHIPS);
     setInquiries(INITIAL_INQUIRIES);
+    setBlogs(INITIAL_BLOGS);
   };
 
   return (
@@ -561,6 +642,7 @@ export function DataProvider({ children }) {
         exhibitors,
         sponsorships,
         inquiries,
+        blogs,
         backendStatus,
         refreshData,
         addVisitor,
@@ -574,6 +656,9 @@ export function DataProvider({ children }) {
         updateSponsorshipStatus,
         deleteSponsorship,
         deleteInquiry,
+        addBlog,
+        updateBlog,
+        deleteBlog,
         resetToDefaults,
       }}
     >

@@ -77,6 +77,9 @@ export default function Footer() {
                 <Link to="/awards">Global Excellence Awards 2027</Link>
               </li>
               <li>
+                <Link to="/blogs">Healthcare Insights &amp; Blogs</Link>
+              </li>
+              <li>
                 <Link to="/contact">Contact Desk &amp; Helpdesk</Link>
               </li>
               {isAdmin && (

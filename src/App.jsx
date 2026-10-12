@@ -25,6 +25,8 @@ import SignupPage from './pages/SignupPage';
 import UserDashboardPage from './pages/UserDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import RegistrationPage from './pages/RegistrationPage';
+import BlogsPage from './pages/BlogsPage';
+import BlogDetailPage from './pages/BlogDetailPage';
 
 import './App.css';
 
@@ -70,6 +72,11 @@ function App() {
               {/* Conference, Schedule & Awards */}
               <Route path="/schedule" element={<SchedulePage />} />
               <Route path="/awards" element={<AwardsPage />} />
+
+              {/* Blogs & Insights */}
+              <Route path="/blogs" element={<BlogsPage onNotify={handleNotify} />} />
+              <Route path="/blogs/:id" element={<BlogDetailPage onNotify={handleNotify} />} />
+              <Route path="/blog/:id" element={<BlogDetailPage onNotify={handleNotify} />} />
 
               {/* General Registration Gateway */}
               <Route path="/registration" element={<RegistrationPage onNotify={handleNotify} />} />

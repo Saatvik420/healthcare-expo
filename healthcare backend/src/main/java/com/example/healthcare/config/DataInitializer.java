@@ -1,9 +1,11 @@
 package com.example.healthcare.config;
 
+import com.example.healthcare.model.Blog;
 import com.example.healthcare.model.Exhibitor;
 import com.example.healthcare.model.Sponsorship;
 import com.example.healthcare.model.User;
 import com.example.healthcare.model.Visitor;
+import com.example.healthcare.repository.BlogRepository;
 import com.example.healthcare.repository.ExhibitorRepository;
 import com.example.healthcare.repository.SponsorshipRepository;
 import com.example.healthcare.repository.UserRepository;
@@ -12,6 +14,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Component
@@ -21,6 +24,7 @@ public class DataInitializer implements CommandLineRunner {
     private final VisitorRepository visitorRepository;
     private final ExhibitorRepository exhibitorRepository;
     private final SponsorshipRepository sponsorshipRepository;
+    private final BlogRepository blogRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(
@@ -28,11 +32,13 @@ public class DataInitializer implements CommandLineRunner {
             VisitorRepository visitorRepository,
             ExhibitorRepository exhibitorRepository,
             SponsorshipRepository sponsorshipRepository,
+            BlogRepository blogRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.visitorRepository = visitorRepository;
         this.exhibitorRepository = exhibitorRepository;
         this.sponsorshipRepository = sponsorshipRepository;
+        this.blogRepository = blogRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -42,6 +48,7 @@ public class DataInitializer implements CommandLineRunner {
         seedVisitors();
         seedExhibitors();
         seedSponsorships();
+        seedBlogs();
     }
 
     private void seedUsers() {
@@ -266,6 +273,68 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
 
             sponsorshipRepository.saveAll(Arrays.asList(s1, s2, s3));
+        }
+    }
+
+    private void seedBlogs() {
+        if (blogRepository.count() == 0) {
+            LocalDateTime now = LocalDateTime.now();
+
+            Blog b1 = Blog.builder()
+                    .blogId("blog_1")
+                    .title("Breakthroughs in Active Pharmaceutical Ingredients: Sourcing Resilience in 2026-2027")
+                    .slug("breakthroughs-in-active-pharmaceutical-ingredients-sourcing-resilience")
+                    .category("Pharma & APIs")
+                    .author("Dr. Sarah Jenkins")
+                    .authorRole("Senior Formulation Scientist & API Auditor")
+                    .coverImage("https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80")
+                    .readTime("6 min read")
+                    .publishedDate("March 28, 2026")
+                    .featured(true)
+                    .excerpt("Explore how advanced chemical synthesis, peptide engineering, and strategic India-ASEAN manufacturing corridors are reshaping global API procurement.")
+                    .content("The global pharmaceutical manufacturing ecosystem is undergoing an unprecedented restructuring. In the wake of supply chain vulnerabilities exposed over recent years, major health authorities and multinational pharmaceutical conglomerates are actively diversifying raw material sourcing strategies.\n\nIndia and the ASEAN nations represent the fastest-growing corridor for high-purity Active Pharmaceutical Ingredients (APIs), key starting materials (KSMs), and advanced intermediates. At IndiGlobal Healthcare Expo 2027, Halls 1 & 2 will serve as the premier nexus for over 150 certified bulk drug producers and global procurement directors.\n\n### Core Drivers of the API Renaissance\n\nSeveral macroeconomic and regulatory catalysts are propelling this transformation:\n\n1. Production Linked Incentives & Infrastructure Clusters: Mega bulk-drug industrial parks with centralized effluent treatment, dedicated power grids, and stream-lined regulatory clearances have lowered production costs by 15-22%.\n2. Shift Toward Continuous Flow Chemistry: Traditional batch synthesis is rapidly giving way to automated microreactor and continuous-flow architectures, minimizing batch-to-batch variation and slashing solvent consumption.\n3. Enhanced Drug Master File (DMF) Compliance: Indian and ASEAN manufacturers have dramatically improved regulatory filings, securing record numbers of US FDA, EU GMP, and WHO pre-qualifications.\n\nIndiGlobal Healthcare Expo 2027 will host dedicated bilateral buyer-seller roundtables to help procurement executives build long-term, direct-from-source contracts with audited API manufacturers.")
+                    .tags("APIs, Bulk Drugs, Supply Chain, Formulations, India-ASEAN")
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+            Blog b2 = Blog.builder()
+                    .blogId("blog_2")
+                    .title("Next-Generation Cleanroom Automation and Sterile Fill-Finish Systems")
+                    .slug("next-generation-cleanroom-automation-sterile-fill-finish-systems")
+                    .category("Pharma Machinery")
+                    .author("Elena Rostova")
+                    .authorRole("Cleanroom Engineering Lead, EuroSterile Systems")
+                    .coverImage("https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&q=80")
+                    .readTime("5 min read")
+                    .publishedDate("March 22, 2026")
+                    .featured(false)
+                    .excerpt("From robotic isolators to continuous WFI water loops, discover how Hall 4 machinery innovators are redefining sterility assurance and energy efficiency.")
+                    .content("Sterile injectables, monoclonal antibodies, and cell therapies demand production environments where human intervention is minimized to virtually zero. As regulatory agencies intensify Annex 1 requirements for sterile medicinal products, pharmaceutical cleanrooms have transformed into automated technological marvels.\n\nAt IndiGlobal Healthcare Expo 2027, Hall 4 (Pharma Machinery & Cleanroom Automation) showcases turnkey machinery from leading German, Japanese, and Indian automation engineers.\n\nFacilities modernizing their fill-finish lines are experiencing up to a 40% reduction in batch rejection rates alongside substantial energy savings from smart HVAC variable-frequency air circulation.")
+                    .tags("Cleanrooms, Pharma Machinery, Sterile Automation, Injectables, Robotics")
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+            Blog b3 = Blog.builder()
+                    .blogId("blog_3")
+                    .title("India-ASEAN Medical Device Harmonization: Fast-Tracking Cross-Border Approvals")
+                    .slug("india-asean-medical-device-harmonization-cross-border-approvals")
+                    .category("Healthcare Policies")
+                    .author("Somchai Prasert")
+                    .authorRole("Managing Director, Bangkok MedTech Alliance")
+                    .coverImage("https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&w=1200&q=80")
+                    .readTime("5 min read")
+                    .publishedDate("March 15, 2026")
+                    .featured(false)
+                    .excerpt("A deep dive into mutual recognition agreements, CDSCO guidelines, and FDA Thailand protocols expediting bilateral medical technology trade.")
+                    .content("The ASEAN region represents a medical device market exceeding USD 10 billion, with annual growth topping 8.5%. Simultaneously, India's medical technology manufacturing sector has expanded rapidly, graduating from basic consumables to advanced cardiology implants, surgical robotics, and in-vitro diagnostics.\n\nUnder the landmark India-ASEAN Global Confluence 2027, bilateral healthcare regulatory harmonization is taking center stage.")
+                    .tags("Medical Devices, ASEAN Confluence, Regulatory Affairs, CDSCO, Trade Policy")
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+            blogRepository.saveAll(Arrays.asList(b1, b2, b3));
         }
     }
 }

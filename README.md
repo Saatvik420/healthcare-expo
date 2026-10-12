@@ -42,7 +42,8 @@ The application includes an **Executive Admin Dashboard** (accessible at `/admin
 - 🤝 **Corporate Sponsorships Pipeline**: Track brand sponsorships, tiers, contract commitment values, and agreement statuses.
 - 📩 **Contact Helpdesk Inquiries**: View incoming inquiries submitted via the Contact page and respond directly via email.
 - 📊 **Real-time KPI Analytics & Hall Occupancy**: Live metrics on registered delegates, approved stalls, sponsorship pipeline, and hall occupancy rates.
-- 📥 **Real CSV Data Export**: 1-click real CSV report generation and file download for visitors, exhibitors, sponsorships, and inquiries.
+- 📰 **Blog & Editorial Management Desk**: Complete CRUD operations for healthcare articles, category tagging, featured story toggles, live cover previews, markdown content authoring, and real-time backend synchronization.
+- 📥 **Real CSV Data Export**: 1-click real CSV report generation and file download for visitors, exhibitors, sponsorships, inquiries, and published blog articles.
 - ➕ **On-Site Desks**: Register new trade visitors and book exhibitor stalls directly from inside the admin console.
 
 ---
