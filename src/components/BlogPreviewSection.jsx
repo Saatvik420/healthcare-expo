@@ -17,7 +17,7 @@ export default function BlogPreviewSection() {
       <div className="container">
         <div className="section-header text-center mb-5">
           <span className="section-badge">
-            <i className="fa-solid fa-newspaper"></i> Intelligence &amp; Strategy
+            <i className="fa-solid fa-newspaper"></i> Our Blogs
           </span>
           <h2 className="section-title">
             Latest Insights <span className="text-gradient">&amp; Chronicles</span>

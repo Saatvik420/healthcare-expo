@@ -99,7 +99,8 @@
 /* ==========================================================================
    NAVIGATION BAR
    ========================================================================== */
-header {
+header,
+header.site-header {
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -107,6 +108,11 @@ header {
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border-color);
   box-shadow: var(--shadow-sm);
+  transition: z-index 0.2s ease;
+}
+
+header.site-header.mobile-nav-active {
+  z-index: 99995 !important;
 }
 
 .nav-container {
@@ -121,6 +127,8 @@ header {
   align-items: center;
   gap: 0.75rem;
   text-decoration: none;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .logo-symbol {
@@ -3756,25 +3764,6 @@ footer {
   .footer-grid {
     grid-template-columns: 1fr 1fr;
   }
-  .mobile-menu-btn {
-    display: block;
-  }
-  .nav-links {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--white);
-    flex-direction: column;
-    padding: 1.5rem;
-    gap: 1.25rem;
-    border-bottom: 1px solid var(--border-color);
-    box-shadow: var(--shadow-md);
-  }
-  .nav-links.mobile-open {
-    display: flex;
-  }
   .sector-detail-card,
   .registration-columns,
   .booth-config-grid,
@@ -6821,11 +6810,15 @@ footer {
 .mobile-menu-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.65);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 1050;
-  animation: fadeIn 0.25s ease-out;
+  z-index: 1010;
+  cursor: pointer;
+  animation: fadeIn 0.22s ease-out;
+  touch-action: manipulation;
 }
 
 @keyframes fadeIn {
@@ -6888,42 +6881,74 @@ textarea:focus {
 @media (max-width: 1024px) {
   /* Switch to mobile hamburger menu at 1024px */
   .mobile-menu-btn {
-    display: block !important;
-    background: transparent;
-    border: none;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex-shrink: 0;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
     font-size: 1.35rem;
     color: var(--accent-navy);
     cursor: pointer;
-    padding: 0.4rem;
+    padding: 0;
     line-height: 1;
+    z-index: 1030;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  }
+
+  .mobile-menu-btn:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
+  .mobile-menu-btn:active {
+    transform: scale(0.94);
+    background: #e2e8f0;
   }
 
   .nav-actions {
-    display: none; /* Inlined inside mobile drawer */
+    display: none !important; /* Inlined inside mobile drawer */
+  }
+
+  .brand-logo {
+    max-width: calc(100% - 56px);
   }
 
   .nav-links {
-    display: none;
+    display: flex !important;
     position: fixed;
     top: 0;
     right: 0;
     bottom: 0;
-    width: min(85vw, 360px);
+    left: auto;
+    width: min(85vw, 340px);
+    height: 100vh;
+    height: 100dvh;
     background: #ffffff;
-    z-index: 1100;
+    z-index: 1020;
     flex-direction: column;
-    padding: 1.25rem 1.5rem;
-    gap: 0.5rem;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.15);
+    padding: 1.25rem 1.25rem 2.25rem;
+    gap: 0.35rem;
+    box-shadow: -10px 0 35px rgba(0, 0, 0, 0.2);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    visibility: hidden;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
   }
 
   .nav-links.mobile-open {
-    display: flex;
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
   }
 
   /* Drawer Header */
@@ -7230,18 +7255,18 @@ textarea:focus {
    OFFICIAL BRAND LOGO & POSTER STYLES
    ========================================================================== */
 .navbar-brand-logo-img {
-  height: 84px;
+  height: 72px;
   width: auto;
-  max-width: 380px;
+  max-width: 340px;
   object-fit: contain;
   display: block;
   transition: transform 0.2s ease;
 }
 
 .mobile-drawer-logo-img {
-  height: 58px;
+  height: 46px;
   width: auto;
-  max-width: 260px;
+  max-width: 200px;
   object-fit: contain;
   display: block;
 }
@@ -7335,14 +7360,35 @@ textarea:focus {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
+@media (max-width: 1200px) and (min-width: 1025px) {
+  .navbar-brand-logo-img {
+    height: 56px;
+    max-width: 250px;
+  }
+}
+
 @media (max-width: 768px) {
   .navbar-brand-logo-img {
-    height: 72px;
-    max-width: 290px;
+    height: 48px;
+    max-width: 210px;
   }
 
   .nav-container {
-    padding: 0.5rem 0;
+    padding: 0.45rem 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar-brand-logo-img {
+    height: 40px;
+    max-width: 175px;
+  }
+}
+
+@media (max-width: 360px) {
+  .navbar-brand-logo-img {
+    height: 34px;
+    max-width: 145px;
   }
 }
 
@@ -9375,4 +9421,158 @@ textarea:focus {
     font-size: 2.1rem;
   }
 }
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS MASTER ENHANCEMENTS (< 768px & < 480px)
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  /* Prevent iOS Safari auto-zoom on input focus */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="password"],
+  input[type="search"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Hero event pillars ribbon */
+  .hero-pillars-ribbon {
+    padding: 0.65rem 0.85rem;
+    gap: 0.45rem;
+  }
+  .pillar-divider {
+    display: none !important;
+  }
+  .pillar-tag {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+  }
+
+  /* Hero theme pill box */
+  .hero-theme-pill-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+    padding: 0.65rem 0.85rem;
+  }
+
+  /* Blogs controls bar */
+  .blogs-controls-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .blogs-search-wrapper {
+    min-width: 100%;
+    width: 100%;
+  }
+  .blogs-sort-wrapper {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .blogs-sort-select {
+    flex: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Container mobile padding */
+  .container {
+    padding: 0 1rem;
+  }
+
+  /* Hero section adjustments */
+  .hero {
+    padding: 2.5rem 0 3rem;
+  }
+  .hero-main-heading {
+    font-size: 1.65rem !important;
+    line-height: 1.25;
+  }
+  .hero-lead-text {
+    font-size: 0.92rem;
+  }
+  .hero-badge-group {
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .hero-cs-pill {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+  }
+  .hero-expo-title-highlight {
+    font-size: 0.95rem;
+  }
+  .hero-expo-collab-text {
+    font-size: 0.68rem;
+  }
+
+  /* Floating Widgets Mobile Layout: WhatsApp on right, Back-to-top on left */
+  .whatsapp-floating-container {
+    bottom: 1rem;
+    right: 1rem;
+  }
+  .whatsapp-floating-btn {
+    width: 52px;
+    height: 52px;
+    font-size: 1.65rem;
+  }
+  .whatsapp-popup-card {
+    width: calc(100vw - 2rem);
+    max-width: 330px;
+    right: 0;
+    bottom: 4rem;
+  }
+
+  .floating-back-to-top {
+    bottom: 1rem;
+    left: 1rem;
+    right: auto;
+    width: 42px;
+    height: 42px;
+    font-size: 1rem;
+  }
+
+  /* Modals padding on phones */
+  .admin-modal-overlay {
+    padding: 0.5rem;
+  }
+  .admin-modal {
+    max-height: 94vh;
+    border-radius: 12px;
+  }
+  .admin-modal-header {
+    padding: 0.85rem 1rem;
+  }
+  .admin-modal-body {
+    padding: 0.85rem 1rem;
+  }
+  .admin-modal-footer {
+    padding: 0.65rem 1rem;
+  }
+
+  /* Blogs hero title */
+  .blogs-hero-section {
+    padding: 2.75rem 0 2rem;
+  }
+  .blogs-hero-title {
+    font-size: 1.85rem !important;
+  }
+
+  /* Schedule and Registration Cards */
+  .schedule-day-theme-banner {
+    padding: 1rem;
+  }
+  .conf-day-card,
+  .opportunity-card,
+  .who-exhibit-card {
+    padding: 1.25rem;
+  }
+}
+
 

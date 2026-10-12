@@ -31,9 +31,20 @@ export default function Navbar() {
     };
   }, [mobileMenuOpen]);
 
+  // Close menu on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && mobileMenuOpen) {
+        closeMenu();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
+
   return (
     <>
-      <header>
+      <header className={`site-header ${mobileMenuOpen ? 'mobile-nav-active' : ''}`}>
         <div className="container nav-container">
           <Link to="/" className="brand-logo" onClick={closeMenu}>
             <img
@@ -214,21 +225,22 @@ export default function Navbar() {
             type="button"
             className="mobile-menu-btn"
             aria-label="Toggle navigation menu"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-expanded={mobileMenuOpen}
+            onClick={() => setMobileMenuOpen((prev) => !prev)}
           >
             <i className={`fa-solid ${mobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
           </button>
         </div>
-      </header>
 
-      {/* Backdrop overlay for mobile menu */}
-      {mobileMenuOpen && (
-        <div
-          className="mobile-menu-backdrop"
-          onClick={closeMenu}
-          aria-hidden="true"
-        ></div>
-      )}
+        {/* Backdrop overlay for mobile menu inside header stacking context */}
+        {mobileMenuOpen && (
+          <div
+            className="mobile-menu-backdrop"
+            onClick={closeMenu}
+            aria-hidden="true"
+          ></div>
+        )}
+      </header>
     </>
   );
 }

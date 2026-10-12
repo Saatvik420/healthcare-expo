@@ -64,9 +64,6 @@ export default function BlogsPage() {
       <section className="blogs-hero-section">
         <div className="container">
           <div className="blogs-hero-content">
-            <span className="section-badge">
-              <i className="fa-solid fa-newspaper"></i> Intelligence &amp; Strategy
-            </span>
             <h1 className="blogs-hero-title">
               Our <span className="text-gradient">Blogs</span>
             </h1>
