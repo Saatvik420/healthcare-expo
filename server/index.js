@@ -35,14 +35,21 @@ let db = {
 };
 
 // Helper for slug generation
-function generateSlug(title) {
+function generateSlug(title, existingBlogs = []) {
   if (!title) return 'blog-' + Date.now();
-  return title
+  const base = title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-')
-    .trim();
+    .trim() || 'blog';
+  let slug = base;
+  let counter = 1;
+  while (Array.isArray(existingBlogs) && existingBlogs.some((b) => b.slug === slug)) {
+    slug = `${base}-${counter}`;
+    counter++;
+  }
+  return slug;
 }
 
 // Load database from file or initialize
@@ -522,15 +529,15 @@ app.post(['/api/blogs', '/blogs', '/api/admin/blogs', '/admin/blogs'], (req, res
     return res.status(400).json({ error: 'Title is required' });
   }
 
-  const slug = data.slug || generateSlug(data.title);
+  const slug = data.slug || generateSlug(data.title, db.blogs || []);
   const now = new Date().toISOString();
   const newBlog = {
     id: data.id || 'blog_' + Date.now(),
     title: data.title,
     slug,
-    category: data.category || 'Pharma & APIs',
-    author: data.author || 'IndiGlobal Secretariat',
-    authorRole: data.authorRole || 'Healthcare Policy Analyst',
+    category: data.category || 'Our Blogs',
+    author: data.author || 'indiglobal healthcare Expo',
+    authorRole: data.authorRole || 'admin',
     coverImage:
       data.coverImage ||
       'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',

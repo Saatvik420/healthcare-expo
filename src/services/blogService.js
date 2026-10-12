@@ -184,7 +184,9 @@ const getLocalBlogs = () => {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_BLOGS));
-  } catch (e) {}
+  } catch {
+    // Ignore storage quota or access issues
+  }
   return INITIAL_BLOGS;
 };
 
@@ -256,8 +258,12 @@ export const blogService = {
             slug: b.slug || getBlogSlug(b),
             id: b.id || b.blogId,
           }));
-          saveLocalBlogs(enriched);
-          return enriched;
+          const local = getLocalBlogs();
+          const apiKeys = new Set(enriched.map((b) => b.id || b.slug));
+          const localOnly = local.filter((b) => !apiKeys.has(b.id) && !apiKeys.has(b.slug));
+          const merged = [...localOnly, ...enriched];
+          saveLocalBlogs(merged);
+          return merged;
         }
       }
     } catch (err) {
@@ -284,7 +290,7 @@ export const blogService = {
       let res;
       try {
         res = await fetchWithTimeout(`${API_BASE}/blogs/slug/${encodeURIComponent(idOrSlug)}`);
-      } catch (e1) {
+      } catch {
         res = null;
       }
 
@@ -339,6 +345,12 @@ export const blogService = {
       ...blogData,
       id: blogData.id || 'blog_' + Date.now(),
       slug,
+      author: blogData.author || 'indiglobal healthcare Expo',
+      authorRole: blogData.authorRole || 'admin',
+      category: blogData.category || 'Our Blogs',
+      coverImage:
+        blogData.coverImage ||
+        'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
       publishedDate:
         blogData.publishedDate ||
         new Date().toLocaleDateString('en-US', {

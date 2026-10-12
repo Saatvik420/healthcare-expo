@@ -1,12 +1,12 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect } from 'react';
-import blogService from '../../services/blogService';
 
 export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
   const [formData, setFormData] = useState({
     title: '',
-    category: 'Pharma & APIs',
-    author: 'IndiGlobal Secretariat',
-    authorRole: 'Healthcare Policy Analyst',
+    category: 'Our Blogs',
+    author: 'indiglobal healthcare Expo',
+    authorRole: 'admin',
     coverImage: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
     readTime: '5 min read',
     tags: '',
@@ -17,15 +17,13 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const categories = blogService.getCategories().filter((c) => c !== 'All');
-
   useEffect(() => {
     if (editingBlog) {
       setFormData({
         title: editingBlog.title || '',
-        category: editingBlog.category || 'Pharma & APIs',
-        author: editingBlog.author || 'IndiGlobal Secretariat',
-        authorRole: editingBlog.authorRole || 'Healthcare Policy Analyst',
+        category: editingBlog.category || 'Our Blogs',
+        author: editingBlog.author || 'indiglobal healthcare Expo',
+        authorRole: editingBlog.authorRole || 'admin',
         coverImage:
           editingBlog.coverImage ||
           'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
@@ -40,9 +38,9 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
     } else {
       setFormData({
         title: '',
-        category: 'Pharma & APIs',
-        author: 'IndiGlobal Secretariat',
-        authorRole: 'Healthcare Policy Analyst',
+        category: 'Our Blogs',
+        author: 'indiglobal healthcare Expo',
+        authorRole: 'admin',
         coverImage:
           'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
         readTime: '5 min read',
@@ -142,36 +140,16 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
               />
             </div>
 
-            <div className="form-row-2 mb-3">
-              <div className="form-group">
-                <label htmlFor="blog-category" className="form-label-required">
-                  Pavilion / Category
-                </label>
-                <select
-                  id="blog-category"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="form-control"
-                >
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="blog-read-time">Read Time</label>
-                <input
-                  type="text"
-                  id="blog-read-time"
-                  placeholder="e.g. 5 min read"
-                  value={formData.readTime}
-                  onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
-                  className="form-control"
-                />
-              </div>
+            <div className="form-group mb-3">
+              <label htmlFor="blog-read-time">Read Time</label>
+              <input
+                type="text"
+                id="blog-read-time"
+                placeholder="e.g. 5 min read"
+                value={formData.readTime}
+                onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
+                className="form-control"
+              />
             </div>
 
             <div className="form-row-2 mb-3">
@@ -180,7 +158,7 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
                 <input
                   type="text"
                   id="blog-author"
-                  placeholder="e.g. Dr. Sarah Jenkins"
+                  placeholder="e.g. indiglobal healthcare Expo"
                   value={formData.author}
                   onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                   className="form-control"
@@ -192,7 +170,7 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
                 <input
                   type="text"
                   id="blog-author-role"
-                  placeholder="e.g. Senior Formulation Scientist"
+                  placeholder="e.g. admin"
                   value={formData.authorRole}
                   onChange={(e) => setFormData({ ...formData, authorRole: e.target.value })}
                   className="form-control"
@@ -203,7 +181,7 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
             <div className="form-group mb-3">
               <label htmlFor="blog-cover">Cover Image URL</label>
               <input
-                type="url"
+                type="text"
                 id="blog-cover"
                 placeholder="https://images.unsplash.com/..."
                 value={formData.coverImage}

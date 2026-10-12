@@ -309,9 +309,16 @@ export const blogsApi = {
   },
 
   create: async (blogData) => {
+    const payload = {
+      ...blogData,
+      category: blogData.category || 'Our Blogs',
+      author: blogData.author || 'indiglobal healthcare Expo',
+      authorRole: blogData.authorRole || 'admin',
+      tags: Array.isArray(blogData.tags) ? blogData.tags.join(', ') : blogData.tags || '',
+    };
     const res = await fetchWithTimeout(`${API_BASE}/blogs`, {
       method: 'POST',
-      body: JSON.stringify(blogData),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create blog');
     return await res.json();

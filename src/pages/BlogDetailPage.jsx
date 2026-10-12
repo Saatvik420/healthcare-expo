@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import blogService, { getBlogSlug } from '../services/blogService';
 import { useData } from '../context/DataContext';
 
 export default function BlogDetailPage({ onNotify }) {
   const { id } = useParams();
-  const navigate = useNavigate();
   const { blogs = [] } = useData();
 
   const [blog, setBlog] = useState(null);
@@ -19,21 +18,31 @@ export default function BlogDetailPage({ onNotify }) {
     const loadBlog = async () => {
       setIsLoading(true);
       try {
-        const found = await blogService.getBlogByIdOrSlug(id);
+        let found = null;
+        try {
+          found = await blogService.getBlogByIdOrSlug(id);
+        } catch {
+          found = blogs.find((b) => b.id === id || b.slug === id || getBlogSlug(b) === id);
+        }
+        if (!found) {
+          found = blogs.find((b) => b.id === id || b.slug === id || getBlogSlug(b) === id);
+        }
         if (!active) return;
         setBlog(found);
 
         // Canonical URL update: If opened by raw ID, replace URL with SEO-friendly slug
-        const cleanSlug = getBlogSlug(found);
-        if (cleanSlug && id !== cleanSlug) {
-          window.history.replaceState(null, '', `/blogs/${cleanSlug}`);
+        if (found) {
+          const cleanSlug = getBlogSlug(found);
+          if (cleanSlug && id !== cleanSlug) {
+            window.history.replaceState(null, '', `/blogs/${cleanSlug}`);
+          }
         }
 
         // Related blogs
-        const allBlogs = await blogService.getAllBlogs();
+        const allBlogs = blogs.length > 0 ? blogs : await blogService.getAllBlogs();
         if (!active) return;
         const related = (allBlogs || [])
-          .filter((b) => (b.id || b.slug) !== (found.id || found.slug))
+          .filter((b) => (b.id || b.slug) !== (found?.id || found?.slug))
           .slice(0, 3);
         setRelatedBlogs(related);
       } catch (err) {
@@ -49,7 +58,7 @@ export default function BlogDetailPage({ onNotify }) {
     return () => {
       active = false;
     };
-  }, [id]);
+  }, [id, blogs]);
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -204,7 +213,7 @@ export default function BlogDetailPage({ onNotify }) {
             </Link>
             <span className="breadcrumb-sep">/</span>
             <Link to="/blogs" className="breadcrumb-link">
-              Insights &amp; Blogs
+              Our Blogs
             </Link>
             <span className="breadcrumb-sep">/</span>
             <span className="breadcrumb-current">{blog.title}</span>

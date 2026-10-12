@@ -334,8 +334,12 @@ export function DataProvider({ children }) {
         if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
           setInquiries(bInquiries.value);
         }
-        if (bBlogs.status === 'fulfilled' && bBlogs.value?.length > 0) {
-          setBlogs(bBlogs.value);
+        if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
+          setBlogs((prev) => {
+            const backendKeys = new Set(bBlogs.value.map((b) => b.id || b.blogId || b.slug));
+            const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug));
+            return [...localOnly, ...bBlogs.value];
+          });
         }
         return true;
       } else {
@@ -383,8 +387,12 @@ export function DataProvider({ children }) {
           if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
             setInquiries(bInquiries.value);
           }
-          if (bBlogs.status === 'fulfilled' && bBlogs.value?.length > 0) {
-            setBlogs(bBlogs.value);
+          if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
+            setBlogs((prev) => {
+              const backendKeys = new Set(bBlogs.value.map((b) => b.id || b.blogId || b.slug));
+              const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug));
+              return [...localOnly, ...bBlogs.value];
+            });
           }
         } else {
           setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
@@ -577,6 +585,12 @@ export function DataProvider({ children }) {
       ...blogData,
       id: blogData.id || 'blog_' + Date.now(),
       slug,
+      author: blogData.author || 'indiglobal healthcare Expo',
+      authorRole: blogData.authorRole || 'admin',
+      category: blogData.category || 'Our Blogs',
+      coverImage:
+        blogData.coverImage ||
+        'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
       publishedDate:
         blogData.publishedDate ||
         new Date().toLocaleDateString('en-US', {
@@ -587,18 +601,42 @@ export function DataProvider({ children }) {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
-    setBlogs((prev) => [newBlog, ...prev]);
+
+    // Immediately update state so it appears on screen without delay
+    setBlogs((prev) => [newBlog, ...prev.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)]);
+
+    // Immediately persist to localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem('ghe_blogs') || '[]');
+      const updated = [newBlog, ...stored.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)];
+      localStorage.setItem('ghe_blogs', JSON.stringify(updated));
+      localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
+    } catch (e) {
+      console.warn('Local storage write error:', e);
+    }
 
     try {
-      const created = await blogsApi.create(newBlog);
+      const apiPayload = {
+        ...newBlog,
+        tags: Array.isArray(newBlog.tags) ? newBlog.tags.join(', ') : newBlog.tags || '',
+      };
+      const created = await blogsApi.create(apiPayload);
       if (created) {
+        const enriched = {
+          ...newBlog,
+          ...created,
+          id: created.id || created.blogId || newBlog.id,
+          tags: Array.isArray(created.tags)
+            ? created.tags
+            : (created.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
+        };
         setBlogs((prev) =>
-          prev.map((b) => (b.id === newBlog.id ? created : b))
+          prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
         );
-        return created;
+        return enriched;
       }
-    } catch {
-      // Saved in localStorage
+    } catch (err) {
+      console.warn('Backend API save failed, saved locally:', err);
     }
     return newBlog;
   };

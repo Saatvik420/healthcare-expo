@@ -60,6 +60,15 @@ public class BlogController {
         if (blog.getCreatedAt() == null) {
             blog.setCreatedAt(LocalDateTime.now());
         }
+        if (blog.getAuthor() == null || blog.getAuthor().trim().isEmpty()) {
+            blog.setAuthor("indiglobal healthcare Expo");
+        }
+        if (blog.getAuthorRole() == null || blog.getAuthorRole().trim().isEmpty()) {
+            blog.setAuthorRole("admin");
+        }
+        if (blog.getCategory() == null || blog.getCategory().trim().isEmpty()) {
+            blog.setCategory("Our Blogs");
+        }
         blog.setUpdatedAt(LocalDateTime.now());
         Blog saved = blogRepository.save(blog);
         return ResponseEntity.status(201).body(saved);

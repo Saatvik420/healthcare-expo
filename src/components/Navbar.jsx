@@ -111,7 +111,7 @@ export default function Navbar() {
                 onClick={closeMenu}
               >
                 <i className="fa-solid fa-newspaper nav-item-icon"></i>
-                <span>Insights &amp; Blogs</span>
+                <span>Our Blogs</span>
               </NavLink>
             </li>
             <li>

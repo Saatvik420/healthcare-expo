@@ -68,11 +68,8 @@ export default function BlogsPage() {
               <i className="fa-solid fa-newspaper"></i> Intelligence &amp; Strategy
             </span>
             <h1 className="blogs-hero-title">
-              Healthcare Insights <span className="text-gradient">&amp; Chronicles</span>
+              Our <span className="text-gradient">Blogs</span>
             </h1>
-            <p className="blogs-hero-subtitle">
-              Authoritative industry perspectives on active pharmaceutical ingredients, cleanroom automation, India-ASEAN regulatory harmonization, and hospital infrastructure 2030.
-            </p>
           </div>
         </div>
       </section>
@@ -205,12 +202,15 @@ export default function BlogsPage() {
                     <Link to={`/blogs/${slug}`} className="blog-card-link">
                       <div className="blog-card-cover-wrap">
                         <img
-                          src={blog.coverImage}
+                          src={blog.coverImage || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80'}
                           alt={blog.title}
                           className="blog-card-cover"
                           loading="lazy"
+                          onError={(e) => {
+                            e.target.src = 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80';
+                          }}
                         />
-                        <span className="blog-card-cat-badge">{blog.category}</span>
+                        <span className="blog-card-cat-badge">{blog.category || 'Our Blogs'}</span>
                         {blog.featured && (
                           <span className="blog-card-star-badge" title="Featured Article">
                             <i className="fa-solid fa-star"></i>

@@ -52,7 +52,6 @@ export default function AdminDashboardPage({ onNotify }) {
 
   // Search & Filters for Blogs
   const [blogSearch, setBlogSearch] = useState('');
-  const [blogCategoryFilter, setBlogCategoryFilter] = useState('all');
   const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
@@ -492,7 +491,7 @@ export default function AdminDashboardPage({ onNotify }) {
               <i className="fa-solid fa-newspaper"></i>
             </div>
             <div className="kpi-details">
-              <span className="kpi-label">Blog Articles</span>
+              <span className="kpi-label">Our Blogs</span>
               <h3 className="kpi-number">{blogs.length}</h3>
               <small className="kpi-sub">
                 {blogs.filter((b) => b.featured).length} Featured Story &bull; Active Editorial
@@ -536,7 +535,7 @@ export default function AdminDashboardPage({ onNotify }) {
             className={`admin-tab-btn ${activeTab === 'blogs' ? 'active' : ''}`}
             onClick={() => setActiveTab('blogs')}
           >
-            <i className="fa-solid fa-newspaper"></i> Blog Articles ({blogs.length})
+            <i className="fa-solid fa-newspaper"></i> Our Blogs ({blogs.length})
           </button>
           <button
             type="button"
@@ -1124,20 +1123,6 @@ export default function AdminDashboardPage({ onNotify }) {
               </div>
 
               <div className="table-filters-group">
-                <select
-                  value={blogCategoryFilter}
-                  onChange={(e) => setBlogCategoryFilter(e.target.value)}
-                  className="table-filter-select"
-                >
-                  <option value="all">All Categories ({blogs.length})</option>
-                  <option value="Pharma & APIs">Pharma & APIs</option>
-                  <option value="Pharma Machinery">Pharma Machinery</option>
-                  <option value="Healthcare Policies">Healthcare Policies</option>
-                  <option value="Cold Chain & Logistics">Cold Chain & Logistics</option>
-                  <option value="Hospital Infrastructure">Hospital Infrastructure</option>
-                  <option value="Exhibition Strategy">Exhibition Strategy</option>
-                </select>
-
                 <button
                   type="button"
                   className="btn btn-primary btn-sm-admin"
@@ -1157,7 +1142,6 @@ export default function AdminDashboardPage({ onNotify }) {
                 <thead>
                   <tr>
                     <th>Article</th>
-                    <th>Category</th>
                     <th>Author & Role</th>
                     <th>Published Date</th>
                     <th>Status</th>
@@ -1167,10 +1151,6 @@ export default function AdminDashboardPage({ onNotify }) {
                 <tbody>
                   {blogs
                     .filter((b) => {
-                      const matchesCategory =
-                        blogCategoryFilter === 'all' ||
-                        (b.category &&
-                          b.category.toLowerCase() === blogCategoryFilter.toLowerCase());
                       const query = blogSearch.trim().toLowerCase();
                       const matchesSearch =
                         !query ||
@@ -1179,7 +1159,7 @@ export default function AdminDashboardPage({ onNotify }) {
                         b.author?.toLowerCase().includes(query) ||
                         (Array.isArray(b.tags) &&
                           b.tags.some((t) => t.toLowerCase().includes(query)));
-                      return matchesCategory && matchesSearch;
+                      return matchesSearch;
                     })
                     .map((blog) => (
                       <tr key={blog.id || blog.slug}>
@@ -1201,9 +1181,6 @@ export default function AdminDashboardPage({ onNotify }) {
                               </small>
                             </div>
                           </div>
-                        </td>
-                        <td>
-                          <span className="badge badge-category">{blog.category}</span>
                         </td>
                         <td>
                           <div className="admin-cell-user">
@@ -1261,21 +1238,16 @@ export default function AdminDashboardPage({ onNotify }) {
                       </tr>
                     ))}
                   {blogs.filter((b) => {
-                    const matchesCategory =
-                      blogCategoryFilter === 'all' ||
-                      (b.category &&
-                        b.category.toLowerCase() === blogCategoryFilter.toLowerCase());
                     const query = blogSearch.trim().toLowerCase();
                     return (
-                      matchesCategory &&
-                      (!query ||
-                        b.title?.toLowerCase().includes(query) ||
-                        b.excerpt?.toLowerCase().includes(query) ||
-                        b.author?.toLowerCase().includes(query))
+                      !query ||
+                      b.title?.toLowerCase().includes(query) ||
+                      b.excerpt?.toLowerCase().includes(query) ||
+                      b.author?.toLowerCase().includes(query)
                     );
                   }).length === 0 && (
                     <tr>
-                      <td colSpan="6" className="text-center py-4">
+                      <td colSpan="5" className="text-center py-4">
                         <div className="empty-table-state">
                           <i
                             className="fa-solid fa-newspaper text-muted"
@@ -1287,7 +1259,6 @@ export default function AdminDashboardPage({ onNotify }) {
                             className="btn btn-outline btn-xs mt-2"
                             onClick={() => {
                               setBlogSearch('');
-                              setBlogCategoryFilter('all');
                             }}
                           >
                             Clear Filters
