@@ -3,6 +3,8 @@
  * Provides resilient communication with automatic fallback.
  */
 
+export const DEFAULT_PRODUCTION_API_URL = 'https://healthcare-backend-ftho.onrender.com/api';
+
 // Dynamically resolve API URL to support Netlify + Render, custom domain, and local network
 export const getApiBaseUrl = () => {
   // 1. Check if admin configured custom backend URL in localStorage (e.g. Render URL)
@@ -48,7 +50,7 @@ export const getApiBaseUrl = () => {
     }
   }
 
-  // Default to relative '/api' (handled by proxy or reverse proxy)
+  // Default to relative '/api' (proxied by Netlify edge redirects)
   return '/api';
 };
 
@@ -86,14 +88,75 @@ export async function fetchWithTimeout(resource, options = {}) {
   }
 }
 
+/**
+ * Validates that the response contains valid JSON and is not an HTML SPA fallback document
+ */
+export async function safeJsonResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('text/html')) {
+    throw new Error('API returned HTML document instead of JSON. The backend route may be unproxied or offline.');
+  }
+  return await response.json();
+}
+
+/**
+ * Resilient request helper that tries the primary base URL (relative /api) and,
+ * if on a public domain and encountering an HTML SPA fallback or network issue,
+ * automatically retries directly with the live Render backend URL.
+ */
+export async function requestWithFallback(endpointPath, options = {}) {
+  const cleanPath = endpointPath.startsWith('/') ? endpointPath : `/${endpointPath}`;
+  const base = getApiBaseUrl();
+  const primaryUrl = `${base}${cleanPath}`;
+
+  try {
+    const res = await fetchWithTimeout(primaryUrl, options);
+    const contentType = res.headers.get('content-type') || '';
+    if (res.ok && !contentType.includes('text/html')) {
+      return res;
+    }
+
+    // If primary returned HTML (SPA fallback) or error on production site, try direct Render backend
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isLocal && base !== DEFAULT_PRODUCTION_API_URL) {
+      const fallbackUrl = `${DEFAULT_PRODUCTION_API_URL}${cleanPath}`;
+      const fallbackRes = await fetchWithTimeout(fallbackUrl, options);
+      const fbContentType = fallbackRes.headers.get('content-type') || '';
+      if (fallbackRes.ok && !fbContentType.includes('text/html')) {
+        return fallbackRes;
+      }
+    }
+    return res;
+  } catch (err) {
+    const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    if (!isLocal && base !== DEFAULT_PRODUCTION_API_URL) {
+      try {
+        const fallbackUrl = `${DEFAULT_PRODUCTION_API_URL}${cleanPath}`;
+        const fallbackRes = await fetchWithTimeout(fallbackUrl, options);
+        const fbContentType = fallbackRes.headers.get('content-type') || '';
+        if (fallbackRes.ok && !fbContentType.includes('text/html')) {
+          return fallbackRes;
+        }
+      } catch {
+        // preserve original error
+      }
+    }
+    throw err;
+  }
+}
+
 // Health check
 export const healthApi = {
   check: async (overrideUrl) => {
-    const base = overrideUrl || getApiBase();
     try {
-      const res = await fetchWithTimeout(`${base}/health`, { timeout: 12000 });
+      let res;
+      if (overrideUrl) {
+        res = await fetchWithTimeout(`${overrideUrl}/health`, { timeout: 12000 });
+      } else {
+        res = await requestWithFallback('/health', { timeout: 12000 });
+      }
       if (!res.ok) return { isOnline: false };
-      const data = await res.json();
+      const data = await safeJsonResponse(res);
       return { isOnline: true, ...data };
     } catch {
       return { isOnline: false };
@@ -104,20 +167,20 @@ export const healthApi = {
 // Analytics & Stats API
 export const statsApi = {
   get: async () => {
-    const res = await fetchWithTimeout(`${API_BASE}/stats`);
+    const res = await requestWithFallback('/stats');
     if (!res.ok) throw new Error('Failed to fetch dashboard stats');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 };
 
 // Auth API
 export const authApi = {
   login: async (email, password) => {
-    const res = await fetchWithTimeout(`${API_BASE}/auth/login`, {
+    const res = await requestWithFallback('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     });
-    const data = await res.json();
+    const data = await safeJsonResponse(res);
     if (!res.ok) {
       throw new Error(data.message || 'Login failed');
     }
@@ -125,11 +188,11 @@ export const authApi = {
   },
 
   signup: async (userData) => {
-    const res = await fetchWithTimeout(`${API_BASE}/auth/signup`, {
+    const res = await requestWithFallback('/auth/signup', {
       method: 'POST',
       body: JSON.stringify(userData),
     });
-    const data = await res.json();
+    const data = await safeJsonResponse(res);
     if (!res.ok) {
       throw new Error(data.message || 'Account registration failed');
     }
@@ -140,9 +203,9 @@ export const authApi = {
 // Visitors API
 export const visitorsApi = {
   getAll: async () => {
-    const res = await fetchWithTimeout(`${API_BASE}/visitors`);
+    const res = await requestWithFallback('/visitors');
     if (!res.ok) throw new Error('Failed to fetch visitors');
-    const data = await res.json();
+    const data = await safeJsonResponse(res);
     return data.map((v) => ({
       ...v,
       id: v.visitorCode || (v.id ? `vis_${v.id}` : `vis_${Date.now()}`),
@@ -151,9 +214,9 @@ export const visitorsApi = {
   },
 
   getById: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/visitors/${id}`);
+    const res = await requestWithFallback(`/visitors/${encodeURIComponent(id)}`);
     if (!res.ok) throw new Error('Failed to fetch visitor details');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   create: async (visitorData) => {
@@ -175,25 +238,25 @@ export const visitorsApi = {
       notes: visitorData.notes || '',
     };
 
-    const res = await fetchWithTimeout(`${API_BASE}/visitors`, {
+    const res = await requestWithFallback('/visitors', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create visitor');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   update: async (id, visitorData) => {
-    const res = await fetchWithTimeout(`${API_BASE}/visitors/${id}`, {
+    const res = await requestWithFallback(`/visitors/${encodeURIComponent(id)}`, {
       method: 'PUT',
       body: JSON.stringify(visitorData),
     });
     if (!res.ok) throw new Error('Failed to update visitor');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   delete: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/visitors/${id}`, {
+    const res = await requestWithFallback(`/visitors/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
     return res.ok;
@@ -203,9 +266,9 @@ export const visitorsApi = {
 // Exhibitors API
 export const exhibitorsApi = {
   getAll: async () => {
-    const res = await fetchWithTimeout(`${API_BASE}/exhibitors`);
+    const res = await requestWithFallback('/exhibitors');
     if (!res.ok) throw new Error('Failed to fetch exhibitors');
-    const data = await res.json();
+    const data = await safeJsonResponse(res);
     return data.map((e) => ({
       ...e,
       id: e.exhibitorCode || (e.id ? `exh_${e.id}` : `exh_${Date.now()}`),
@@ -213,9 +276,9 @@ export const exhibitorsApi = {
   },
 
   getById: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/exhibitors/${id}`);
+    const res = await requestWithFallback(`/exhibitors/${encodeURIComponent(id)}`);
     if (!res.ok) throw new Error('Failed to fetch exhibitor details');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   create: async (exhibitorData) => {
@@ -235,34 +298,34 @@ export const exhibitorsApi = {
       notes: exhibitorData.notes,
     };
 
-    const res = await fetchWithTimeout(`${API_BASE}/exhibitors`, {
+    const res = await requestWithFallback('/exhibitors', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create exhibitor booking');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   update: async (id, updateData) => {
-    const res = await fetchWithTimeout(`${API_BASE}/exhibitors/${id}`, {
+    const res = await requestWithFallback(`/exhibitors/${encodeURIComponent(id)}`, {
       method: 'PUT',
       body: JSON.stringify(updateData),
     });
     if (!res.ok) throw new Error('Failed to update exhibitor');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   updateStatus: async (id, status) => {
-    const res = await fetchWithTimeout(`${API_BASE}/exhibitors/${id}/status`, {
+    const res = await requestWithFallback(`/exhibitors/${encodeURIComponent(id)}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
     });
     if (!res.ok) throw new Error('Failed to update exhibitor status');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   delete: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/exhibitors/${id}`, {
+    const res = await requestWithFallback(`/exhibitors/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
     return res.ok;
@@ -272,9 +335,9 @@ export const exhibitorsApi = {
 // Sponsorships API
 export const sponsorshipsApi = {
   getAll: async () => {
-    const res = await fetchWithTimeout(`${API_BASE}/sponsorships`);
+    const res = await requestWithFallback('/sponsorships');
     if (!res.ok) throw new Error('Failed to fetch sponsorships');
-    const data = await res.json();
+    const data = await safeJsonResponse(res);
     return data.map((s) => ({
       ...s,
       id: s.sponsorshipCode || (s.id ? `sp_${s.id}` : `sp_${Date.now()}`),
@@ -294,25 +357,25 @@ export const sponsorshipsApi = {
       date: sponsorshipData.date,
     };
 
-    const res = await fetchWithTimeout(`${API_BASE}/sponsorships`, {
+    const res = await requestWithFallback('/sponsorships', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create sponsorship');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   updateStatus: async (id, status) => {
-    const res = await fetchWithTimeout(`${API_BASE}/sponsorships/${id}/status`, {
+    const res = await requestWithFallback(`/sponsorships/${encodeURIComponent(id)}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status }),
     });
     if (!res.ok) throw new Error('Failed to update sponsorship status');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   delete: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/sponsorships/${id}`, {
+    const res = await requestWithFallback(`/sponsorships/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
     return res.ok;
@@ -322,22 +385,22 @@ export const sponsorshipsApi = {
 // Contact Inquiry API
 export const contactApi = {
   submit: async (inquiryData) => {
-    const res = await fetchWithTimeout(`${API_BASE}/contact`, {
+    const res = await requestWithFallback('/contact', {
       method: 'POST',
       body: JSON.stringify(inquiryData),
     });
     if (!res.ok) throw new Error('Failed to submit contact message');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   getAll: async () => {
-    const res = await fetchWithTimeout(`${API_BASE}/contact`);
+    const res = await requestWithFallback('/contact');
     if (!res.ok) throw new Error('Failed to fetch inquiries');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   delete: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/contact/${id}`, {
+    const res = await requestWithFallback(`/contact/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
     return res.ok;
@@ -347,21 +410,22 @@ export const contactApi = {
 // Blogs API
 export const blogsApi = {
   getAll: async (category) => {
-    const url = category && category.toLowerCase() !== 'all'
-      ? `${API_BASE}/blogs?category=${encodeURIComponent(category)}`
-      : `${API_BASE}/blogs`;
-    const res = await fetchWithTimeout(url);
+    const path = category && category.toLowerCase() !== 'all'
+      ? `/blogs?category=${encodeURIComponent(category)}`
+      : `/blogs`;
+    const res = await requestWithFallback(path);
     if (!res.ok) throw new Error('Failed to fetch blogs');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   getByIdOrSlug: async (idOrSlug) => {
-    let res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(idOrSlug)}`);
-    if (!res.ok) {
-      res = await fetchWithTimeout(`${API_BASE}/blogs/slug/${encodeURIComponent(idOrSlug)}`);
+    let res = await requestWithFallback(`/blogs/${encodeURIComponent(idOrSlug)}`);
+    const isHtml = (res.headers.get('content-type') || '').includes('text/html');
+    if (!res.ok || isHtml) {
+      res = await requestWithFallback(`/blogs/slug/${encodeURIComponent(idOrSlug)}`);
     }
     if (!res.ok) throw new Error('Failed to fetch blog');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   create: async (blogData) => {
@@ -375,29 +439,33 @@ export const blogsApi = {
       author: blogData.author || 'indiglobal healthcare Expo',
       authorRole: blogData.authorRole || 'admin',
       tags: Array.isArray(blogData.tags) ? blogData.tags.join(', ') : blogData.tags || '',
+      publishedDate: blogData.publishedDate || new Date().toLocaleDateString('en-US', {
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+      }),
     };
-    const res = await fetchWithTimeout(`${API_BASE}/blogs`, {
+    const res = await requestWithFallback('/blogs', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to create blog');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   update: async (id, blogData) => {
-    const res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
+    const res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
       method: 'PUT',
       body: JSON.stringify(blogData),
     });
     if (!res.ok) throw new Error('Failed to update blog');
-    return await res.json();
+    return await safeJsonResponse(res);
   },
 
   delete: async (id) => {
-    const res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
+    const res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
     return res.ok;
   },
 };
-

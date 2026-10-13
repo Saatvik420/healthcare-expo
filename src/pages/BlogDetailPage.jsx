@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import blogService, { getBlogSlug } from '../services/blogService';
+import blogService, { getBlogSlug, formatBlogPublishedDate } from '../services/blogService';
 import { useData } from '../context/DataContext';
 
 export default function BlogDetailPage({ onNotify }) {
@@ -279,7 +279,7 @@ export default function BlogDetailPage({ onNotify }) {
 
               <div className="article-stats">
                 <span className="article-date">
-                  <i className="fa-regular fa-calendar"></i> {blog.publishedDate}
+                  <i className="fa-regular fa-calendar"></i> {blog.publishedDate || formatBlogPublishedDate(blog)}
                 </span>
                 <span className="meta-sep">&bull;</span>
                 <span className="article-read-time">

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, blogsApi, healthApi } from '../services/api';
-import { INITIAL_BLOGS, getBlogSlug } from '../services/blogService';
+import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, getBlogTimestamp } from '../services/blogService';
 
 const DataContext = createContext();
 
@@ -336,9 +336,15 @@ export function DataProvider({ children }) {
         }
         if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
           setBlogs((prev) => {
-            const backendKeys = new Set(bBlogs.value.map((b) => b.id || b.blogId || b.slug));
-            const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug));
-            const merged = [...localOnly, ...bBlogs.value];
+            const enrichedBackend = bBlogs.value.map((b) => ({
+              ...b,
+              id: b.id || b.blogId,
+              slug: b.slug || getBlogSlug(b),
+              publishedDate: formatBlogPublishedDate(b),
+            }));
+            const backendKeys = new Set(enrichedBackend.map((b) => b.id || b.blogId || b.slug));
+            const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug) && !backendKeys.has(b.blogId));
+            const merged = [...enrichedBackend, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
             try {
               localStorage.setItem('ghe_blogs', JSON.stringify(merged));
               localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
@@ -396,9 +402,15 @@ export function DataProvider({ children }) {
           }
           if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
             setBlogs((prev) => {
-              const backendKeys = new Set(bBlogs.value.map((b) => b.id || b.blogId || b.slug));
-              const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug));
-              const merged = [...localOnly, ...bBlogs.value];
+              const enrichedBackend = bBlogs.value.map((b) => ({
+                ...b,
+                id: b.id || b.blogId,
+                slug: b.slug || getBlogSlug(b),
+                publishedDate: formatBlogPublishedDate(b),
+              }));
+              const backendKeys = new Set(enrichedBackend.map((b) => b.id || b.blogId || b.slug));
+              const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug) && !backendKeys.has(b.blogId));
+              const merged = [...enrichedBackend, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
               try {
                 localStorage.setItem('ghe_blogs', JSON.stringify(merged));
                 localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
@@ -630,10 +642,19 @@ export function DataProvider({ children }) {
     // 1. Immediately update state so it appears on screen without delay
     setBlogs((prev) => [newBlog, ...prev.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)]);
 
-    // 2. Immediately persist to localStorage
+    // 2. Immediately persist to localStorage, preserving initial blogs if first article
     try {
-      const stored = JSON.parse(localStorage.getItem('ghe_blogs') || '[]');
-      const updated = [newBlog, ...stored.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)];
+      const rawStored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
+      let baseList = INITIAL_BLOGS;
+      if (rawStored) {
+        try {
+          const parsed = JSON.parse(rawStored);
+          if (Array.isArray(parsed) && parsed.length > 0) baseList = parsed;
+        } catch {
+          // fallback
+        }
+      }
+      const updated = [newBlog, ...baseList.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)];
       localStorage.setItem('ghe_blogs', JSON.stringify(updated));
       localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
     } catch (e) {
@@ -649,15 +670,19 @@ export function DataProvider({ children }) {
           ...created,
           id: created.id || created.blogId || newBlog.id,
           slug: created.slug || newBlog.slug,
+          publishedDate: formatBlogPublishedDate(created) || newBlog.publishedDate,
           tags: Array.isArray(created.tags)
             ? created.tags
-            : (created.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
+            : typeof created.tags === 'string'
+            ? created.tags.split(',').map((t) => t.trim()).filter(Boolean)
+            : newBlog.tags,
         };
         setBlogs((prev) =>
           prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
         );
         try {
-          const stored = JSON.parse(localStorage.getItem('ghe_blogs') || '[]');
+          const rawStored = localStorage.getItem('ghe_blogs') || '[]';
+          const stored = JSON.parse(rawStored);
           const updated = stored.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b));
           localStorage.setItem('ghe_blogs', JSON.stringify(updated));
           localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));

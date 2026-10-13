@@ -3,7 +3,7 @@
  * Connects to the backend REST API with persistent localStorage fallback.
  */
 
-import { API_BASE, fetchWithTimeout } from './api';
+import { blogsApi } from './api';
 
 const STORAGE_KEY = 'ighe_blogs_cache';
 
@@ -170,6 +170,67 @@ Whether your organization is seeking regional distribution partners or evaluatin
   }
 ];
 
+export const formatBlogPublishedDate = (blog) => {
+  if (!blog) return '';
+  if (blog.publishedDate && typeof blog.publishedDate === 'string' && blog.publishedDate.trim()) {
+    return blog.publishedDate.trim();
+  }
+  if (blog.createdAt) {
+    try {
+      const normalized = String(blog.createdAt).replace(/(\.\d{3})\d+/, '$1');
+      const d = new Date(normalized);
+      if (!isNaN(d.getTime())) {
+        return d.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        });
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return 'Recently Published';
+};
+
+export const getBlogSlug = (blog) => {
+  if (!blog) return '';
+  if (blog.slug && typeof blog.slug === 'string' && blog.slug.trim()) {
+    return blog.slug.trim();
+  }
+  if (blog.title && typeof blog.title === 'string' && blog.title.trim()) {
+    return blog.title
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  }
+  return blog.id || blog.blogId || '';
+};
+
+export const getBlogTimestamp = (blog) => {
+  if (!blog) return 0;
+  if (blog.createdAt) {
+    const normalized = String(blog.createdAt).replace(/(\.\d{3})\d+/, '$1');
+    const t = new Date(normalized).getTime();
+    if (!isNaN(t) && t > 0) return t;
+  }
+  if (blog.publishedDate) {
+    const t = new Date(blog.publishedDate).getTime();
+    if (!isNaN(t) && t > 0) return t;
+  }
+  if (blog.id && typeof blog.id === 'string' && blog.id.startsWith('blog_')) {
+    const num = parseInt(blog.id.replace('blog_', ''), 10);
+    if (!isNaN(num) && num > 1000000) return num;
+  }
+  if (blog.blogId && typeof blog.blogId === 'string' && blog.blogId.startsWith('blog_')) {
+    const num = parseInt(blog.blogId.replace('blog_', ''), 10);
+    if (!isNaN(num) && num > 1000000) return num;
+  }
+  return 0;
+};
+
 // Helper to get local stored blogs
 const getLocalBlogs = () => {
   try {
@@ -202,70 +263,28 @@ const saveLocalBlogs = (blogs) => {
   }
 };
 
-export const getBlogSlug = (blog) => {
-  if (!blog) return '';
-  if (blog.slug && typeof blog.slug === 'string' && blog.slug.trim()) {
-    return blog.slug.trim();
-  }
-  if (blog.title && typeof blog.title === 'string' && blog.title.trim()) {
-    return blog.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-')
-      .trim();
-  }
-  return blog.id || blog.blogId || '';
-};
-
-export const getBlogTimestamp = (blog) => {
-  if (!blog) return 0;
-  if (blog.createdAt) {
-    const t = new Date(blog.createdAt).getTime();
-    if (!isNaN(t)) return t;
-  }
-  if (blog.publishedDate) {
-    const t = new Date(blog.publishedDate).getTime();
-    if (!isNaN(t)) return t;
-  }
-  if (blog.id && typeof blog.id === 'string' && blog.id.startsWith('blog_')) {
-    const num = parseInt(blog.id.replace('blog_', ''), 10);
-    if (!isNaN(num) && num > 1000000) return num;
-  }
-  if (blog.blogId && typeof blog.blogId === 'string' && blog.blogId.startsWith('blog_')) {
-    const num = parseInt(blog.blogId.replace('blog_', ''), 10);
-    if (!isNaN(num) && num > 1000000) return num;
-  }
-  return 0;
-};
-
 export const blogService = {
   getBlogSlug,
   getBlogTimestamp,
+  formatBlogPublishedDate,
 
   // Get all blogs with optional category filter
   getAllBlogs: async (category = '') => {
     try {
-      const url =
-        category && category.toLowerCase() !== 'all'
-          ? `${API_BASE}/blogs?category=${encodeURIComponent(category)}`
-          : `${API_BASE}/blogs`;
-      const res = await fetchWithTimeout(url);
-      if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          const enriched = data.map((b) => ({
-            ...b,
-            slug: b.slug || getBlogSlug(b),
-            id: b.id || b.blogId,
-          }));
-          const local = getLocalBlogs();
-          const apiKeys = new Set(enriched.map((b) => b.id || b.slug));
-          const localOnly = local.filter((b) => !apiKeys.has(b.id) && !apiKeys.has(b.slug));
-          const merged = [...localOnly, ...enriched];
-          saveLocalBlogs(merged);
-          return merged;
-        }
+      const data = await blogsApi.getAll(category);
+      if (Array.isArray(data) && data.length > 0) {
+        const enriched = data.map((b) => ({
+          ...b,
+          slug: b.slug || getBlogSlug(b),
+          id: b.id || b.blogId,
+          publishedDate: formatBlogPublishedDate(b),
+        }));
+        const local = getLocalBlogs();
+        const apiKeys = new Set(enriched.map((b) => b.id || b.slug));
+        const localOnly = local.filter((b) => !apiKeys.has(b.id) && !apiKeys.has(b.slug));
+        const merged = [...enriched, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+        saveLocalBlogs(merged);
+        return merged;
       }
     } catch (err) {
       console.warn('API blogs fetch failed, falling back to local cache:', err.message);
@@ -275,6 +294,7 @@ export const blogService = {
       ...b,
       slug: b.slug || getBlogSlug(b),
       id: b.id || b.blogId,
+      publishedDate: formatBlogPublishedDate(b),
     }));
 
     if (category && category.toLowerCase() !== 'all') {
@@ -288,26 +308,14 @@ export const blogService = {
   // Get single blog by ID or Slug
   getBlogByIdOrSlug: async (idOrSlug) => {
     try {
-      let res;
-      try {
-        res = await fetchWithTimeout(`${API_BASE}/blogs/slug/${encodeURIComponent(idOrSlug)}`, { timeout: 1500 });
-      } catch {
-        res = null;
-      }
-
-      if (!res || !res.ok) {
-        res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(idOrSlug)}`, { timeout: 1500 });
-      }
-
-      if (res && res.ok) {
-        const data = await res.json();
-        if (data) {
-          return {
-            ...data,
-            slug: data.slug || getBlogSlug(data),
-            id: data.id || data.blogId,
-          };
-        }
+      const data = await blogsApi.getByIdOrSlug(idOrSlug);
+      if (data) {
+        return {
+          ...data,
+          slug: data.slug || getBlogSlug(data),
+          id: data.id || data.blogId,
+          publishedDate: formatBlogPublishedDate(data),
+        };
       }
     } catch (err) {
       console.warn('API blog detail fetch failed, falling back to local cache:', err.message);
@@ -326,6 +334,7 @@ export const blogService = {
         ...found,
         slug: found.slug || getBlogSlug(found),
         id: found.id || found.blogId,
+        publishedDate: formatBlogPublishedDate(found),
       };
     }
     throw new Error('Blog article not found');
@@ -365,18 +374,15 @@ export const blogService = {
 
     let created = null;
     try {
-      const res = await fetchWithTimeout(`${API_BASE}/blogs`, {
-        method: 'POST',
-        body: JSON.stringify(newBlog),
-      });
-      if (res.ok) {
-        created = await res.json();
-      }
+      created = await blogsApi.create(newBlog);
     } catch (err) {
       console.warn('Failed to save blog to API, persisting locally:', err.message);
     }
 
-    const item = created || newBlog;
+    const item = {
+      ...(created || newBlog),
+      publishedDate: formatBlogPublishedDate(created || newBlog),
+    };
     const local = getLocalBlogs();
     const updatedList = [item, ...local.filter((b) => b.id !== item.id && b.slug !== item.slug)];
     saveLocalBlogs(updatedList);
@@ -392,18 +398,15 @@ export const blogService = {
 
     let updated = null;
     try {
-      const res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
-        method: 'PUT',
-        body: JSON.stringify(updatedData),
-      });
-      if (res.ok) {
-        updated = await res.json();
-      }
+      updated = await blogsApi.update(id, updatedData);
     } catch (err) {
       console.warn('Failed to update blog on API, saving locally:', err.message);
     }
 
-    const item = updated || { ...updatedData, id };
+    const item = {
+      ...(updated || { ...updatedData, id }),
+      publishedDate: formatBlogPublishedDate(updated || { ...updatedData, id }),
+    };
     const local = getLocalBlogs();
     const updatedList = local.map((b) => (b.id === id || b.slug === id ? item : b));
     saveLocalBlogs(updatedList);
@@ -413,9 +416,7 @@ export const blogService = {
   // Delete blog (Admin)
   deleteBlog: async (id) => {
     try {
-      await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(id)}`, {
-        method: 'DELETE',
-      });
+      await blogsApi.delete(id);
     } catch (err) {
       console.warn('Failed to delete blog on API, removing locally:', err.message);
     }

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { getBlogSlug, getBlogTimestamp } from '../services/blogService';
+import { getBlogSlug, getBlogTimestamp, formatBlogPublishedDate } from '../services/blogService';
 
 export default function BlogPreviewSection() {
   const { blogs = [] } = useData();
@@ -54,7 +54,7 @@ export default function BlogPreviewSection() {
 
                   <div className="blog-card-body">
                     <div className="blog-card-meta">
-                      <span className="blog-date">{blog.publishedDate}</span>
+                      <span className="blog-date">{blog.publishedDate || formatBlogPublishedDate(blog)}</span>
                       <span className="meta-sep">&bull;</span>
                       <span className="blog-read-time">
                         <i className="fa-regular fa-clock"></i> {blog.readTime || '5 min read'}

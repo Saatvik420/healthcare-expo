@@ -10,7 +10,7 @@ import AddExhibitorModal from '../components/admin/AddExhibitorModal';
 import InquiryDetailModal from '../components/admin/InquiryDetailModal';
 import BlogModal from '../components/admin/BlogModal';
 import BackendConfigModal from '../components/admin/BackendConfigModal';
-import { getBlogSlug } from '../services/blogService';
+import { getBlogSlug, formatBlogPublishedDate } from '../services/blogService';
 
 export default function AdminDashboardPage({ onNotify }) {
   const { currentUser, isAdmin, login, logout } = useAuth();
@@ -1152,6 +1152,26 @@ export default function AdminDashboardPage({ onNotify }) {
         {/* ============================================================== */}
         {activeTab === 'blogs' && (
           <div className="admin-table-container">
+            <div className="backend-sync-info-pill mb-3" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', background: 'var(--color-surface, #1e293b)', borderRadius: '8px', border: '1px solid var(--color-border, #334155)', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem' }}>
+                <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: backendStatus.isOnline ? '#22c55e' : '#eab308' }}></span>
+                <strong>Cloud Sync:</strong>
+                <span className="text-muted">
+                  {backendStatus.isOnline
+                    ? 'Connected to live Render database. Published articles instantly sync to all public visitors & devices.'
+                    : 'Connecting to central backend...'}
+                </span>
+              </div>
+              <button
+                type="button"
+                className="btn btn-outline btn-xs-admin"
+                onClick={() => setIsBackendConfigOpen(true)}
+                style={{ fontSize: '0.75rem', padding: '4px 10px' }}
+              >
+                <i className="fa-solid fa-cloud-arrow-up"></i> Backend Settings
+              </button>
+            </div>
+
             <div className="table-controls-bar">
               <div className="table-search-box">
                 <i className="fa-solid fa-magnifying-glass"></i>
@@ -1284,7 +1304,7 @@ export default function AdminDashboardPage({ onNotify }) {
                         </td>
                         <td>
                           <div className="admin-cell-date">
-                            <span>{blog.publishedDate}</span>
+                            <span>{blog.publishedDate || formatBlogPublishedDate(blog)}</span>
                             <small>{blog.readTime || '5 min read'}</small>
                           </div>
                         </td>

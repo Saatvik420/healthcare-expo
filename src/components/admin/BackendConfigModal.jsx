@@ -15,9 +15,9 @@ export default function BackendConfigModal({ isOpen, onClose, onSave, onNotify }
     if (isOpen) {
       try {
         const stored = localStorage.getItem('ghe_custom_api_url') || '';
-        setUrlInput(stored || (import.meta.env.VITE_API_URL || ''));
+        setUrlInput(stored || (import.meta.env.VITE_API_URL || 'https://healthcare-backend-ftho.onrender.com/api'));
       } catch {
-        setUrlInput('');
+        setUrlInput('https://healthcare-backend-ftho.onrender.com/api');
       }
       setTestState({ status: 'idle', message: '', latency: null });
     }
@@ -163,14 +163,14 @@ export default function BackendConfigModal({ isOpen, onClose, onSave, onNotify }
               <input
                 type="url"
                 id="backend-url-input"
-                placeholder="https://your-service-name.onrender.com"
+                placeholder="https://healthcare-backend-ftho.onrender.com"
                 value={urlInput}
                 onChange={(e) => setUrlInput(e.target.value)}
                 className="form-control"
               />
             </div>
             <small className="text-muted">
-              Paste your Render Web Service URL (e.g. <code>https://healthcare-backend.onrender.com</code>). <code>/api</code> is added automatically if omitted.
+              Paste your Render Web Service URL (e.g. <code>https://healthcare-backend-ftho.onrender.com</code>). <code>/api</code> is added automatically if omitted.
             </small>
           </div>
 

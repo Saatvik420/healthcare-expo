@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { getBlogSlug, getBlogTimestamp } from '../services/blogService';
+import { getBlogSlug, getBlogTimestamp, formatBlogPublishedDate } from '../services/blogService';
 
 export default function BlogsPage() {
   const { blogs = [] } = useData();
@@ -140,7 +140,7 @@ export default function BlogsPage() {
                   <div className="featured-spotlight-meta">
                     <span className="featured-cat-badge">{featuredBlog.category}</span>
                     <span className="meta-sep">&bull;</span>
-                    <span>{featuredBlog.publishedDate}</span>
+                    <span>{featuredBlog.publishedDate || formatBlogPublishedDate(featuredBlog)}</span>
                     <span className="meta-sep">&bull;</span>
                     <span>
                       <i className="fa-regular fa-clock"></i> {featuredBlog.readTime || '5 min read'}
@@ -199,7 +199,7 @@ export default function BlogsPage() {
 
                       <div className="blog-card-body">
                         <div className="blog-card-meta">
-                          <span className="blog-date">{blog.publishedDate}</span>
+                          <span className="blog-date">{blog.publishedDate || formatBlogPublishedDate(blog)}</span>
                           <span className="meta-sep">&bull;</span>
                           <span className="blog-read-time">
                             <i className="fa-regular fa-clock"></i> {blog.readTime || '5 min read'}
