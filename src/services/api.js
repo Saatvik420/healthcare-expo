@@ -3,33 +3,68 @@
  * Provides resilient communication with automatic fallback.
  */
 
-// Dynamically resolve API URL to support cross-device testing on local network & production
+// Dynamically resolve API URL to support Netlify + Render, custom domain, and local network
 export const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
+  // 1. Check if admin configured custom backend URL in localStorage (e.g. Render URL)
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const customUrl = localStorage.getItem('ghe_custom_api_url');
+      if (customUrl && typeof customUrl === 'string' && customUrl.trim()) {
+        let clean = customUrl.trim().replace(/\/+$/, '');
+        if (!clean.endsWith('/api')) clean += '/api';
+        return clean;
+      }
+    }
+  } catch {
+    // ignore
   }
+
+  // 2. Build-time environment variable (VITE_API_URL set in Netlify / .env)
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_URL;
+  if (envUrl && typeof envUrl === 'string' && envUrl.trim()) {
+    let clean = envUrl.trim().replace(/\/+$/, '');
+    if (!clean.endsWith('/api')) clean += '/api';
+    return clean;
+  }
+
+  // 3. Localhost and development defaults
   if (typeof window !== 'undefined' && window.location) {
     const { hostname, port } = window.location;
-    // When accessing via Vite dev (5173), preview (4173), or backend port (8080):
-    // Relative '/api' will automatically proxy through Vite or Express to the backend!
+
+    // Vite dev server (5173), preview (4173), or direct Express backend (8080)
     if (port === '5173' || port === '4173' || port === '8080') {
       return '/api';
     }
-    // If accessing via LAN IP or hostname on another port:
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+
+    // Private local LAN IP when developing across devices on Wi-Fi
+    const isPrivateIp =
+      /^192\.168\./.test(hostname) ||
+      /^10\./.test(hostname) ||
+      /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname) ||
+      hostname.endsWith('.local');
+
+    if (isPrivateIp && port) {
       return `http://${hostname}:8080/api`;
     }
   }
+
+  // Default to relative '/api' (handled by proxy or reverse proxy)
   return '/api';
 };
 
-const API_BASE = getApiBaseUrl();
+export const getApiBase = () => getApiBaseUrl();
+
+// Dynamic object that resolves getApiBaseUrl() in template literals
+export const API_BASE = {
+  toString: () => getApiBaseUrl(),
+};
 
 /**
  * Standard fetch helper with timeout
+ * Set to 15s to tolerate Render free-tier cold starts
  */
-async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 4000 } = options;
+export async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 15000 } = options;
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeout);
 
@@ -53,10 +88,11 @@ async function fetchWithTimeout(resource, options = {}) {
 
 // Health check
 export const healthApi = {
-  check: async () => {
+  check: async (overrideUrl) => {
+    const base = overrideUrl || getApiBase();
     try {
-      const res = await fetchWithTimeout(`${API_BASE}/health`, { timeout: 2500 });
-      if (!res.ok) return false;
+      const res = await fetchWithTimeout(`${base}/health`, { timeout: 12000 });
+      if (!res.ok) return { isOnline: false };
       const data = await res.json();
       return { isOnline: true, ...data };
     } catch {

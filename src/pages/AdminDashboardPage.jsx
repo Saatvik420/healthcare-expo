@@ -9,6 +9,7 @@ import AddVisitorModal from '../components/admin/AddVisitorModal';
 import AddExhibitorModal from '../components/admin/AddExhibitorModal';
 import InquiryDetailModal from '../components/admin/InquiryDetailModal';
 import BlogModal from '../components/admin/BlogModal';
+import BackendConfigModal from '../components/admin/BackendConfigModal';
 import { getBlogSlug } from '../services/blogService';
 
 export default function AdminDashboardPage({ onNotify }) {
@@ -63,6 +64,7 @@ export default function AdminDashboardPage({ onNotify }) {
   const [selectedInquiry, setSelectedInquiry] = useState(null);
   const [isAddVisitorOpen, setIsAddVisitorOpen] = useState(false);
   const [isAddExhibitorOpen, setIsAddExhibitorOpen] = useState(false);
+  const [isBackendConfigOpen, setIsBackendConfigOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Admin authentication form state (for direct /admin visitors)
@@ -380,20 +382,27 @@ export default function AdminDashboardPage({ onNotify }) {
                   className={`backend-status-pill ${
                     backendStatus.isOnline ? 'online' : 'offline'
                   }`}
-                  title={
-                    backendStatus.isOnline
-                      ? 'Live connection to central database API'
-                      : 'Running on browser persistent storage'
-                  }
+                  onClick={() => setIsBackendConfigOpen(true)}
+                  style={{ cursor: 'pointer' }}
+                  title="Click to configure Render or Cloud Backend URL"
                 >
                   <span className="status-indicator-dot"></span>
                   {backendStatus.isOnline ? 'Backend API (Live)' : 'Local Storage Mode'}
+                  <i className="fa-solid fa-gear ms-1" style={{ fontSize: '0.72rem', opacity: 0.85 }}></i>
                 </span>
               </div>
             </div>
           </div>
 
           <div className="admin-bar-actions">
+            <button
+              type="button"
+              className="btn btn-outline btn-sm-admin"
+              onClick={() => setIsBackendConfigOpen(true)}
+              title="Configure Render or Cloud Backend URL"
+            >
+              <i className="fa-solid fa-server"></i> Backend URL
+            </button>
             <button
               type="button"
               className="btn btn-outline btn-sm-admin"
@@ -1431,6 +1440,17 @@ export default function AdminDashboardPage({ onNotify }) {
           }}
           onSave={handleSaveBlog}
           editingBlog={editingBlog}
+        />
+      )}
+
+      {isBackendConfigOpen && (
+        <BackendConfigModal
+          isOpen={isBackendConfigOpen}
+          onClose={() => setIsBackendConfigOpen(false)}
+          onSave={async () => {
+            await refreshData();
+          }}
+          onNotify={onNotify}
         />
       )}
     </div>

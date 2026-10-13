@@ -3,27 +3,8 @@
  * Connects to the backend REST API with persistent localStorage fallback.
  */
 
-// Dynamically resolve API URL to support cross-device testing on local network & production
-export const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  if (typeof window !== 'undefined' && window.location) {
-    const { hostname, port } = window.location;
-    // When accessing via Vite dev (5173), preview (4173), or backend port (8080):
-    // Relative '/api' will automatically proxy through Vite or Express to the backend!
-    if (port === '5173' || port === '4173' || port === '8080') {
-      return '/api';
-    }
-    // If accessing via LAN IP or hostname on another port:
-    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
-      return `http://${hostname}:8080/api`;
-    }
-  }
-  return '/api';
-};
+import { API_BASE, fetchWithTimeout } from './api';
 
-const API_BASE = getApiBaseUrl();
 const STORAGE_KEY = 'ighe_blogs_cache';
 
 export const INITIAL_BLOGS = [
@@ -257,30 +238,6 @@ export const getBlogTimestamp = (blog) => {
   }
   return 0;
 };
-
-// Timeout fetch helper
-async function fetchWithTimeout(resource, options = {}) {
-  const { timeout = 4000 } = options;
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
-
-  try {
-    const response = await fetch(resource, {
-      ...options,
-      signal: controller.signal,
-      headers: {
-        'Content-Type': 'application/json',
-        Accept: 'application/json',
-        ...(options.headers || {}),
-      },
-    });
-    clearTimeout(id);
-    return response;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
-  }
-}
 
 export const blogService = {
   getBlogSlug,
