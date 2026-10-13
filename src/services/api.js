@@ -430,21 +430,50 @@ export const blogsApi = {
 
   create: async (blogData) => {
     const blogId = blogData.blogId || blogData.id || `blog_${Date.now()}`;
-    const { id, ...rest } = blogData;
+    const slug =
+      blogData.slug ||
+      (blogData.title
+        ? blogData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim()
+        : `blog-${Date.now()}`);
+    const rest = { ...blogData };
+    delete rest.id;
+    delete rest.createdAt;
+    delete rest.updatedAt;
+
     const payload = {
       ...rest,
-      blogId,
-      ...(typeof id === 'number' ? { id } : {}),
-      category: blogData.category || 'Our Blogs',
-      author: blogData.author || 'indiglobal healthcare Expo',
-      authorRole: blogData.authorRole || 'admin',
-      tags: Array.isArray(blogData.tags) ? blogData.tags.join(', ') : blogData.tags || '',
-      publishedDate: blogData.publishedDate || new Date().toLocaleDateString('en-US', {
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      }),
+      blogId: typeof blogId === 'string' && blogId.startsWith('blog_') ? blogId : `blog_${Date.now()}`,
+      slug,
+      title: blogData.title?.trim() || 'Untitled Article',
+      excerpt: blogData.excerpt?.trim() || '',
+      content: blogData.content?.trim() || '',
+      category: blogData.category?.trim() || 'Our Blogs',
+      author: blogData.author?.trim() || 'IndiGlobal Healthcare Expo',
+      authorRole: blogData.authorRole?.trim() || 'Secretariat Contributor',
+      coverImage:
+        blogData.coverImage?.trim() ||
+        'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
+      readTime: blogData.readTime?.trim() || '5 min read',
+      publishedDate:
+        blogData.publishedDate ||
+        new Date().toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+      featured: Boolean(blogData.featured),
+      tags: Array.isArray(blogData.tags)
+        ? blogData.tags.join(', ')
+        : typeof blogData.tags === 'string'
+        ? blogData.tags
+        : '',
     };
+
     const res = await requestWithFallback('/blogs', {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -454,9 +483,43 @@ export const blogsApi = {
   },
 
   update: async (id, blogData) => {
+    const slug =
+      blogData.slug ||
+      (blogData.title
+        ? blogData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim()
+        : undefined);
+    const rest = { ...blogData };
+    delete rest.id;
+    delete rest.createdAt;
+    delete rest.updatedAt;
+
+    const payload = {
+      ...rest,
+      ...(slug ? { slug } : {}),
+      ...(blogData.title ? { title: blogData.title.trim() } : {}),
+      ...(blogData.excerpt ? { excerpt: blogData.excerpt.trim() } : {}),
+      ...(blogData.content ? { content: blogData.content.trim() } : {}),
+      ...(blogData.category ? { category: blogData.category.trim() } : {}),
+      ...(blogData.author ? { author: blogData.author.trim() } : {}),
+      ...(blogData.authorRole ? { authorRole: blogData.authorRole.trim() } : {}),
+      ...(blogData.coverImage ? { coverImage: blogData.coverImage.trim() } : {}),
+      ...(blogData.readTime ? { readTime: blogData.readTime.trim() } : {}),
+      featured: Boolean(blogData.featured),
+      tags: Array.isArray(blogData.tags)
+        ? blogData.tags.join(', ')
+        : typeof blogData.tags === 'string'
+        ? blogData.tags
+        : '',
+    };
+
     const res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
       method: 'PUT',
-      body: JSON.stringify(blogData),
+      body: JSON.stringify(payload),
     });
     if (!res.ok) throw new Error('Failed to update blog');
     return await safeJsonResponse(res);

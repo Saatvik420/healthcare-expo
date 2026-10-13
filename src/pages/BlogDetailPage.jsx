@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import blogService, { getBlogSlug, formatBlogPublishedDate } from '../services/blogService';
+import blogService, { getBlogSlug, formatBlogPublishedDate, isSameBlog } from '../services/blogService';
 import { useData } from '../context/DataContext';
 
 export default function BlogDetailPage({ onNotify }) {
@@ -22,6 +22,7 @@ export default function BlogDetailPage({ onNotify }) {
         let found = (blogs || []).find(
           (b) =>
             b.id === id ||
+            String(b.id) === String(id) ||
             b.slug === id ||
             b.blogId === id ||
             getBlogSlug(b) === id ||
@@ -40,6 +41,7 @@ export default function BlogDetailPage({ onNotify }) {
               found = cached.find(
                 (b) =>
                   b.id === id ||
+                  String(b.id) === String(id) ||
                   b.slug === id ||
                   b.blogId === id ||
                   getBlogSlug(b) === id ||
@@ -75,7 +77,7 @@ export default function BlogDetailPage({ onNotify }) {
         const allBlogs = blogs.length > 0 ? blogs : await blogService.getAllBlogs();
         if (!active) return;
         const related = (allBlogs || [])
-          .filter((b) => (b.id || b.slug) !== (found?.id || found?.slug))
+          .filter((b) => !isSameBlog(b, found))
           .slice(0, 3);
         setRelatedBlogs(related);
       } catch (err) {

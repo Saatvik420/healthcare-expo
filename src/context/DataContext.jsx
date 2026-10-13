@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, blogsApi, healthApi } from '../services/api';
-import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, getBlogTimestamp } from '../services/blogService';
+import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, isSameBlog, mergeBlogLists } from '../services/blogService';
 
 const DataContext = createContext();
 
@@ -291,7 +291,19 @@ export function DataProvider({ children }) {
   const [blogs, setBlogs] = useState(() => {
     try {
       const stored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
-      return stored ? JSON.parse(stored) : INITIAL_BLOGS;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const unique = [];
+          for (const b of parsed) {
+            if (!unique.some((u) => isSameBlog(u, b))) {
+              unique.push(b);
+            }
+          }
+          return unique;
+        }
+      }
+      return INITIAL_BLOGS;
     } catch {
       return INITIAL_BLOGS;
     }
@@ -336,15 +348,36 @@ export function DataProvider({ children }) {
         }
         if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
           setBlogs((prev) => {
-            const enrichedBackend = bBlogs.value.map((b) => ({
-              ...b,
-              id: b.id || b.blogId,
-              slug: b.slug || getBlogSlug(b),
-              publishedDate: formatBlogPublishedDate(b),
-            }));
-            const backendKeys = new Set(enrichedBackend.map((b) => b.id || b.blogId || b.slug));
-            const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug) && !backendKeys.has(b.blogId));
-            const merged = [...enrichedBackend, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+            const merged = mergeBlogLists(bBlogs.value, prev);
+
+            // Auto-sync custom local blogs to backend if not yet present
+            const customLocal = prev.filter(
+              (localB) =>
+                !bBlogs.value.some((backendB) => isSameBlog(localB, backendB)) &&
+                !INITIAL_BLOGS.some((seed) => isSameBlog(seed, localB))
+            );
+
+            if (customLocal.length > 0) {
+              for (const customBlog of customLocal) {
+                blogsApi
+                  .create(customBlog)
+                  .then((created) => {
+                    if (created) {
+                      setBlogs((current) =>
+                        current.map((item) =>
+                          isSameBlog(item, customBlog)
+                            ? { ...item, ...created, id: created.id || created.blogId || item.id }
+                            : item
+                        )
+                      );
+                    }
+                  })
+                  .catch((err) => {
+                    console.warn('Auto-sync custom blog to backend failed:', err);
+                  });
+              }
+            }
+
             try {
               localStorage.setItem('ghe_blogs', JSON.stringify(merged));
               localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
@@ -402,15 +435,36 @@ export function DataProvider({ children }) {
           }
           if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
             setBlogs((prev) => {
-              const enrichedBackend = bBlogs.value.map((b) => ({
-                ...b,
-                id: b.id || b.blogId,
-                slug: b.slug || getBlogSlug(b),
-                publishedDate: formatBlogPublishedDate(b),
-              }));
-              const backendKeys = new Set(enrichedBackend.map((b) => b.id || b.blogId || b.slug));
-              const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug) && !backendKeys.has(b.blogId));
-              const merged = [...enrichedBackend, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+              const merged = mergeBlogLists(bBlogs.value, prev);
+
+              // Auto-sync custom local blogs to backend if not yet present
+              const customLocal = prev.filter(
+                (localB) =>
+                  !bBlogs.value.some((backendB) => isSameBlog(localB, backendB)) &&
+                  !INITIAL_BLOGS.some((seed) => isSameBlog(seed, localB))
+              );
+
+              if (customLocal.length > 0) {
+                for (const customBlog of customLocal) {
+                  blogsApi
+                    .create(customBlog)
+                    .then((created) => {
+                      if (created) {
+                        setBlogs((current) =>
+                          current.map((item) =>
+                            isSameBlog(item, customBlog)
+                              ? { ...item, ...created, id: created.id || created.blogId || item.id }
+                              : item
+                          )
+                        );
+                      }
+                    })
+                    .catch((err) => {
+                      console.warn('Auto-sync custom blog to backend failed:', err);
+                    });
+                }
+              }
+
               try {
                 localStorage.setItem('ghe_blogs', JSON.stringify(merged));
                 localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
@@ -640,7 +694,7 @@ export function DataProvider({ children }) {
     };
 
     // 1. Immediately update state so it appears on screen without delay
-    setBlogs((prev) => [newBlog, ...prev.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)]);
+    setBlogs((prev) => [newBlog, ...prev.filter((b) => !isSameBlog(b, newBlog))]);
 
     // 2. Immediately persist to localStorage, preserving initial blogs if first article
     try {
@@ -654,7 +708,7 @@ export function DataProvider({ children }) {
           // fallback
         }
       }
-      const updated = [newBlog, ...baseList.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)];
+      const updated = [newBlog, ...baseList.filter((b) => !isSameBlog(b, newBlog))];
       localStorage.setItem('ghe_blogs', JSON.stringify(updated));
       localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
     } catch (e) {
@@ -678,12 +732,12 @@ export function DataProvider({ children }) {
             : newBlog.tags,
         };
         setBlogs((prev) =>
-          prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
+          prev.map((b) => (isSameBlog(b, newBlog) ? enriched : b))
         );
         try {
           const rawStored = localStorage.getItem('ghe_blogs') || '[]';
           const stored = JSON.parse(rawStored);
-          const updated = stored.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b));
+          const updated = stored.map((b) => (isSameBlog(b, newBlog) ? enriched : b));
           localStorage.setItem('ghe_blogs', JSON.stringify(updated));
           localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
         } catch (storageErr) {
@@ -707,7 +761,7 @@ export function DataProvider({ children }) {
 
     setBlogs((prev) => {
       const next = prev.map((b) =>
-        b.id === id || b.blogId === id || b.slug === id || String(b.id) === String(id)
+        isSameBlog(b, { id }) || b.slug === id || String(b.id) === String(id)
           ? { ...b, ...updated }
           : b
       );
@@ -730,7 +784,7 @@ export function DataProvider({ children }) {
   const deleteBlog = async (id) => {
     setBlogs((prev) => {
       const next = prev.filter(
-        (b) => b.id !== id && b.slug !== id && b.blogId !== id && String(b.id) !== String(id)
+        (b) => !isSameBlog(b, { id }) && b.slug !== id && String(b.id) !== String(id)
       );
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));

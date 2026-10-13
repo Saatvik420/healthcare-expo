@@ -334,7 +334,61 @@ public class DataInitializer implements CommandLineRunner {
                     .updatedAt(now)
                     .build();
 
-            blogRepository.saveAll(Arrays.asList(b1, b2, b3));
+            Blog b4 = Blog.builder()
+                    .blogId("blog_4")
+                    .title("The Digital Cold-Chain Frontier: Preserving Biologics & Vaccines Across Tropical Climates")
+                    .slug("digital-cold-chain-frontier-preserving-biologics-vaccines")
+                    .category("Cold Chain & Logistics")
+                    .author("Tariq Al-Mansoor")
+                    .authorRole("Cold-Chain Operations Director, Gulf Health Logistics")
+                    .coverImage("https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80")
+                    .readTime("4 min read")
+                    .publishedDate("March 08, 2026")
+                    .featured(false)
+                    .excerpt("How IoT temperature telemetry, vacuum insulation panels, and blockchain chain-of-custody safeguard temperature-sensitive therapeutics across equatorial trade routes.")
+                    .content("Over 35% of all pharmaceutical cargo now requires precise temperature management, from mRNA therapeutics requiring ultra-cold -80°C storage to standard monoclonal antibody formulations maintained at 2°C to 8°C. In the equatorial climate of Southeast Asia, any transit bottleneck can lead to catastrophic thermal excursions.\n\nThe IndiGlobal Healthcare Expo Cold Chain Pavilion highlights turnkey temperature-controlled packaging and transport technologies engineered specifically for high ambient heat and humidity.")
+                    .tags("Cold Chain, Logistics, IoT Telemetry, Biologics, Packaging")
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+            Blog b5 = Blog.builder()
+                    .blogId("blog_5")
+                    .title("Hospital Infrastructure 2030: Modular ICUs, Smart Diagnostics, and Green Hospitals")
+                    .slug("hospital-infrastructure-2030-modular-icus-smart-diagnostics")
+                    .category("Hospital Infrastructure")
+                    .author("Dr. Vikram Malhotra")
+                    .authorRole("Healthcare Infrastructure & Hospital Systems Consultant")
+                    .coverImage("https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?auto=format&fit=crop&w=1200&q=80")
+                    .readTime("7 min read")
+                    .publishedDate("February 25, 2026")
+                    .featured(false)
+                    .excerpt("Hospital directors and infrastructure builders from 40+ countries are convening at Hall 5 to evaluate modular surgical suites, AI triage systems, and net-zero hospital designs.")
+                    .content("Modern healthcare architecture is transitioning from sprawling, rigid concrete complexes toward highly agile, technology-embedded clinical ecosystems. Driven by rising patient numbers, acute infectious disease preparedness, and carbon neutrality pledges, hospitals are rethinking physical layouts from the foundation up.\n\nAt IndiGlobal Healthcare Expo 2027, Hall 5 (Packaging & Medical Solutions / Hospital Infra) hosts leading designers of modular medical spaces and smart diagnostic systems.")
+                    .tags("Hospital Infra, Smart Diagnostics, Green Hospitals, MedTech, Critical Care")
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+            Blog b6 = Blog.builder()
+                    .blogId("blog_6")
+                    .title("Smart B2B Healthcare Expos: How Matchmaking Drives Multilateral Pharma Contracts")
+                    .slug("smart-b2b-healthcare-expos-matchmaking-pharma-contracts")
+                    .category("Exhibition Strategy")
+                    .author("IndiGlobal Secretariat")
+                    .authorRole("Trade Delegation & B2B Coordination Team")
+                    .coverImage("https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80")
+                    .readTime("4 min read")
+                    .publishedDate("February 12, 2026")
+                    .featured(false)
+                    .excerpt("Why high-value healthcare procurement relies on pre-vetted buyer-seller matchmaking and how delegations maximize commercial returns at trade shows.")
+                    .content("In an era of digital communication, the healthcare industry continues to depend fundamentally on in-person trust and verification. When multi-million dollar annual contracts for sterile bulk formulations or critical medical imaging equipment are on the table, face-to-face negotiations with certified executives remain irreplaceable.\n\nThe IndiGlobal Healthcare Expo 2027 Secretariat has engineered an intelligent pre-qualification and matchmaking system designed to maximize commercial yield for both attendees and exhibitors.")
+                    .tags("B2B Matchmaking, Trade Delegation, Exhibitor Strategy, Pharma Expo")
+                    .createdAt(now)
+                    .updatedAt(now)
+                    .build();
+
+            blogRepository.saveAll(Arrays.asList(b1, b2, b3, b4, b5, b6));
         }
     }
 }

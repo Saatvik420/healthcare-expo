@@ -231,14 +231,73 @@ export const getBlogTimestamp = (blog) => {
   return 0;
 };
 
-// Helper to get local stored blogs
+// Comprehensive blog deduplication matcher
+export const isSameBlog = (a, b) => {
+  if (!a || !b) return false;
+
+  // 1. Direct ID match (handles number vs string e.g. 1 == "1")
+  if (a.id !== undefined && b.id !== undefined && String(a.id) === String(b.id)) return true;
+
+  // 2. blogId match (e.g. "blog_1" === "blog_1")
+  if (a.blogId && b.blogId && String(a.blogId) === String(b.blogId)) return true;
+
+  // 3. Cross id vs blogId match
+  if (a.id && b.blogId && (String(a.id) === String(b.blogId) || String(a.blogId) === String(b.id))) return true;
+
+  // 4. Normalized numeric ID matching (e.g. "blog_1" vs "1" or 1)
+  const normA = String(a.id || a.blogId || '').replace(/^blog_/, '');
+  const normB = String(b.id || b.blogId || '').replace(/^blog_/, '');
+  if (normA && normB && normA === normB) return true;
+
+  // 5. Slug match
+  const slugA = (a.slug || '').trim().toLowerCase();
+  const slugB = (b.slug || '').trim().toLowerCase();
+  if (slugA && slugB && slugA === slugB) return true;
+
+  // 6. Title match (case-insensitive, trimmed)
+  const titleA = (a.title || '').trim().toLowerCase();
+  const titleB = (b.title || '').trim().toLowerCase();
+  if (titleA && titleB && titleA === titleB) return true;
+
+  return false;
+};
+
+// Robust merge utility that gives backend data priority and preserves unique local blogs
+export const mergeBlogLists = (backendList = [], localList = []) => {
+  const enrichedBackend = (backendList || []).map((b) => ({
+    ...b,
+    id: b.id || b.blogId,
+    slug: b.slug || getBlogSlug(b),
+    publishedDate: formatBlogPublishedDate(b),
+  }));
+
+  // Keep only local items that DO NOT match any backend blog
+  const localOnly = (localList || [])
+    .map((b) => ({
+      ...b,
+      id: b.id || b.blogId,
+      slug: b.slug || getBlogSlug(b),
+      publishedDate: formatBlogPublishedDate(b),
+    }))
+    .filter((localB) => !enrichedBackend.some((backendB) => isSameBlog(localB, backendB)));
+
+  return [...enrichedBackend, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+};
+
+// Helper to get local stored blogs with deduplication
 const getLocalBlogs = () => {
   try {
     const raw = localStorage.getItem('ghe_blogs') || localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        const unique = [];
+        for (const b of parsed) {
+          if (!unique.some((u) => isSameBlog(u, b))) {
+            unique.push(b);
+          }
+        }
+        return unique;
       }
     }
   } catch (e) {
@@ -267,23 +326,22 @@ export const blogService = {
   getBlogSlug,
   getBlogTimestamp,
   formatBlogPublishedDate,
+  isSameBlog,
+  mergeBlogLists,
 
   // Get all blogs with optional category filter
   getAllBlogs: async (category = '') => {
     try {
       const data = await blogsApi.getAll(category);
       if (Array.isArray(data) && data.length > 0) {
-        const enriched = data.map((b) => ({
-          ...b,
-          slug: b.slug || getBlogSlug(b),
-          id: b.id || b.blogId,
-          publishedDate: formatBlogPublishedDate(b),
-        }));
         const local = getLocalBlogs();
-        const apiKeys = new Set(enriched.map((b) => b.id || b.slug));
-        const localOnly = local.filter((b) => !apiKeys.has(b.id) && !apiKeys.has(b.slug));
-        const merged = [...enriched, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+        const merged = mergeBlogLists(data, local);
         saveLocalBlogs(merged);
+        if (category && category.toLowerCase() !== 'all') {
+          return merged.filter(
+            (b) => b.category && b.category.toLowerCase() === category.toLowerCase()
+          );
+        }
         return merged;
       }
     } catch (err) {
@@ -327,6 +385,7 @@ export const blogService = {
         b.slug === idOrSlug ||
         b.id === idOrSlug ||
         b.blogId === idOrSlug ||
+        String(b.id) === String(idOrSlug) ||
         getBlogSlug(b) === idOrSlug
     );
     if (found) {
@@ -382,9 +441,11 @@ export const blogService = {
     const item = {
       ...(created || newBlog),
       publishedDate: formatBlogPublishedDate(created || newBlog),
+      slug: (created && created.slug) || newBlog.slug,
+      id: (created && (created.id || created.blogId)) || newBlog.id,
     };
     const local = getLocalBlogs();
-    const updatedList = [item, ...local.filter((b) => b.id !== item.id && b.slug !== item.slug)];
+    const updatedList = [item, ...local.filter((b) => !isSameBlog(b, item))];
     saveLocalBlogs(updatedList);
     return item;
   },
@@ -408,7 +469,9 @@ export const blogService = {
       publishedDate: formatBlogPublishedDate(updated || { ...updatedData, id }),
     };
     const local = getLocalBlogs();
-    const updatedList = local.map((b) => (b.id === id || b.slug === id ? item : b));
+    const updatedList = local.map((b) =>
+      isSameBlog(b, { id }) || b.slug === id || String(b.id) === String(id) ? item : b
+    );
     saveLocalBlogs(updatedList);
     return item;
   },
@@ -422,7 +485,7 @@ export const blogService = {
     }
 
     const local = getLocalBlogs();
-    const filtered = local.filter((b) => b.id !== id && b.slug !== id && b.blogId !== id);
+    const filtered = local.filter((b) => !isSameBlog(b, { id }) && b.slug !== id && String(b.id) !== String(id));
     saveLocalBlogs(filtered);
     return true;
   },
