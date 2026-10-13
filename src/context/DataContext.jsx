@@ -338,7 +338,14 @@ export function DataProvider({ children }) {
           setBlogs((prev) => {
             const backendKeys = new Set(bBlogs.value.map((b) => b.id || b.blogId || b.slug));
             const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug));
-            return [...localOnly, ...bBlogs.value];
+            const merged = [...localOnly, ...bBlogs.value];
+            try {
+              localStorage.setItem('ghe_blogs', JSON.stringify(merged));
+              localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
+            } catch (storageErr) {
+              console.warn('Cache write failed:', storageErr);
+            }
+            return merged;
           });
         }
         return true;
@@ -391,7 +398,14 @@ export function DataProvider({ children }) {
             setBlogs((prev) => {
               const backendKeys = new Set(bBlogs.value.map((b) => b.id || b.blogId || b.slug));
               const localOnly = prev.filter((b) => !backendKeys.has(b.id) && !backendKeys.has(b.slug));
-              return [...localOnly, ...bBlogs.value];
+              const merged = [...localOnly, ...bBlogs.value];
+              try {
+                localStorage.setItem('ghe_blogs', JSON.stringify(merged));
+                localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
+              } catch (storageErr) {
+                console.warn('Cache write failed:', storageErr);
+              }
+              return merged;
             });
           }
         } else {

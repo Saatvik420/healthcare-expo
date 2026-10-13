@@ -3,7 +3,27 @@
  * Provides resilient communication with automatic fallback.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+// Dynamically resolve API URL to support cross-device testing on local network & production
+export const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (typeof window !== 'undefined' && window.location) {
+    const { hostname, port } = window.location;
+    // When accessing via Vite dev (5173), preview (4173), or backend port (8080):
+    // Relative '/api' will automatically proxy through Vite or Express to the backend!
+    if (port === '5173' || port === '4173' || port === '8080') {
+      return '/api';
+    }
+    // If accessing via LAN IP or hostname on another port:
+    if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+      return `http://${hostname}:8080/api`;
+    }
+  }
+  return '/api';
+};
+
+const API_BASE = getApiBaseUrl();
 
 /**
  * Standard fetch helper with timeout

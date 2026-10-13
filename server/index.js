@@ -637,6 +637,18 @@ app.delete(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blog
 });
 
 // -------------------------------------------------------------
+// Serve Frontend in Production / Standalone Mode
+// -------------------------------------------------------------
+const distPath = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
+
+// -------------------------------------------------------------
 // Start Server
 // -------------------------------------------------------------
 app.listen(PORT, () => {
