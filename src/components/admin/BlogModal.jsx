@@ -91,6 +91,62 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
     }
   };
 
+  // Insert markdown hyperlink at cursor position or wrap selection
+  const handleInsertLink = () => {
+    const textarea = document.getElementById('blog-content');
+    const start = textarea ? textarea.selectionStart : formData.content.length;
+    const end = textarea ? textarea.selectionEnd : formData.content.length;
+    const selectedText = formData.content.substring(start, end).trim();
+
+    const linkText = window.prompt('Enter link text to display:', selectedText || 'Click here');
+    if (!linkText) return;
+
+    const url = window.prompt('Enter link URL (e.g. https://example.com or /register):', 'https://');
+    if (!url || !url.trim()) return;
+
+    const cleanUrl = url.trim();
+    const markdownLink = `[${linkText}](${cleanUrl})`;
+    const before = formData.content.substring(0, start);
+    const after = formData.content.substring(end);
+    const newContent = `${before}${markdownLink}${after}`;
+
+    setFormData((prev) => ({ ...prev, content: newContent }));
+    handleContentChange(newContent);
+
+    if (textarea) {
+      setTimeout(() => {
+        textarea.focus();
+        const cursor = start + markdownLink.length;
+        textarea.setSelectionRange(cursor, cursor);
+      }, 50);
+    }
+  };
+
+  // Quick formatting insert (bold, headings, bullet list)
+  const handleInsertSnippet = (prefix, suffix = '', defaultText = '') => {
+    const textarea = document.getElementById('blog-content');
+    const start = textarea ? textarea.selectionStart : formData.content.length;
+    const end = textarea ? textarea.selectionEnd : formData.content.length;
+    const selectedText = formData.content.substring(start, end);
+    const textToWrap = selectedText || defaultText;
+
+    const insertion = `${prefix}${textToWrap}${suffix}`;
+    const before = formData.content.substring(0, start);
+    const after = formData.content.substring(end);
+    const newContent = `${before}${insertion}${after}`;
+
+    setFormData((prev) => ({ ...prev, content: newContent }));
+    handleContentChange(newContent);
+
+    if (textarea) {
+      setTimeout(() => {
+        textarea.focus();
+        const cursor = start + insertion.length;
+        textarea.setSelectionRange(cursor, cursor);
+      }, 50);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
@@ -195,44 +251,6 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
               </div>
             </div>
 
-            {/* Category & Read Time Row */}
-            <div className="form-row-2 mb-3">
-              <div className="form-group">
-                <label htmlFor="blog-category">Category / Pillar</label>
-                <input
-                  type="text"
-                  id="blog-category"
-                  placeholder="e.g. Healthcare Insights, Pharma & APIs, Medical Tech..."
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="form-control"
-                  list="category-suggestions"
-                />
-                <datalist id="category-suggestions">
-                  <option value="Healthcare Insights" />
-                  <option value="Pharma & APIs" />
-                  <option value="Pharma Machinery" />
-                  <option value="Medical Devices" />
-                  <option value="Cold Chain & Logistics" />
-                  <option value="Hospital Infrastructure" />
-                  <option value="Healthcare Policies" />
-                  <option value="Exhibition Strategy" />
-                </datalist>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="blog-read-time">Estimated Read Time</label>
-                <input
-                  type="text"
-                  id="blog-read-time"
-                  placeholder="e.g. 5 min read"
-                  value={formData.readTime}
-                  onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
-                  className="form-control"
-                />
-              </div>
-            </div>
-
             {/* Author & Role Row */}
             <div className="form-row-2 mb-3">
               <div className="form-group">
@@ -258,6 +276,19 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
                   className="form-control"
                 />
               </div>
+            </div>
+
+            {/* Read Time Row */}
+            <div className="form-group mb-3">
+              <label htmlFor="blog-read-time">Estimated Read Time</label>
+              <input
+                type="text"
+                id="blog-read-time"
+                placeholder="e.g. 5 min read"
+                value={formData.readTime}
+                onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
+                className="form-control"
+              />
             </div>
 
             {/* Cover Image URL & Presets */}
@@ -350,21 +381,71 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
               <small className="text-muted">Recommended: 120 - 220 characters for crisp card layouts.</small>
             </div>
 
-            {/* Full Content */}
+            {/* Full Content with Rich Formatting Toolbar */}
             <div className="form-group mb-3">
               <div className="content-label-row">
                 <label htmlFor="blog-content" className="form-label-required">
                   Full Article Content
                 </label>
                 <span className="markdown-hint">
-                  <i className="fa-brands fa-markdown"></i> Headings (###), bold (**text**), lists (*) supported
+                  <i className="fa-brands fa-markdown"></i> Hyperlinks &amp; formatting supported
                 </span>
               </div>
+
+              {/* Quick Formatting & Hyperlink Toolbar */}
+              <div className="blog-editor-toolbar">
+                <button
+                  type="button"
+                  className="blog-toolbar-btn blog-toolbar-btn-link"
+                  onClick={handleInsertLink}
+                  title="Insert Hyperlink"
+                >
+                  <i className="fa-solid fa-link"></i> Add Hyperlink
+                </button>
+                <button
+                  type="button"
+                  className="blog-toolbar-btn"
+                  onClick={() => handleInsertSnippet('**', '**', 'bold text')}
+                  title="Bold (**text**)"
+                >
+                  <i className="fa-solid fa-bold"></i> Bold
+                </button>
+                <button
+                  type="button"
+                  className="blog-toolbar-btn"
+                  onClick={() => handleInsertSnippet('\n## ', '\n', 'Section Title')}
+                  title="Section Heading (##)"
+                >
+                  <i className="fa-solid fa-heading"></i> H2
+                </button>
+                <button
+                  type="button"
+                  className="blog-toolbar-btn"
+                  onClick={() => handleInsertSnippet('\n### ', '\n', 'Subsection Title')}
+                  title="Subsection Heading (###)"
+                >
+                  <i className="fa-solid fa-heading" style={{ fontSize: '0.75rem' }}></i> H3
+                </button>
+                <button
+                  type="button"
+                  className="blog-toolbar-btn"
+                  onClick={() => handleInsertSnippet('\n* ', '\n', 'Key takeaway item')}
+                  title="Bullet list item (*)"
+                >
+                  <i className="fa-solid fa-list-ul"></i> Bullet
+                </button>
+                <span className="toolbar-tip ms-auto">
+                  <i className="fa-solid fa-circle-info"></i> Link format: <code>[Text](https://...)</code>
+                </span>
+              </div>
+
               <textarea
                 id="blog-content"
-                rows="9"
+                rows="10"
                 required
                 placeholder="Write or paste your article content here...
+
+Tip: You can insert hyperlinks in between your text using the 'Add Hyperlink' button above, or write [link text](https://example.com) directly!
 
 ### Executive Overview
 Enter section overview...

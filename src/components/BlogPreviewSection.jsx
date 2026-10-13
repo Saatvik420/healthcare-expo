@@ -44,7 +44,6 @@ export default function BlogPreviewSection() {
                       className="blog-card-cover"
                       loading="lazy"
                     />
-                    <span className="blog-card-cat-badge">{blog.category}</span>
                     {blog.featured && (
                       <span className="blog-card-star-badge" title="Featured Article">
                         <i className="fa-solid fa-star"></i>

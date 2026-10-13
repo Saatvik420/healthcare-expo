@@ -9247,6 +9247,43 @@ textarea:focus {
   color: #334155;
 }
 
+/* Blog Article Inline Links */
+.blog-inline-link {
+  color: #059669;
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.15s ease;
+  word-break: break-word;
+}
+
+.blog-inline-link:hover {
+  color: #047857;
+  text-decoration-color: #047857;
+  text-decoration-thickness: 2px;
+}
+
+.inline-link-icon {
+  font-size: 0.72em;
+  opacity: 0.8;
+  vertical-align: middle;
+}
+
+.blog-raw-link {
+  color: #0284c7;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  word-break: break-all;
+}
+
+.blog-raw-link:hover {
+  color: #0369a1;
+}
+
 /* Article Tags */
 .article-tags-wrap {
   display: flex;
@@ -9676,10 +9713,79 @@ textarea:focus {
   gap: 0.35rem;
 }
 
+.blog-editor-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  margin-top: 0.35rem;
+}
+
+.blog-toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.25;
+}
+
+.blog-toolbar-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #94a3b8;
+}
+
+.blog-toolbar-btn-link {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+  font-weight: 700;
+}
+
+.blog-toolbar-btn-link:hover {
+  background: #d1fae5;
+  color: #047857;
+  border-color: #6ee7b7;
+}
+
+.toolbar-tip {
+  font-size: 0.76rem;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.toolbar-tip code {
+  background: #ffffff;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  border: 1px solid #cbd5e1;
+  font-family: monospace;
+  font-size: 0.74rem;
+  color: #059669;
+  font-weight: 600;
+}
+
 .blog-content-textarea {
-  min-height: 180px;
+  min-height: 220px;
   resize: vertical;
   line-height: 1.6;
+  border-top-left-radius: 0 !important;
+  border-top-right-radius: 0 !important;
 }
 
 .blog-featured-toggle {

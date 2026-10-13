@@ -122,7 +122,68 @@ export default function BlogDetailPage({ onNotify }) {
     }
   };
 
-  // Render paragraphs and headers safely
+  // Inline parser supporting markdown hyperlinks [text](url), raw URLs, and **bold**
+  const renderInlineContent = (text) => {
+    if (!text) return null;
+
+    // Pattern matches:
+    // 1. Markdown link: [Anchor text](https://example.com)
+    // 2. Bold text: **bold**
+    // 3. Raw URL: https://example.com or http://example.com
+    const regex = /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|https?:\/\/[^\s<)]+)/g;
+    const parts = text.split(regex);
+
+    return parts.map((part, pIdx) => {
+      if (!part) return null;
+
+      // Markdown link [text](url)
+      if (part.startsWith('[') && part.includes('](') && part.endsWith(')')) {
+        const match = part.match(/^\[(.*?)\]\((.*?)\)$/);
+        if (match) {
+          const anchorText = match[1];
+          const href = match[2].trim();
+          const isExternal = href.startsWith('http://') || href.startsWith('https://');
+          return (
+            <a
+              key={pIdx}
+              href={href}
+              target={isExternal ? '_blank' : '_self'}
+              rel={isExternal ? 'noopener noreferrer' : undefined}
+              className="blog-inline-link"
+            >
+              {anchorText}
+              {isExternal && <i className="fa-solid fa-arrow-up-right-from-square inline-link-icon"></i>}
+            </a>
+          );
+        }
+      }
+
+      // Bold text **bold**
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
+      }
+
+      // Raw URL https://...
+      if (part.startsWith('http://') || part.startsWith('https://')) {
+        return (
+          <a
+            key={pIdx}
+            href={part}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="blog-inline-link"
+          >
+            {part}
+            <i className="fa-solid fa-arrow-up-right-from-square inline-link-icon"></i>
+          </a>
+        );
+      }
+
+      return part;
+    });
+  };
+
+  // Render paragraphs, headings, lists, and inline links safely
   const renderFormattedContent = (content) => {
     if (!content) return null;
 
@@ -134,7 +195,7 @@ export default function BlogDetailPage({ onNotify }) {
       if (trimmed.startsWith('### ')) {
         return (
           <h3 key={idx} className="blog-article-h3">
-            {trimmed.replace('### ', '')}
+            {renderInlineContent(trimmed.replace('### ', ''))}
           </h3>
         );
       }
@@ -143,7 +204,7 @@ export default function BlogDetailPage({ onNotify }) {
       if (trimmed.startsWith('## ')) {
         return (
           <h2 key={idx} className="blog-article-h2">
-            {trimmed.replace('## ', '')}
+            {renderInlineContent(trimmed.replace('## ', ''))}
           </h2>
         );
       }
@@ -164,7 +225,7 @@ export default function BlogDetailPage({ onNotify }) {
                 return (
                   <div key={lineIdx} className="blog-list-item">
                     <span className="blog-list-bullet">&bull;</span>
-                    <span className="blog-list-text">{renderInlineBold(cleanLine.slice(2))}</span>
+                    <span className="blog-list-text">{renderInlineContent(cleanLine.slice(2))}</span>
                   </div>
                 );
               } else if (/^\d+\./.test(cleanLine)) {
@@ -173,14 +234,14 @@ export default function BlogDetailPage({ onNotify }) {
                   <div key={lineIdx} className="blog-list-item">
                     <span className="blog-list-num">{match ? match[1] : `${lineIdx + 1}.`}</span>
                     <span className="blog-list-text">
-                      {renderInlineBold(match ? match[2] : cleanLine)}
+                      {renderInlineContent(match ? match[2] : cleanLine)}
                     </span>
                   </div>
                 );
               }
               return (
                 <p key={lineIdx} className="blog-list-text">
-                  {renderInlineBold(cleanLine)}
+                  {renderInlineContent(cleanLine)}
                 </p>
               );
             })}
@@ -191,21 +252,9 @@ export default function BlogDetailPage({ onNotify }) {
       // Standard Paragraph
       return (
         <p key={idx} className="blog-article-paragraph">
-          {renderInlineBold(trimmed)}
+          {renderInlineContent(trimmed)}
         </p>
       );
-    });
-  };
-
-  // Inline bold parser for **bold** text
-  const renderInlineBold = (text) => {
-    if (!text || !text.includes('**')) return text;
-    const parts = text.split(/(\*\*.*?\*\*)/g);
-    return parts.map((part, pIdx) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
-      }
-      return part;
     });
   };
 
@@ -265,7 +314,6 @@ export default function BlogDetailPage({ onNotify }) {
         <div className="container article-container">
           {/* Header */}
           <header className="article-header">
-            <div className="article-category-badge">{blog.category}</div>
             <h1 className="article-headline">{blog.title}</h1>
 
             <div className="article-meta-bar">
@@ -342,7 +390,7 @@ export default function BlogDetailPage({ onNotify }) {
                 className="article-cover-img"
               />
               <figcaption className="article-cover-caption">
-                IndiGlobal Healthcare Expo 2027 &bull; {blog.category} Official Briefing
+                IndiGlobal Healthcare Expo 2027 &bull; Official Industry Briefing
               </figcaption>
             </div>
           )}
@@ -406,7 +454,6 @@ export default function BlogDetailPage({ onNotify }) {
                     <Link key={rel.id || relSlug} to={`/blogs/${relSlug}`} className="related-card">
                       <div className="related-thumb-wrap">
                         <img src={rel.coverImage} alt={rel.title} className="related-thumb" />
-                        <span className="related-cat-badge">{rel.category}</span>
                       </div>
                       <div className="related-info">
                         <small className="related-date">{rel.publishedDate}</small>

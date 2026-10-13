@@ -18,7 +18,6 @@ export default function BlogsPage() {
         blog.excerpt?.toLowerCase().includes(query) ||
         blog.content?.toLowerCase().includes(query) ||
         blog.author?.toLowerCase().includes(query) ||
-        blog.category?.toLowerCase().includes(query) ||
         (Array.isArray(blog.tags) && blog.tags.some((t) => t.toLowerCase().includes(query))) ||
         (typeof blog.tags === 'string' && blog.tags.toLowerCase().includes(query))
       );
@@ -138,8 +137,6 @@ export default function BlogsPage() {
 
                 <div className="featured-spotlight-info">
                   <div className="featured-spotlight-meta">
-                    <span className="featured-cat-badge">{featuredBlog.category}</span>
-                    <span className="meta-sep">&bull;</span>
                     <span>{featuredBlog.publishedDate || formatBlogPublishedDate(featuredBlog)}</span>
                     <span className="meta-sep">&bull;</span>
                     <span>
@@ -189,7 +186,6 @@ export default function BlogsPage() {
                             e.target.src = 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80';
                           }}
                         />
-                        <span className="blog-card-cat-badge">{blog.category || 'Our Blogs'}</span>
                         {blog.featured && (
                           <span className="blog-card-star-badge" title="Featured Article">
                             <i className="fa-solid fa-star"></i>
