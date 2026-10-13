@@ -435,34 +435,52 @@ export default function AdminDashboardPage({ onNotify }) {
       <div className="container py-4">
         {/* KPI Metrics Ribbon */}
         <div className="admin-kpi-grid">
-          <div className="kpi-card" onClick={() => setActiveTab('visitors')} style={{ cursor: 'pointer' }}>
+          <div
+            className={`kpi-card ${activeTab === 'visitors' ? 'active-kpi' : ''}`}
+            onClick={() => setActiveTab('visitors')}
+            role="button"
+            tabIndex={0}
+            title="Click to view Visitors"
+          >
             <div className="kpi-icon kpi-blue">
               <i className="fa-solid fa-users"></i>
             </div>
             <div className="kpi-details">
-              <span className="kpi-label">Registered Trade Attendees</span>
+              <span className="kpi-label">Trade Attendees</span>
               <h3 className="kpi-number">{visitors.length}</h3>
               <small className="kpi-sub">
-                {visitors.filter((v) => v.passType === 'vip').length} VIP Delegates &bull;{' '}
+                {visitors.filter((v) => v.passType === 'vip').length} VIP &bull;{' '}
                 {visitors.filter((v) => v.status === 'Checked-in').length} Checked-In
               </small>
             </div>
           </div>
 
-          <div className="kpi-card" onClick={() => setActiveTab('exhibitors')} style={{ cursor: 'pointer' }}>
+          <div
+            className={`kpi-card ${activeTab === 'exhibitors' ? 'active-kpi' : ''}`}
+            onClick={() => setActiveTab('exhibitors')}
+            role="button"
+            tabIndex={0}
+            title="Click to view Exhibitors"
+          >
             <div className="kpi-icon kpi-green">
               <i className="fa-solid fa-store"></i>
             </div>
             <div className="kpi-details">
-              <span className="kpi-label">Exhibitor Booths Allotted</span>
+              <span className="kpi-label">Exhibitor Booths</span>
               <h3 className="kpi-number">{exhibitors.length}</h3>
               <small className="kpi-sub">
-                {exhibitors.filter((e) => e.status === 'Approved').length} Fully Approved
+                {exhibitors.filter((e) => e.status === 'Approved').length} Approved Booths
               </small>
             </div>
           </div>
 
-          <div className="kpi-card" onClick={() => setActiveTab('sponsorships')} style={{ cursor: 'pointer' }}>
+          <div
+            className={`kpi-card ${activeTab === 'sponsorships' ? 'active-kpi' : ''}`}
+            onClick={() => setActiveTab('sponsorships')}
+            role="button"
+            tabIndex={0}
+            title="Click to view Sponsorships"
+          >
             <div className="kpi-icon kpi-purple">
               <i className="fa-solid fa-handshake"></i>
             </div>
@@ -475,18 +493,30 @@ export default function AdminDashboardPage({ onNotify }) {
             </div>
           </div>
 
-          <div className="kpi-card" onClick={() => setActiveTab('inquiries')} style={{ cursor: 'pointer' }}>
+          <div
+            className={`kpi-card ${activeTab === 'inquiries' ? 'active-kpi' : ''}`}
+            onClick={() => setActiveTab('inquiries')}
+            role="button"
+            tabIndex={0}
+            title="Click to view Inquiries"
+          >
             <div className="kpi-icon kpi-amber">
               <i className="fa-solid fa-envelope-open-text"></i>
             </div>
             <div className="kpi-details">
               <span className="kpi-label">Desk Inquiries</span>
               <h3 className="kpi-number">{inquiries.length}</h3>
-              <small className="kpi-sub">Public Conference Inquiries</small>
+              <small className="kpi-sub">Public Secretariat Inquiries</small>
             </div>
           </div>
 
-          <div className="kpi-card" onClick={() => setActiveTab('blogs')} style={{ cursor: 'pointer' }}>
+          <div
+            className={`kpi-card ${activeTab === 'blogs' ? 'active-kpi' : ''}`}
+            onClick={() => setActiveTab('blogs')}
+            role="button"
+            tabIndex={0}
+            title="Click to manage Our Blogs"
+          >
             <div className="kpi-icon kpi-indigo">
               <i className="fa-solid fa-newspaper"></i>
             </div>
@@ -494,7 +524,7 @@ export default function AdminDashboardPage({ onNotify }) {
               <span className="kpi-label">Our Blogs</span>
               <h3 className="kpi-number">{blogs.length}</h3>
               <small className="kpi-sub">
-                {blogs.filter((b) => b.featured).length} Featured Story &bull; Active Editorial
+                {blogs.filter((b) => b.featured).length} Featured &bull; Live Editorial
               </small>
             </div>
           </div>
@@ -1137,11 +1167,12 @@ export default function AdminDashboardPage({ onNotify }) {
             </div>
 
             {/* Blogs Table */}
-            <div className="table-responsive">
-              <table className="admin-table">
+            <div className="responsive-table-scroll">
+              <table className="admin-data-table">
                 <thead>
                   <tr>
                     <th>Article</th>
+                    <th>Category</th>
                     <th>Author & Role</th>
                     <th>Published Date</th>
                     <th>Status</th>
@@ -1157,17 +1188,20 @@ export default function AdminDashboardPage({ onNotify }) {
                         b.title?.toLowerCase().includes(query) ||
                         b.excerpt?.toLowerCase().includes(query) ||
                         b.author?.toLowerCase().includes(query) ||
+                        b.category?.toLowerCase().includes(query) ||
                         (Array.isArray(b.tags) &&
-                          b.tags.some((t) => t.toLowerCase().includes(query)));
+                          b.tags.some((t) => t.toLowerCase().includes(query))) ||
+                        (typeof b.tags === 'string' &&
+                          b.tags.toLowerCase().includes(query));
                       return matchesSearch;
                     })
                     .map((blog) => (
-                      <tr key={blog.id || blog.slug}>
+                      <tr key={blog.id || blog.slug || blog.blogId}>
                         <td>
                           <div className="admin-blog-cell">
                             <div className="admin-blog-thumb">
                               <img
-                                src={blog.coverImage}
+                                src={blog.coverImage || 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80'}
                                 alt={blog.title}
                                 onError={(e) => {
                                   e.target.style.display = 'none';
@@ -1175,17 +1209,22 @@ export default function AdminDashboardPage({ onNotify }) {
                               />
                             </div>
                             <div className="admin-blog-info">
-                              <span className="admin-blog-title">{blog.title}</span>
+                              <span className="admin-blog-title" title={blog.title}>{blog.title}</span>
                               <small className="admin-blog-excerpt">
-                                {blog.excerpt?.slice(0, 85)}...
+                                {blog.excerpt ? blog.excerpt.slice(0, 85) + '...' : ''}
                               </small>
                             </div>
                           </div>
                         </td>
                         <td>
+                          <span className="badge-category">
+                            {blog.category || 'Our Blogs'}
+                          </span>
+                        </td>
+                        <td>
                           <div className="admin-cell-user">
                             <span className="user-name">{blog.author}</span>
-                            <small className="user-meta">{blog.authorRole}</small>
+                            <small className="user-meta">{blog.authorRole || 'Contributor'}</small>
                           </div>
                         </td>
                         <td>
@@ -1243,11 +1282,13 @@ export default function AdminDashboardPage({ onNotify }) {
                       !query ||
                       b.title?.toLowerCase().includes(query) ||
                       b.excerpt?.toLowerCase().includes(query) ||
-                      b.author?.toLowerCase().includes(query)
+                      b.author?.toLowerCase().includes(query) ||
+                      b.category?.toLowerCase().includes(query) ||
+                      (Array.isArray(b.tags) && b.tags.some((t) => t.toLowerCase().includes(query)))
                     );
                   }).length === 0 && (
                     <tr>
-                      <td colSpan="5" className="text-center py-4">
+                      <td colSpan="6" className="text-center py-4">
                         <div className="empty-table-state">
                           <i
                             className="fa-solid fa-newspaper text-muted"

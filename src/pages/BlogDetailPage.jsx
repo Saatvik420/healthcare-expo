@@ -18,17 +18,50 @@ export default function BlogDetailPage({ onNotify }) {
     const loadBlog = async () => {
       setIsLoading(true);
       try {
-        let found = null;
-        try {
-          found = await blogService.getBlogByIdOrSlug(id);
-        } catch {
-          found = blogs.find((b) => b.id === id || b.slug === id || getBlogSlug(b) === id);
-        }
+        // 1. Instant in-memory lookup
+        let found = (blogs || []).find(
+          (b) =>
+            b.id === id ||
+            b.slug === id ||
+            b.blogId === id ||
+            getBlogSlug(b) === id ||
+            getBlogSlug(b)?.toLowerCase() === id?.toLowerCase()
+        );
+
+        // 2. Instant local storage cache lookup
         if (!found) {
-          found = blogs.find((b) => b.id === id || b.slug === id || getBlogSlug(b) === id);
+          try {
+            const cached = JSON.parse(
+              localStorage.getItem('ghe_blogs') ||
+                localStorage.getItem('ighe_blogs_cache') ||
+                '[]'
+            );
+            if (Array.isArray(cached)) {
+              found = cached.find(
+                (b) =>
+                  b.id === id ||
+                  b.slug === id ||
+                  b.blogId === id ||
+                  getBlogSlug(b) === id ||
+                  getBlogSlug(b)?.toLowerCase() === id?.toLowerCase()
+              );
+            }
+          } catch {
+            // ignore cache parse error
+          }
         }
+
+        // 3. Fallback to API if still not found
+        if (!found) {
+          try {
+            found = await blogService.getBlogByIdOrSlug(id);
+          } catch {
+            // ignore
+          }
+        }
+
         if (!active) return;
-        setBlog(found);
+        setBlog(found || null);
 
         // Canonical URL update: If opened by raw ID, replace URL with SEO-friendly slug
         if (found) {

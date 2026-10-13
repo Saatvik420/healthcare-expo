@@ -309,8 +309,12 @@ export const blogsApi = {
   },
 
   create: async (blogData) => {
+    const blogId = blogData.blogId || blogData.id || `blog_${Date.now()}`;
+    const { id, ...rest } = blogData;
     const payload = {
-      ...blogData,
+      ...rest,
+      blogId,
+      ...(typeof id === 'number' ? { id } : {}),
       category: blogData.category || 'Our Blogs',
       author: blogData.author || 'indiglobal healthcare Expo',
       authorRole: blogData.authorRole || 'admin',

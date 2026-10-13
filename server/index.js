@@ -531,8 +531,10 @@ app.post(['/api/blogs', '/blogs', '/api/admin/blogs', '/admin/blogs'], (req, res
 
   const slug = data.slug || generateSlug(data.title, db.blogs || []);
   const now = new Date().toISOString();
+  const blogId = data.blogId || data.id || 'blog_' + Date.now();
   const newBlog = {
-    id: data.id || 'blog_' + Date.now(),
+    id: blogId,
+    blogId,
     title: data.title,
     slug,
     category: data.category || 'Our Blogs',

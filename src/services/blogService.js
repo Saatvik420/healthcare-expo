@@ -172,7 +172,7 @@ Whether your organization is seeking regional distribution partners or evaluatin
 // Helper to get local stored blogs
 const getLocalBlogs = () => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem('ghe_blogs') || localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
@@ -184,6 +184,7 @@ const getLocalBlogs = () => {
   }
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_BLOGS));
+    localStorage.setItem('ghe_blogs', JSON.stringify(INITIAL_BLOGS));
   } catch {
     // Ignore storage quota or access issues
   }
@@ -194,6 +195,7 @@ const getLocalBlogs = () => {
 const saveLocalBlogs = (blogs) => {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(blogs));
+    localStorage.setItem('ghe_blogs', JSON.stringify(blogs));
   } catch (e) {
     console.error('Error saving blogs to localStorage', e);
   }
@@ -289,13 +291,13 @@ export const blogService = {
     try {
       let res;
       try {
-        res = await fetchWithTimeout(`${API_BASE}/blogs/slug/${encodeURIComponent(idOrSlug)}`);
+        res = await fetchWithTimeout(`${API_BASE}/blogs/slug/${encodeURIComponent(idOrSlug)}`, { timeout: 1500 });
       } catch {
         res = null;
       }
 
       if (!res || !res.ok) {
-        res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(idOrSlug)}`);
+        res = await fetchWithTimeout(`${API_BASE}/blogs/${encodeURIComponent(idOrSlug)}`, { timeout: 1500 });
       }
 
       if (res && res.ok) {

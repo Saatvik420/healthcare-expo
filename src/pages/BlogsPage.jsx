@@ -1,32 +1,27 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import blogService, { getBlogSlug } from '../services/blogService';
+import { getBlogSlug } from '../services/blogService';
 
 export default function BlogsPage() {
   const { blogs = [] } = useData();
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, readTime
 
-  const categories = useMemo(() => blogService.getCategories(), []);
-
   // Filter and sort blogs
   const filteredBlogs = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
     let result = (blogs || []).filter((blog) => {
-      const matchesCategory =
-        selectedCategory === 'All' ||
-        (blog.category && blog.category.toLowerCase() === selectedCategory.toLowerCase());
-
-      const query = searchQuery.trim().toLowerCase();
-      const matchesSearch =
-        !query ||
+      if (!query) return true;
+      return (
         blog.title?.toLowerCase().includes(query) ||
         blog.excerpt?.toLowerCase().includes(query) ||
+        blog.content?.toLowerCase().includes(query) ||
         blog.author?.toLowerCase().includes(query) ||
-        (Array.isArray(blog.tags) && blog.tags.some((t) => t.toLowerCase().includes(query)));
-
-      return matchesCategory && matchesSearch;
+        blog.category?.toLowerCase().includes(query) ||
+        (Array.isArray(blog.tags) && blog.tags.some((t) => t.toLowerCase().includes(query))) ||
+        (typeof blog.tags === 'string' && blog.tags.toLowerCase().includes(query))
+      );
     });
 
     result.sort((a, b) => {
@@ -43,7 +38,7 @@ export default function BlogsPage() {
     });
 
     return result;
-  }, [blogs, selectedCategory, searchQuery, sortBy]);
+  }, [blogs, searchQuery, sortBy]);
 
   // Featured story
   const featuredBlog = useMemo(() => {
@@ -52,11 +47,11 @@ export default function BlogsPage() {
 
   // Other blogs excluding the featured one if showing all and no search query
   const gridBlogs = useMemo(() => {
-    if (selectedCategory === 'All' && !searchQuery.trim() && featuredBlog) {
+    if (!searchQuery.trim() && featuredBlog) {
       return filteredBlogs.filter((b) => (b.id || b.slug) !== (featuredBlog.id || featuredBlog.slug));
     }
     return filteredBlogs;
-  }, [filteredBlogs, selectedCategory, searchQuery, featuredBlog]);
+  }, [filteredBlogs, searchQuery, featuredBlog]);
 
   return (
     <div className="page-wrapper blogs-page">
@@ -73,7 +68,7 @@ export default function BlogsPage() {
 
       <section className="section py-5">
         <div className="container">
-          {/* Controls Bar: Search & Categories & Sorting */}
+          {/* Controls Bar: Search & Sorting */}
           <div className="blogs-controls-bar">
             {/* Search Box */}
             <div className="blogs-search-wrapper">
@@ -115,29 +110,8 @@ export default function BlogsPage() {
             </div>
           </div>
 
-          {/* Categories Pill Navigation */}
-          <div className="blogs-categories-scroll">
-            {categories.map((cat) => {
-              const count =
-                cat === 'All'
-                  ? blogs.length
-                  : blogs.filter((b) => b.category?.toLowerCase() === cat.toLowerCase()).length;
-              return (
-                <button
-                  key={cat}
-                  type="button"
-                  className={`blogs-cat-pill ${selectedCategory === cat ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(cat)}
-                >
-                  <span>{cat}</span>
-                  <span className="blogs-cat-badge">{count}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* FEATURED STORY SPOTLIGHT (Only when viewing All and no search) */}
-          {selectedCategory === 'All' && !searchQuery.trim() && featuredBlog && (
+          {/* FEATURED STORY SPOTLIGHT (Only when not actively searching) */}
+          {!searchQuery.trim() && featuredBlog && (
             <div className="blogs-featured-spotlight">
               <Link
                 to={`/blogs/${featuredBlog.slug || getBlogSlug(featuredBlog)}`}
@@ -258,18 +232,14 @@ export default function BlogsPage() {
               </div>
               <h3>No articles found</h3>
               <p>
-                We could not find any articles matching &ldquo;{searchQuery}&rdquo; in category{' '}
-                <strong>{selectedCategory}</strong>.
+                We could not find any articles matching &ldquo;{searchQuery}&rdquo;.
               </p>
               <button
                 type="button"
                 className="btn btn-outline mt-3"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSelectedCategory('All');
-                }}
+                onClick={() => setSearchQuery('')}
               >
-                Reset All Filters
+                Clear Search
               </button>
             </div>
           )}

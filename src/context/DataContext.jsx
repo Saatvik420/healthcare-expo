@@ -581,16 +581,25 @@ export function DataProvider({ children }) {
   // Blog Operations
   const addBlog = async (blogData) => {
     const slug = blogData.slug || getBlogSlug(blogData);
+    const blogId = blogData.id || blogData.blogId || 'blog_' + Date.now();
+    const tagsArray = Array.isArray(blogData.tags)
+      ? blogData.tags
+      : typeof blogData.tags === 'string'
+      ? blogData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      : [];
+
     const newBlog = {
       ...blogData,
-      id: blogData.id || 'blog_' + Date.now(),
+      id: blogId,
+      blogId,
       slug,
-      author: blogData.author || 'indiglobal healthcare Expo',
-      authorRole: blogData.authorRole || 'admin',
-      category: blogData.category || 'Our Blogs',
+      author: blogData.author?.trim() || 'IndiGlobal Healthcare Expo',
+      authorRole: blogData.authorRole?.trim() || 'Secretariat Contributor',
+      category: blogData.category?.trim() || 'Our Blogs',
       coverImage:
-        blogData.coverImage ||
+        blogData.coverImage?.trim() ||
         'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
+      readTime: blogData.readTime?.trim() || '5 min read',
       publishedDate:
         blogData.publishedDate ||
         new Date().toLocaleDateString('en-US', {
@@ -598,14 +607,16 @@ export function DataProvider({ children }) {
           day: 'numeric',
           year: 'numeric',
         }),
+      featured: Boolean(blogData.featured),
+      tags: tagsArray,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    // Immediately update state so it appears on screen without delay
+    // 1. Immediately update state so it appears on screen without delay
     setBlogs((prev) => [newBlog, ...prev.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)]);
 
-    // Immediately persist to localStorage
+    // 2. Immediately persist to localStorage
     try {
       const stored = JSON.parse(localStorage.getItem('ghe_blogs') || '[]');
       const updated = [newBlog, ...stored.filter((b) => b.id !== newBlog.id && b.slug !== newBlog.slug)];
@@ -615,28 +626,28 @@ export function DataProvider({ children }) {
       console.warn('Local storage write error:', e);
     }
 
-    try {
-      const apiPayload = {
-        ...newBlog,
-        tags: Array.isArray(newBlog.tags) ? newBlog.tags.join(', ') : newBlog.tags || '',
-      };
-      const created = await blogsApi.create(apiPayload);
-      if (created) {
-        const enriched = {
-          ...newBlog,
-          ...created,
-          id: created.id || created.blogId || newBlog.id,
-          tags: Array.isArray(created.tags)
-            ? created.tags
-            : (created.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
-        };
-        setBlogs((prev) =>
-          prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
-        );
-        return enriched;
+    // 3. Sync to API if backend is online
+    if (backendStatus.isOnline) {
+      try {
+        const created = await blogsApi.create(newBlog);
+        if (created) {
+          const enriched = {
+            ...newBlog,
+            ...created,
+            id: created.id || created.blogId || newBlog.id,
+            slug: created.slug || newBlog.slug,
+            tags: Array.isArray(created.tags)
+              ? created.tags
+              : (created.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
+          };
+          setBlogs((prev) =>
+            prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
+          );
+          return enriched;
+        }
+      } catch (err) {
+        console.warn('Backend API save failed, saved locally:', err);
       }
-    } catch (err) {
-      console.warn('Backend API save failed, saved locally:', err);
     }
     return newBlog;
   };
@@ -646,22 +657,44 @@ export function DataProvider({ children }) {
       ...updateData,
       updatedAt: new Date().toISOString(),
     };
-    setBlogs((prev) =>
-      prev.map((b) => (b.id === id || b.slug === id ? { ...b, ...updated } : b))
-    );
-    try {
-      await blogsApi.update(id, updated);
-    } catch {
-      // Saved in localStorage
+    setBlogs((prev) => {
+      const next = prev.map((b) => (b.id === id || b.slug === id ? { ...b, ...updated } : b));
+      try {
+        localStorage.setItem('ghe_blogs', JSON.stringify(next));
+        localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
+      } catch (e) {
+        console.warn('Local storage write error:', e);
+      }
+      return next;
+    });
+
+    if (backendStatus.isOnline) {
+      try {
+        await blogsApi.update(id, updated);
+      } catch (err) {
+        console.warn('Backend API update failed, saved locally:', err);
+      }
     }
   };
 
   const deleteBlog = async (id) => {
-    setBlogs((prev) => prev.filter((b) => b.id !== id && b.slug !== id));
-    try {
-      await blogsApi.delete(id);
-    } catch {
-      // Saved in localStorage
+    setBlogs((prev) => {
+      const next = prev.filter((b) => b.id !== id && b.slug !== id && b.blogId !== id);
+      try {
+        localStorage.setItem('ghe_blogs', JSON.stringify(next));
+        localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
+      } catch (e) {
+        console.warn('Local storage write error:', e);
+      }
+      return next;
+    });
+
+    if (backendStatus.isOnline) {
+      try {
+        await blogsApi.delete(id);
+      } catch (err) {
+        console.warn('Backend API delete failed, removed locally:', err);
+      }
     }
   };
 
