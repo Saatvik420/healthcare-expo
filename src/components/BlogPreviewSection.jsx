@@ -1,15 +1,19 @@
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { getBlogSlug } from '../services/blogService';
+import { getBlogSlug, getBlogTimestamp } from '../services/blogService';
 
 export default function BlogPreviewSection() {
   const { blogs = [] } = useData();
 
   if (!blogs || blogs.length === 0) return null;
 
-  // Take top 3 blogs (prioritizing featured first)
+  // Take top 3 blogs (newest published/created articles displayed first)
   const displayBlogs = [...blogs]
-    .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
+    .sort((a, b) => {
+      const diff = getBlogTimestamp(b) - getBlogTimestamp(a);
+      if (diff !== 0) return diff;
+      return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
+    })
     .slice(0, 3);
 
   return (

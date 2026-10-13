@@ -626,39 +626,52 @@ export function DataProvider({ children }) {
       console.warn('Local storage write error:', e);
     }
 
-    // 3. Sync to API if backend is online
-    if (backendStatus.isOnline) {
-      try {
-        const created = await blogsApi.create(newBlog);
-        if (created) {
-          const enriched = {
-            ...newBlog,
-            ...created,
-            id: created.id || created.blogId || newBlog.id,
-            slug: created.slug || newBlog.slug,
-            tags: Array.isArray(created.tags)
-              ? created.tags
-              : (created.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
-          };
-          setBlogs((prev) =>
-            prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
-          );
-          return enriched;
+    // 3. Sync to API with fallback
+    try {
+      const created = await blogsApi.create(newBlog);
+      if (created) {
+        const enriched = {
+          ...newBlog,
+          ...created,
+          id: created.id || created.blogId || newBlog.id,
+          slug: created.slug || newBlog.slug,
+          tags: Array.isArray(created.tags)
+            ? created.tags
+            : (created.tags || '').split(',').map((t) => t.trim()).filter(Boolean),
+        };
+        setBlogs((prev) =>
+          prev.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b))
+        );
+        try {
+          const stored = JSON.parse(localStorage.getItem('ghe_blogs') || '[]');
+          const updated = stored.map((b) => (b.id === newBlog.id || b.slug === newBlog.slug ? enriched : b));
+          localStorage.setItem('ghe_blogs', JSON.stringify(updated));
+          localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
+        } catch (storageErr) {
+          console.warn('Failed to re-cache enriched blog:', storageErr);
         }
-      } catch (err) {
-        console.warn('Backend API save failed, saved locally:', err);
+        return enriched;
       }
+    } catch (err) {
+      console.warn('Backend API save failed, safely preserved in local storage:', err);
     }
     return newBlog;
   };
 
   const updateBlog = async (id, updateData) => {
+    const slug = updateData.slug || (updateData.title ? getBlogSlug(updateData) : undefined);
     const updated = {
       ...updateData,
+      ...(slug ? { slug } : {}),
       updatedAt: new Date().toISOString(),
     };
+
     setBlogs((prev) => {
-      const next = prev.map((b) => (b.id === id || b.slug === id ? { ...b, ...updated } : b));
+      const next = prev.map((b) =>
+        b.id === id || b.blogId === id || b.slug === id || String(b.id) === String(id)
+          ? { ...b, ...updated }
+          : b
+      );
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));
         localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
@@ -668,18 +681,18 @@ export function DataProvider({ children }) {
       return next;
     });
 
-    if (backendStatus.isOnline) {
-      try {
-        await blogsApi.update(id, updated);
-      } catch (err) {
-        console.warn('Backend API update failed, saved locally:', err);
-      }
+    try {
+      await blogsApi.update(id, updated);
+    } catch (err) {
+      console.warn('Backend API update failed, safely preserved in local storage:', err);
     }
   };
 
   const deleteBlog = async (id) => {
     setBlogs((prev) => {
-      const next = prev.filter((b) => b.id !== id && b.slug !== id && b.blogId !== id);
+      const next = prev.filter(
+        (b) => b.id !== id && b.slug !== id && b.blogId !== id && String(b.id) !== String(id)
+      );
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));
         localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
@@ -689,12 +702,10 @@ export function DataProvider({ children }) {
       return next;
     });
 
-    if (backendStatus.isOnline) {
-      try {
-        await blogsApi.delete(id);
-      } catch (err) {
-        console.warn('Backend API delete failed, removed locally:', err);
-      }
+    try {
+      await blogsApi.delete(id);
+    } catch (err) {
+      console.warn('Backend API delete failed, removed from local storage:', err);
     }
   };
 

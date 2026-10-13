@@ -52,6 +52,8 @@ export default function AdminDashboardPage({ onNotify }) {
 
   // Search & Filters for Blogs
   const [blogSearch, setBlogSearch] = useState('');
+  const [blogCategoryFilter, setBlogCategoryFilter] = useState('all');
+  const [blogFeaturedFilter, setBlogFeaturedFilter] = useState('all');
   const [isBlogModalOpen, setIsBlogModalOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
 
@@ -199,7 +201,7 @@ export default function AdminDashboardPage({ onNotify }) {
 
   const handleSaveBlog = async (blogData) => {
     if (editingBlog) {
-      await updateBlog(editingBlog.id, blogData);
+      await updateBlog(editingBlog.id || editingBlog.blogId || editingBlog.slug, blogData);
       onNotify('Article Updated', `"${blogData.title}" has been updated.`);
     } else {
       await addBlog(blogData);
@@ -1153,6 +1155,40 @@ export default function AdminDashboardPage({ onNotify }) {
               </div>
 
               <div className="table-filters-group">
+                <select
+                  value={blogCategoryFilter}
+                  onChange={(e) => setBlogCategoryFilter(e.target.value)}
+                  className="table-filter-select"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="Pharma & APIs">Pharma &amp; APIs</option>
+                  <option value="Pharma Machinery">Pharma Machinery</option>
+                  <option value="Healthcare Policies">Healthcare Policies</option>
+                  <option value="Cold Chain & Logistics">Cold Chain &amp; Logistics</option>
+                  <option value="Hospital Infrastructure">Hospital Infrastructure</option>
+                  <option value="Exhibition Strategy">Exhibition Strategy</option>
+                  <option value="Healthcare Insights">Healthcare Insights</option>
+                </select>
+
+                <select
+                  value={blogFeaturedFilter}
+                  onChange={(e) => setBlogFeaturedFilter(e.target.value)}
+                  className="table-filter-select"
+                >
+                  <option value="all">All Statuses</option>
+                  <option value="featured">Featured Only</option>
+                  <option value="standard">Standard Only</option>
+                </select>
+
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm-admin"
+                  onClick={() => handleExportCSV('blogs')}
+                  title="Export blogs data to CSV spreadsheet"
+                >
+                  <i className="fa-solid fa-file-csv"></i> Export CSV
+                </button>
+
                 <button
                   type="button"
                   className="btn btn-primary btn-sm-admin"
@@ -1173,7 +1209,7 @@ export default function AdminDashboardPage({ onNotify }) {
                   <tr>
                     <th>Article</th>
                     <th>Category</th>
-                    <th>Author & Role</th>
+                    <th>Author &amp; Role</th>
                     <th>Published Date</th>
                     <th>Status</th>
                     <th style={{ textAlign: 'right' }}>Actions</th>
@@ -1193,7 +1229,17 @@ export default function AdminDashboardPage({ onNotify }) {
                           b.tags.some((t) => t.toLowerCase().includes(query))) ||
                         (typeof b.tags === 'string' &&
                           b.tags.toLowerCase().includes(query));
-                      return matchesSearch;
+
+                      const matchesCategory =
+                        blogCategoryFilter === 'all' ||
+                        b.category?.toLowerCase() === blogCategoryFilter.toLowerCase();
+
+                      const matchesFeatured =
+                        blogFeaturedFilter === 'all' ||
+                        (blogFeaturedFilter === 'featured' && b.featured) ||
+                        (blogFeaturedFilter === 'standard' && !b.featured);
+
+                      return matchesSearch && matchesCategory && matchesFeatured;
                     })
                     .map((blog) => (
                       <tr key={blog.id || blog.slug || blog.blogId}>
@@ -1268,7 +1314,7 @@ export default function AdminDashboardPage({ onNotify }) {
                               type="button"
                               className="btn-action-icon text-danger"
                               title="Delete Article"
-                              onClick={() => handleDeleteBlog(blog.id, blog.title)}
+                              onClick={() => handleDeleteBlog(blog.id || blog.blogId || blog.slug, blog.title)}
                             >
                               <i className="fa-solid fa-trash"></i>
                             </button>
@@ -1278,14 +1324,27 @@ export default function AdminDashboardPage({ onNotify }) {
                     ))}
                   {blogs.filter((b) => {
                     const query = blogSearch.trim().toLowerCase();
-                    return (
+                    const matchesSearch =
                       !query ||
                       b.title?.toLowerCase().includes(query) ||
                       b.excerpt?.toLowerCase().includes(query) ||
                       b.author?.toLowerCase().includes(query) ||
                       b.category?.toLowerCase().includes(query) ||
-                      (Array.isArray(b.tags) && b.tags.some((t) => t.toLowerCase().includes(query)))
-                    );
+                      (Array.isArray(b.tags) &&
+                        b.tags.some((t) => t.toLowerCase().includes(query))) ||
+                      (typeof b.tags === 'string' &&
+                        b.tags.toLowerCase().includes(query));
+
+                    const matchesCategory =
+                      blogCategoryFilter === 'all' ||
+                      b.category?.toLowerCase() === blogCategoryFilter.toLowerCase();
+
+                    const matchesFeatured =
+                      blogFeaturedFilter === 'all' ||
+                      (blogFeaturedFilter === 'featured' && b.featured) ||
+                      (blogFeaturedFilter === 'standard' && !b.featured);
+
+                    return matchesSearch && matchesCategory && matchesFeatured;
                   }).length === 0 && (
                     <tr>
                       <td colSpan="6" className="text-center py-4">
@@ -1297,12 +1356,14 @@ export default function AdminDashboardPage({ onNotify }) {
                           <p className="mt-2 mb-1">No articles match your search criteria</p>
                           <button
                             type="button"
-                            className="btn btn-outline btn-xs mt-2"
+                            className="btn btn-outline btn-sm mt-2"
                             onClick={() => {
                               setBlogSearch('');
+                              setBlogCategoryFilter('all');
+                              setBlogFeaturedFilter('all');
                             }}
                           >
-                            Clear Filters
+                            Reset Filters
                           </button>
                         </div>
                       </td>

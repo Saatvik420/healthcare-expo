@@ -5,6 +5,7 @@ import OpportunitiesSection from '../components/OpportunitiesSection';
 import WhoShouldExhibitSection from '../components/WhoShouldExhibitSection';
 import ConferencePreview from '../components/ConferencePreview';
 import AseanConfluenceSection from '../components/AseanConfluenceSection';
+import BlogPreviewSection from '../components/BlogPreviewSection';
 import Faq from '../components/Faq';
 
 export default function HomePage() {
@@ -17,7 +18,9 @@ export default function HomePage() {
       <WhoShouldExhibitSection />
       <ConferencePreview />
       <AseanConfluenceSection />
+      <BlogPreviewSection />
       <Faq />
     </>
   );
 }
+

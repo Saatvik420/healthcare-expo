@@ -217,6 +217,27 @@ export const getBlogSlug = (blog) => {
   return blog.id || blog.blogId || '';
 };
 
+export const getBlogTimestamp = (blog) => {
+  if (!blog) return 0;
+  if (blog.createdAt) {
+    const t = new Date(blog.createdAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (blog.publishedDate) {
+    const t = new Date(blog.publishedDate).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (blog.id && typeof blog.id === 'string' && blog.id.startsWith('blog_')) {
+    const num = parseInt(blog.id.replace('blog_', ''), 10);
+    if (!isNaN(num) && num > 1000000) return num;
+  }
+  if (blog.blogId && typeof blog.blogId === 'string' && blog.blogId.startsWith('blog_')) {
+    const num = parseInt(blog.blogId.replace('blog_', ''), 10);
+    if (!isNaN(num) && num > 1000000) return num;
+  }
+  return 0;
+};
+
 // Timeout fetch helper
 async function fetchWithTimeout(resource, options = {}) {
   const { timeout = 4000 } = options;
@@ -243,6 +264,7 @@ async function fetchWithTimeout(resource, options = {}) {
 
 export const blogService = {
   getBlogSlug,
+  getBlogTimestamp,
 
   // Get all blogs with optional category filter
   getAllBlogs: async (category = '') => {

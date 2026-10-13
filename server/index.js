@@ -515,7 +515,11 @@ app.get(['/api/blogs/slug/:slug', '/blogs/slug/:slug'], (req, res) => {
 
 app.get(['/api/blogs/:id', '/blogs/:id'], (req, res) => {
   const blog = (db.blogs || []).find(
-    (b) => b.id === req.params.id || b.slug === req.params.id
+    (b) =>
+      b.id === req.params.id ||
+      b.slug === req.params.id ||
+      b.blogId === req.params.id ||
+      String(b.id) === String(req.params.id)
   );
   if (!blog) {
     return res.status(404).json({ error: 'Blog not found' });
@@ -579,7 +583,11 @@ app.put(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blogs/:
   }
 
   const index = db.blogs.findIndex(
-    (b) => b.id === req.params.id || b.slug === req.params.id
+    (b) =>
+      b.id === req.params.id ||
+      b.slug === req.params.id ||
+      b.blogId === req.params.id ||
+      String(b.id) === String(req.params.id)
   );
   if (index === -1) {
     return res.status(404).json({ error: 'Blog not found' });
@@ -613,7 +621,11 @@ app.delete(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blog
 
   const initialLen = db.blogs.length;
   db.blogs = db.blogs.filter(
-    (b) => b.id !== req.params.id && b.slug !== req.params.id
+    (b) =>
+      b.id !== req.params.id &&
+      b.slug !== req.params.id &&
+      b.blogId !== req.params.id &&
+      String(b.id) !== String(req.params.id)
   );
 
   if (db.blogs.length === initialLen) {

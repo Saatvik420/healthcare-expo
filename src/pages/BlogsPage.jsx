@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { getBlogSlug } from '../services/blogService';
+import { getBlogSlug, getBlogTimestamp } from '../services/blogService';
 
 export default function BlogsPage() {
   const { blogs = [] } = useData();
@@ -26,9 +26,9 @@ export default function BlogsPage() {
 
     result.sort((a, b) => {
       if (sortBy === 'newest') {
-        return new Date(b.createdAt || b.publishedDate || 0) - new Date(a.createdAt || a.publishedDate || 0);
+        return getBlogTimestamp(b) - getBlogTimestamp(a);
       } else if (sortBy === 'oldest') {
-        return new Date(a.createdAt || a.publishedDate || 0) - new Date(b.createdAt || b.publishedDate || 0);
+        return getBlogTimestamp(a) - getBlogTimestamp(b);
       } else if (sortBy === 'readTime') {
         const timeA = parseInt(a.readTime || '0', 10) || 0;
         const timeB = parseInt(b.readTime || '0', 10) || 0;
@@ -40,9 +40,17 @@ export default function BlogsPage() {
     return result;
   }, [blogs, searchQuery, sortBy]);
 
-  // Featured story
+  // Featured story: Prioritize newest featured editorial; fallback to freshest article overall
   const featuredBlog = useMemo(() => {
-    return (blogs || []).find((b) => b.featured) || blogs[0] || null;
+    if (!blogs || blogs.length === 0) return null;
+    const featuredList = blogs
+      .filter((b) => b.featured)
+      .sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+    if (featuredList.length > 0) {
+      return featuredList[0];
+    }
+    const sortedAll = [...blogs].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+    return sortedAll[0] || null;
   }, [blogs]);
 
   // Other blogs excluding the featured one if showing all and no search query
