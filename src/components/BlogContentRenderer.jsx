@@ -3,7 +3,7 @@
  * Parses headings, bullet/numbered lists, bold text, markdown hyperlinks [text](url), and raw URLs.
  * Renders inline elements with proper wrapping so layouts never overflow or get clipped.
  */
-export default function BlogContentRenderer({ content, className = '' }) {
+export default function BlogContentRenderer({ content, textAlign = 'left', className = '' }) {
   if (!content) return null;
 
   // Inline parser supporting markdown hyperlinks [text](url), raw URLs, and **bold**
@@ -70,41 +70,68 @@ export default function BlogContentRenderer({ content, className = '' }) {
   const sections = content.split('\n\n');
 
   return (
-    <div className={`blog-content-rendered ${className}`}>
+    <div
+      className={`blog-content-rendered blog-align-${textAlign || 'left'} ${className}`}
+      style={{ textAlign: textAlign || 'left' }}
+    >
       {sections.map((section, idx) => {
         const trimmed = section.trim();
         if (!trimmed) return null;
 
+        // Block-level custom alignment check: e.g. <center>...</center> or <div align="center">...</div>
+        let sectionAlign = null;
+        let cleanText = trimmed;
+
+        if (cleanText.startsWith('<center>') && cleanText.endsWith('</center>')) {
+          sectionAlign = 'center';
+          cleanText = cleanText.slice(8, -9).trim();
+        } else if (/^<div\s+align=["'](left|center|right|justify)["']>([\s\S]*)<\/div>$/i.test(cleanText)) {
+          const match = cleanText.match(/^<div\s+align=["'](left|center|right|justify)["']>([\s\S]*)<\/div>$/i);
+          if (match) {
+            sectionAlign = match[1].toLowerCase();
+            cleanText = match[2].trim();
+          }
+        } else if (/^<p\s+align=["'](left|center|right|justify)["']>([\s\S]*)<\/p>$/i.test(cleanText)) {
+          const match = cleanText.match(/^<p\s+align=["'](left|center|right|justify)["']>([\s\S]*)<\/p>$/i);
+          if (match) {
+            sectionAlign = match[1].toLowerCase();
+            cleanText = match[2].trim();
+          }
+        }
+
+        const alignStyle = sectionAlign ? { textAlign: sectionAlign } : undefined;
+        const alignClass = sectionAlign ? `blog-align-${sectionAlign}` : '';
+
         // Heading 3
-        if (trimmed.startsWith('### ')) {
+        if (cleanText.startsWith('### ')) {
           return (
-            <h3 key={idx} className="blog-article-h3">
-              {renderInlineContent(trimmed.replace('### ', ''))}
+            <h3 key={idx} className={`blog-article-h3 ${alignClass}`} style={alignStyle}>
+              {renderInlineContent(cleanText.replace('### ', ''))}
             </h3>
           );
         }
 
         // Heading 2
-        if (trimmed.startsWith('## ')) {
+        if (cleanText.startsWith('## ')) {
           return (
-            <h2 key={idx} className="blog-article-h2">
-              {renderInlineContent(trimmed.replace('## ', ''))}
+            <h2 key={idx} className={`blog-article-h2 ${alignClass}`} style={alignStyle}>
+              {renderInlineContent(cleanText.replace('## ', ''))}
             </h2>
           );
         }
 
         // List Block (Numbered or Bullet)
         if (
-          trimmed.includes('\n1.') ||
-          trimmed.startsWith('1.') ||
-          trimmed.includes('\n*') ||
-          trimmed.startsWith('*') ||
-          trimmed.includes('\n-') ||
-          trimmed.startsWith('-')
+          cleanText.includes('\n1.') ||
+          cleanText.startsWith('1.') ||
+          cleanText.includes('\n*') ||
+          cleanText.startsWith('*') ||
+          cleanText.includes('\n-') ||
+          cleanText.startsWith('-')
         ) {
-          const lines = trimmed.split('\n');
+          const lines = cleanText.split('\n');
           return (
-            <div key={idx} className="blog-article-list-block">
+            <div key={idx} className={`blog-article-list-block ${alignClass}`} style={alignStyle}>
               {lines.map((line, lineIdx) => {
                 const cleanLine = line.trim();
                 if (!cleanLine) return null;
@@ -139,8 +166,8 @@ export default function BlogContentRenderer({ content, className = '' }) {
 
         // Standard Paragraph
         return (
-          <p key={idx} className="blog-article-paragraph">
-            {renderInlineContent(trimmed)}
+          <p key={idx} className={`blog-article-paragraph ${alignClass}`} style={alignStyle}>
+            {renderInlineContent(cleanText)}
           </p>
         );
       })}

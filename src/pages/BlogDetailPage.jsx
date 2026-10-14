@@ -14,6 +14,7 @@ export default function BlogDetailPage({ onNotify }) {
   const [copySuccess, setCopySuccess] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [fontSize, setFontSize] = useState('normal'); // 'small' | 'normal' | 'large'
+  const [readerAlign, setReaderAlign] = useState(null); // overrides blog.textAlign if user changes it
 
   // Always ensure body overflow is unlocked when viewing a blog
   useEffect(() => {
@@ -278,6 +279,39 @@ export default function BlogDetailPage({ onNotify }) {
                 </div>
               </div>
 
+              {/* Text Alignment Reader Controls */}
+              <div className="article-text-resizer article-align-resizer">
+                <span className="resizer-label">
+                  <i className="fa-solid fa-align-left"></i> Align:
+                </span>
+                <div className="resizer-buttons">
+                  <button
+                    type="button"
+                    className={`resizer-btn ${(readerAlign || blog.textAlign || 'left') === 'left' ? 'active' : ''}`}
+                    onClick={() => setReaderAlign('left')}
+                    title="Align Left"
+                  >
+                    <i className="fa-solid fa-align-left"></i>
+                  </button>
+                  <button
+                    type="button"
+                    className={`resizer-btn ${(readerAlign || blog.textAlign || 'left') === 'justify' ? 'active' : ''}`}
+                    onClick={() => setReaderAlign('justify')}
+                    title="Justify"
+                  >
+                    <i className="fa-solid fa-align-justify"></i>
+                  </button>
+                  <button
+                    type="button"
+                    className={`resizer-btn ${(readerAlign || blog.textAlign || 'left') === 'center' ? 'active' : ''}`}
+                    onClick={() => setReaderAlign('center')}
+                    title="Align Center"
+                  >
+                    <i className="fa-solid fa-align-center"></i>
+                  </button>
+                </div>
+              </div>
+
               {/* Share Actions */}
               <div className="article-share-group">
                 <span className="share-strip-label">
@@ -345,7 +379,7 @@ export default function BlogDetailPage({ onNotify }) {
 
           {/* Body Content with fluid responsive text & custom font size */}
           <div className={`article-body-content font-size-${fontSize}`}>
-            <BlogContentRenderer content={blog.content} />
+            <BlogContentRenderer content={blog.content} textAlign={readerAlign || blog.textAlign || 'left'} />
           </div>
 
           {/* Tags */}

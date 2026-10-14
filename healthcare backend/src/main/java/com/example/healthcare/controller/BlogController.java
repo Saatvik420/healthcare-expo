@@ -69,6 +69,9 @@ public class BlogController {
         if (blog.getCategory() == null || blog.getCategory().trim().isEmpty()) {
             blog.setCategory("Our Blogs");
         }
+        if (blog.getTextAlign() == null || blog.getTextAlign().trim().isEmpty()) {
+            blog.setTextAlign("left");
+        }
         blog.setUpdatedAt(LocalDateTime.now());
         Blog saved = blogRepository.save(blog);
         return ResponseEntity.status(201).body(saved);
@@ -103,6 +106,9 @@ public class BlogController {
         if (updatedData.getCoverImage() != null) current.setCoverImage(updatedData.getCoverImage());
         if (updatedData.getReadTime() != null) current.setReadTime(updatedData.getReadTime());
         if (updatedData.getPublishedDate() != null) current.setPublishedDate(updatedData.getPublishedDate());
+        if (updatedData.getTextAlign() != null && !updatedData.getTextAlign().trim().isEmpty()) {
+            current.setTextAlign(updatedData.getTextAlign());
+        }
         current.setFeatured(updatedData.isFeatured());
         current.setUpdatedAt(LocalDateTime.now());
 

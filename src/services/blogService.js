@@ -427,6 +427,7 @@ export const blogService = {
           day: 'numeric',
           year: 'numeric',
         }),
+      textAlign: blogData.textAlign || 'left',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };

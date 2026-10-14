@@ -1266,6 +1266,12 @@ export default function AdminDashboardPage({ onNotify }) {
                               <small className="admin-blog-excerpt">
                                 {blog.excerpt ? blog.excerpt.slice(0, 85) + '...' : ''}
                               </small>
+                              <div className="admin-blog-meta-tags mt-1">
+                                <span className="badge-align-chip" title={`Article Text Alignment: ${blog.textAlign || 'left'}`}>
+                                  <i className={`fa-solid fa-align-${blog.textAlign === 'center' ? 'center' : blog.textAlign === 'right' ? 'right' : blog.textAlign === 'justify' ? 'justify' : 'left'}`}></i>
+                                  <span className="text-capitalize">{blog.textAlign || 'left'}</span>
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </td>

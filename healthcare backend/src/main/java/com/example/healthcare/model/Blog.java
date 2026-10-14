@@ -43,6 +43,9 @@ public class Blog {
     private String readTime;
     private String publishedDate;
     private boolean featured;
+    
+    @Builder.Default
+    private String textAlign = "left";
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

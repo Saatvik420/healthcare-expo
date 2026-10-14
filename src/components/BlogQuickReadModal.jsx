@@ -143,7 +143,7 @@ export default function BlogQuickReadModal({ isOpen, blog, onClose, onNotify }) 
 
           {/* Formatted Content */}
           <div className="quick-modal-article-body">
-            <BlogContentRenderer content={blog.content} />
+            <BlogContentRenderer content={blog.content} textAlign={blog.textAlign || 'left'} />
           </div>
 
           {Array.isArray(blog.tags) && blog.tags.length > 0 && (

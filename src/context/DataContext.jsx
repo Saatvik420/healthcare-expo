@@ -688,6 +688,7 @@ export function DataProvider({ children }) {
           year: 'numeric',
         }),
       featured: Boolean(blogData.featured),
+      textAlign: blogData.textAlign || 'left',
       tags: tagsArray,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

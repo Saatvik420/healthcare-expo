@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useState, useEffect, useMemo } from 'react';
 import { getBlogSlug } from '../../services/blogService';
+import BlogContentRenderer from '../BlogContentRenderer';
 
 const SAMPLE_COVERS = [
   { label: 'Pharma & Lab', url: 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80' },
@@ -25,7 +26,9 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
     excerpt: '',
     content: '',
     featured: false,
+    textAlign: 'left',
   });
+  const [activeTab, setActiveTab] = useState('write'); // 'write' | 'preview'
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -44,6 +47,7 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
         excerpt: editingBlog.excerpt || '',
         content: editingBlog.content || '',
         featured: Boolean(editingBlog.featured),
+        textAlign: editingBlog.textAlign || 'left',
       });
     } else {
       setFormData({
@@ -57,8 +61,10 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
         excerpt: '',
         content: '',
         featured: false,
+        textAlign: 'left',
       });
     }
+    setActiveTab('write');
     setError('');
   }, [editingBlog, isOpen]);
 
@@ -147,6 +153,36 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
     }
   };
 
+  // Change overall alignment or wrap selection with alignment markup
+  const handleAlignmentSelect = (alignMode) => {
+    const textarea = document.getElementById('blog-content');
+    const start = textarea ? textarea.selectionStart : 0;
+    const end = textarea ? textarea.selectionEnd : 0;
+    const selectedText = formData.content.substring(start, end).trim();
+
+    if (selectedText) {
+      // Wrap highlighted block with alignment div
+      const insertion = `<div align="${alignMode}">\n${selectedText}\n</div>`;
+      const before = formData.content.substring(0, start);
+      const after = formData.content.substring(end);
+      const newContent = `${before}${insertion}${after}`;
+
+      setFormData((prev) => ({ ...prev, content: newContent }));
+      handleContentChange(newContent);
+
+      if (textarea) {
+        setTimeout(() => {
+          textarea.focus();
+          const cursor = start + insertion.length;
+          textarea.setSelectionRange(cursor, cursor);
+        }, 50);
+      }
+    } else {
+      // Switch overall article text alignment
+      setFormData((prev) => ({ ...prev, textAlign: alignMode }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.title.trim()) {
@@ -181,6 +217,7 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
         readTime: formData.readTime?.trim() || '5 min read',
         excerpt: formData.excerpt.trim(),
         content: formData.content.trim(),
+        textAlign: formData.textAlign || 'left',
         tags: tagsArray,
         slug: liveSlug,
       };
@@ -381,71 +418,179 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
               <small className="text-muted">Recommended: 120 - 220 characters for crisp card layouts.</small>
             </div>
 
-            {/* Full Content with Rich Formatting Toolbar */}
+            {/* Article Text Alignment Option */}
+            <div className="form-group mb-3 blog-align-control-card">
+              <div className="blog-align-label-row">
+                <label className="form-label-bold mb-0">
+                  <i className="fa-solid fa-align-left text-primary me-1"></i> Article Text Alignment
+                </label>
+                <span className="blog-align-current-badge">
+                  Active Mode: <strong className="text-capitalize">{formData.textAlign || 'left'}</strong>
+                </span>
+              </div>
+              <p className="blog-align-desc">
+                Choose the default reading alignment for your article. Readers can view the content cleanly formatted in your selected alignment.
+              </p>
+              <div className="blog-align-btn-group" role="radiogroup" aria-label="Text Alignment Options">
+                <button
+                  type="button"
+                  className={`blog-align-opt-btn ${formData.textAlign === 'left' ? 'active' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, textAlign: 'left' }))}
+                  title="Standard left-aligned reading"
+                >
+                  <i className="fa-solid fa-align-left"></i>
+                  <span>Left (Default)</span>
+                </button>
+                <button
+                  type="button"
+                  className={`blog-align-opt-btn ${formData.textAlign === 'justify' ? 'active' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, textAlign: 'justify' }))}
+                  title="Even margins on left and right borders"
+                >
+                  <i className="fa-solid fa-align-justify"></i>
+                  <span>Justify (Editorial)</span>
+                </button>
+                <button
+                  type="button"
+                  className={`blog-align-opt-btn ${formData.textAlign === 'center' ? 'active' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, textAlign: 'center' }))}
+                  title="Centered headline and paragraph layout"
+                >
+                  <i className="fa-solid fa-align-center"></i>
+                  <span>Center</span>
+                </button>
+                <button
+                  type="button"
+                  className={`blog-align-opt-btn ${formData.textAlign === 'right' ? 'active' : ''}`}
+                  onClick={() => setFormData((prev) => ({ ...prev, textAlign: 'right' }))}
+                  title="Right-aligned text presentation"
+                >
+                  <i className="fa-solid fa-align-right"></i>
+                  <span>Right</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Full Content with Rich Formatting & Alignment Toolbar */}
             <div className="form-group mb-3">
               <div className="content-label-row">
-                <label htmlFor="blog-content" className="form-label-required">
+                <label htmlFor="blog-content" className="form-label-required mb-0">
                   Full Article Content
                 </label>
-                <span className="markdown-hint">
-                  <i className="fa-brands fa-markdown"></i> Hyperlinks &amp; formatting supported
-                </span>
+                <div className="editor-view-tabs">
+                  <button
+                    type="button"
+                    className={`editor-tab-btn ${activeTab === 'write' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('write')}
+                  >
+                    <i className="fa-solid fa-pen-to-square"></i> Editor
+                  </button>
+                  <button
+                    type="button"
+                    className={`editor-tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
+                    onClick={() => setActiveTab('preview')}
+                  >
+                    <i className="fa-solid fa-eye"></i> Live Preview ({formData.textAlign})
+                  </button>
+                </div>
               </div>
 
-              {/* Quick Formatting & Hyperlink Toolbar */}
-              <div className="blog-editor-toolbar">
-                <button
-                  type="button"
-                  className="blog-toolbar-btn blog-toolbar-btn-link"
-                  onClick={handleInsertLink}
-                  title="Insert Hyperlink"
-                >
-                  <i className="fa-solid fa-link"></i> Add Hyperlink
-                </button>
-                <button
-                  type="button"
-                  className="blog-toolbar-btn"
-                  onClick={() => handleInsertSnippet('**', '**', 'bold text')}
-                  title="Bold (**text**)"
-                >
-                  <i className="fa-solid fa-bold"></i> Bold
-                </button>
-                <button
-                  type="button"
-                  className="blog-toolbar-btn"
-                  onClick={() => handleInsertSnippet('\n## ', '\n', 'Section Title')}
-                  title="Section Heading (##)"
-                >
-                  <i className="fa-solid fa-heading"></i> H2
-                </button>
-                <button
-                  type="button"
-                  className="blog-toolbar-btn"
-                  onClick={() => handleInsertSnippet('\n### ', '\n', 'Subsection Title')}
-                  title="Subsection Heading (###)"
-                >
-                  <i className="fa-solid fa-heading" style={{ fontSize: '0.75rem' }}></i> H3
-                </button>
-                <button
-                  type="button"
-                  className="blog-toolbar-btn"
-                  onClick={() => handleInsertSnippet('\n* ', '\n', 'Key takeaway item')}
-                  title="Bullet list item (*)"
-                >
-                  <i className="fa-solid fa-list-ul"></i> Bullet
-                </button>
-                <span className="toolbar-tip ms-auto">
-                  <i className="fa-solid fa-circle-info"></i> Link format: <code>[Text](https://...)</code>
-                </span>
-              </div>
+              {activeTab === 'write' ? (
+                <>
+                  {/* Quick Formatting & Hyperlink Toolbar */}
+                  <div className="blog-editor-toolbar">
+                    <button
+                      type="button"
+                      className="blog-toolbar-btn blog-toolbar-btn-link"
+                      onClick={handleInsertLink}
+                      title="Insert Hyperlink"
+                    >
+                      <i className="fa-solid fa-link"></i> Add Hyperlink
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-toolbar-btn"
+                      onClick={() => handleInsertSnippet('**', '**', 'bold text')}
+                      title="Bold (**text**)"
+                    >
+                      <i className="fa-solid fa-bold"></i> Bold
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-toolbar-btn"
+                      onClick={() => handleInsertSnippet('\n## ', '\n', 'Section Title')}
+                      title="Section Heading (##)"
+                    >
+                      <i className="fa-solid fa-heading"></i> H2
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-toolbar-btn"
+                      onClick={() => handleInsertSnippet('\n### ', '\n', 'Subsection Title')}
+                      title="Subsection Heading (###)"
+                    >
+                      <i className="fa-solid fa-heading" style={{ fontSize: '0.75rem' }}></i> H3
+                    </button>
+                    <button
+                      type="button"
+                      className="blog-toolbar-btn"
+                      onClick={() => handleInsertSnippet('\n* ', '\n', 'Key takeaway item')}
+                      title="Bullet list item (*)"
+                    >
+                      <i className="fa-solid fa-list-ul"></i> Bullet
+                    </button>
 
-              <textarea
-                id="blog-content"
-                rows="10"
-                required
-                placeholder="Write or paste your article content here...
+                    <div className="blog-toolbar-divider" aria-hidden="true"></div>
 
-Tip: You can insert hyperlinks in between your text using the 'Add Hyperlink' button above, or write [link text](https://example.com) directly!
+                    {/* Text Alignment Toolbar Actions */}
+                    <div className="blog-toolbar-align-group">
+                      <span className="toolbar-inline-label">Align:</span>
+                      <button
+                        type="button"
+                        className={`blog-toolbar-btn blog-toolbar-align-btn ${formData.textAlign === 'left' ? 'active' : ''}`}
+                        onClick={() => handleAlignmentSelect('left')}
+                        title="Align Left (or wrap selection in left-aligned block)"
+                      >
+                        <i className="fa-solid fa-align-left"></i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`blog-toolbar-btn blog-toolbar-align-btn ${formData.textAlign === 'justify' ? 'active' : ''}`}
+                        onClick={() => handleAlignmentSelect('justify')}
+                        title="Justify (or wrap selection in justified block)"
+                      >
+                        <i className="fa-solid fa-align-justify"></i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`blog-toolbar-btn blog-toolbar-align-btn ${formData.textAlign === 'center' ? 'active' : ''}`}
+                        onClick={() => handleAlignmentSelect('center')}
+                        title="Align Center (or wrap selection in centered block)"
+                      >
+                        <i className="fa-solid fa-align-center"></i>
+                      </button>
+                      <button
+                        type="button"
+                        className={`blog-toolbar-btn blog-toolbar-align-btn ${formData.textAlign === 'right' ? 'active' : ''}`}
+                        onClick={() => handleAlignmentSelect('right')}
+                        title="Align Right (or wrap selection in right-aligned block)"
+                      >
+                        <i className="fa-solid fa-align-right"></i>
+                      </button>
+                    </div>
+
+                    <span className="toolbar-tip ms-auto">
+                      <i className="fa-solid fa-circle-info"></i> Alignment: <code>{formData.textAlign}</code>
+                    </span>
+                  </div>
+
+                  <textarea
+                    id="blog-content"
+                    rows="11"
+                    required
+                    placeholder="Write or paste your article content here...
+
+Tip: Use the Text Alignment options to align whole article or specific blocks.
 
 ### Executive Overview
 Enter section overview...
@@ -456,10 +601,33 @@ Enter section overview...
 
 ### Concluding Recommendations
 Summary and recommendations for trade delegates..."
-                value={formData.content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                className="form-control font-mono-text blog-content-textarea"
-              ></textarea>
+                    value={formData.content}
+                    onChange={(e) => handleContentChange(e.target.value)}
+                    style={{ textAlign: formData.textAlign || 'left' }}
+                    className="form-control font-mono-text blog-content-textarea"
+                  ></textarea>
+                </>
+              ) : (
+                <div className="blog-modal-preview-box">
+                  <div className="preview-box-header">
+                    <span className="preview-badge">
+                      <i className="fa-solid fa-eye text-primary"></i> Live Reader Simulation
+                    </span>
+                    <span className="preview-align-indicator">
+                      Text Alignment: <strong className="text-capitalize">{formData.textAlign}</strong>
+                    </span>
+                  </div>
+                  <div className="preview-box-body">
+                    <BlogContentRenderer
+                      content={
+                        formData.content.trim() ||
+                        '*No article content written yet. Switch to the Editor tab to start typing.*'
+                      }
+                      textAlign={formData.textAlign}
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Featured Article Toggle */}
