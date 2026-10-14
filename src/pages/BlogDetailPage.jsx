@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import blogService, { getBlogSlug, formatBlogPublishedDate, isSameBlog } from '../services/blogService';
 import { useData } from '../context/DataContext';
+import BlogContentRenderer from '../components/BlogContentRenderer';
 
 export default function BlogDetailPage({ onNotify }) {
   const { id } = useParams();
@@ -11,6 +12,30 @@ export default function BlogDetailPage({ onNotify }) {
   const [relatedBlogs, setRelatedBlogs] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [copySuccess, setCopySuccess] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(0);
+  const [fontSize, setFontSize] = useState('normal'); // 'small' | 'normal' | 'large'
+
+  // Always ensure body overflow is unlocked when viewing a blog
+  useEffect(() => {
+    document.body.style.overflow = '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+
+  // Track scroll progress for reading bar
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight > 0) {
+        const pct = (window.scrollY / scrollHeight) * 100;
+        setReadingProgress(Math.min(100, Math.max(0, pct)));
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -122,142 +147,6 @@ export default function BlogDetailPage({ onNotify }) {
     }
   };
 
-  // Inline parser supporting markdown hyperlinks [text](url), raw URLs, and **bold**
-  const renderInlineContent = (text) => {
-    if (!text) return null;
-
-    // Pattern matches:
-    // 1. Markdown link: [Anchor text](https://example.com)
-    // 2. Bold text: **bold**
-    // 3. Raw URL: https://example.com or http://example.com
-    const regex = /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|https?:\/\/[^\s<)]+)/g;
-    const parts = text.split(regex);
-
-    return parts.map((part, pIdx) => {
-      if (!part) return null;
-
-      // Markdown link [text](url)
-      if (part.startsWith('[') && part.includes('](') && part.endsWith(')')) {
-        const match = part.match(/^\[(.*?)\]\((.*?)\)$/);
-        if (match) {
-          const anchorText = match[1];
-          const href = match[2].trim();
-          const isExternal = href.startsWith('http://') || href.startsWith('https://');
-          return (
-            <a
-              key={pIdx}
-              href={href}
-              target={isExternal ? '_blank' : '_self'}
-              rel={isExternal ? 'noopener noreferrer' : undefined}
-              className="blog-inline-link"
-            >
-              {anchorText}
-              {isExternal && <i className="fa-solid fa-arrow-up-right-from-square inline-link-icon"></i>}
-            </a>
-          );
-        }
-      }
-
-      // Bold text **bold**
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={pIdx}>{part.slice(2, -2)}</strong>;
-      }
-
-      // Raw URL https://...
-      if (part.startsWith('http://') || part.startsWith('https://')) {
-        return (
-          <a
-            key={pIdx}
-            href={part}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="blog-inline-link"
-          >
-            {part}
-            <i className="fa-solid fa-arrow-up-right-from-square inline-link-icon"></i>
-          </a>
-        );
-      }
-
-      return part;
-    });
-  };
-
-  // Render paragraphs, headings, lists, and inline links safely
-  const renderFormattedContent = (content) => {
-    if (!content) return null;
-
-    const sections = content.split('\n\n');
-    return sections.map((section, idx) => {
-      const trimmed = section.trim();
-
-      // Heading 3
-      if (trimmed.startsWith('### ')) {
-        return (
-          <h3 key={idx} className="blog-article-h3">
-            {renderInlineContent(trimmed.replace('### ', ''))}
-          </h3>
-        );
-      }
-
-      // Heading 2
-      if (trimmed.startsWith('## ')) {
-        return (
-          <h2 key={idx} className="blog-article-h2">
-            {renderInlineContent(trimmed.replace('## ', ''))}
-          </h2>
-        );
-      }
-
-      // List Block (Numbered or Bullet)
-      if (
-        trimmed.includes('\n1.') ||
-        trimmed.startsWith('1.') ||
-        trimmed.includes('\n*') ||
-        trimmed.startsWith('*')
-      ) {
-        const lines = trimmed.split('\n');
-        return (
-          <div key={idx} className="blog-article-list-block">
-            {lines.map((line, lineIdx) => {
-              const cleanLine = line.trim();
-              if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
-                return (
-                  <div key={lineIdx} className="blog-list-item">
-                    <span className="blog-list-bullet">&bull;</span>
-                    <span className="blog-list-text">{renderInlineContent(cleanLine.slice(2))}</span>
-                  </div>
-                );
-              } else if (/^\d+\./.test(cleanLine)) {
-                const match = cleanLine.match(/^(\d+\.)\s*(.*)$/);
-                return (
-                  <div key={lineIdx} className="blog-list-item">
-                    <span className="blog-list-num">{match ? match[1] : `${lineIdx + 1}.`}</span>
-                    <span className="blog-list-text">
-                      {renderInlineContent(match ? match[2] : cleanLine)}
-                    </span>
-                  </div>
-                );
-              }
-              return (
-                <p key={lineIdx} className="blog-list-text">
-                  {renderInlineContent(cleanLine)}
-                </p>
-              );
-            })}
-          </div>
-        );
-      }
-
-      // Standard Paragraph
-      return (
-        <p key={idx} className="blog-article-paragraph">
-          {renderInlineContent(trimmed)}
-        </p>
-      );
-    });
-  };
-
   if (isLoading) {
     return (
       <div className="page-wrapper py-5">
@@ -288,6 +177,14 @@ export default function BlogDetailPage({ onNotify }) {
 
   return (
     <div className="page-wrapper blog-detail-page">
+      {/* Realtime Reading Progress Indicator */}
+      <div className="blog-reading-progress-track" aria-hidden="true">
+        <div
+          className="blog-reading-progress-bar"
+          style={{ width: `${readingProgress}%` }}
+        />
+      </div>
+
       {/* Top Breadcrumb & Return Ribbon */}
       <section className="blog-detail-topbar">
         <div className="container">
@@ -300,7 +197,9 @@ export default function BlogDetailPage({ onNotify }) {
               Our Blogs
             </Link>
             <span className="breadcrumb-sep">/</span>
-            <span className="breadcrumb-current">{blog.title}</span>
+            <span className="breadcrumb-current" title={blog.title}>
+              {blog.title}
+            </span>
           </div>
 
           <Link to="/blogs" className="blog-back-btn">
@@ -310,10 +209,16 @@ export default function BlogDetailPage({ onNotify }) {
       </section>
 
       {/* Main Article Container */}
-      <article className="section py-4">
+      <article className="section py-4 blog-article-section">
         <div className="container article-container">
           {/* Header */}
           <header className="article-header">
+            {blog.category && (
+              <span className="article-category-badge">
+                {blog.category}
+              </span>
+            )}
+
             <h1 className="article-headline">{blog.title}</h1>
 
             <div className="article-meta-bar">
@@ -338,45 +243,81 @@ export default function BlogDetailPage({ onNotify }) {
               </div>
             </div>
 
-            {/* Social Share Bar */}
-            <div className="article-share-strip">
-              <span className="share-strip-label">
-                <i className="fa-solid fa-share-nodes"></i> Share this insight:
-              </span>
-              <div className="share-buttons-row">
-                <button
-                  type="button"
-                  className="share-btn share-btn-copy"
-                  onClick={handleCopyLink}
-                  title="Copy link to clipboard"
-                >
-                  <i className={`fa-solid ${copySuccess ? 'fa-check' : 'fa-link'}`}></i>
-                  <span>{copySuccess ? 'Copied!' : 'Copy Link'}</span>
-                </button>
-                <button
-                  type="button"
-                  className="share-btn share-btn-linkedin"
-                  onClick={() => handleShare('linkedin')}
-                  title="Share on LinkedIn"
-                >
-                  <i className="fa-brands fa-linkedin"></i>
-                </button>
-                <button
-                  type="button"
-                  className="share-btn share-btn-twitter"
-                  onClick={() => handleShare('twitter')}
-                  title="Share on X / Twitter"
-                >
-                  <i className="fa-brands fa-x-twitter"></i>
-                </button>
-                <button
-                  type="button"
-                  className="share-btn share-btn-whatsapp"
-                  onClick={() => handleShare('whatsapp')}
-                  title="Share via WhatsApp"
-                >
-                  <i className="fa-brands fa-whatsapp"></i>
-                </button>
+            {/* Reader Utilities & Social Share Strip */}
+            <div className="article-toolbar-strip">
+              {/* Text Size Accessibility Controls */}
+              <div className="article-text-resizer">
+                <span className="resizer-label">
+                  <i className="fa-solid fa-text-height"></i> Text Size:
+                </span>
+                <div className="resizer-buttons">
+                  <button
+                    type="button"
+                    className={`resizer-btn ${fontSize === 'small' ? 'active' : ''}`}
+                    onClick={() => setFontSize('small')}
+                    title="Small text"
+                  >
+                    A-
+                  </button>
+                  <button
+                    type="button"
+                    className={`resizer-btn ${fontSize === 'normal' ? 'active' : ''}`}
+                    onClick={() => setFontSize('normal')}
+                    title="Default text"
+                  >
+                    A
+                  </button>
+                  <button
+                    type="button"
+                    className={`resizer-btn ${fontSize === 'large' ? 'active' : ''}`}
+                    onClick={() => setFontSize('large')}
+                    title="Large text"
+                  >
+                    A+
+                  </button>
+                </div>
+              </div>
+
+              {/* Share Actions */}
+              <div className="article-share-group">
+                <span className="share-strip-label">
+                  <i className="fa-solid fa-share-nodes"></i> Share:
+                </span>
+                <div className="share-buttons-row">
+                  <button
+                    type="button"
+                    className="share-btn share-btn-copy"
+                    onClick={handleCopyLink}
+                    title="Copy link to clipboard"
+                  >
+                    <i className={`fa-solid ${copySuccess ? 'fa-check' : 'fa-link'}`}></i>
+                    <span>{copySuccess ? 'Copied!' : 'Copy Link'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="share-btn share-btn-linkedin"
+                    onClick={() => handleShare('linkedin')}
+                    title="Share on LinkedIn"
+                  >
+                    <i className="fa-brands fa-linkedin"></i>
+                  </button>
+                  <button
+                    type="button"
+                    className="share-btn share-btn-twitter"
+                    onClick={() => handleShare('twitter')}
+                    title="Share on X / Twitter"
+                  >
+                    <i className="fa-brands fa-x-twitter"></i>
+                  </button>
+                  <button
+                    type="button"
+                    className="share-btn share-btn-whatsapp"
+                    onClick={() => handleShare('whatsapp')}
+                    title="Share via WhatsApp"
+                  >
+                    <i className="fa-brands fa-whatsapp"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </header>
@@ -402,9 +343,9 @@ export default function BlogDetailPage({ onNotify }) {
             </div>
           )}
 
-          {/* Body Content */}
-          <div className="article-body-content">
-            {renderFormattedContent(blog.content)}
+          {/* Body Content with fluid responsive text & custom font size */}
+          <div className={`article-body-content font-size-${fontSize}`}>
+            <BlogContentRenderer content={blog.content} />
           </div>
 
           {/* Tags */}

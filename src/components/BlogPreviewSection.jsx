@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { getBlogSlug, getBlogTimestamp, formatBlogPublishedDate } from '../services/blogService';
+import BlogQuickReadModal from './BlogQuickReadModal';
 
 export default function BlogPreviewSection() {
   const { blogs = [] } = useData();
+  const [quickReadBlog, setQuickReadBlog] = useState(null);
 
   if (!blogs || blogs.length === 0) return null;
 
@@ -15,6 +18,12 @@ export default function BlogPreviewSection() {
       return (b.featured ? 1 : 0) - (a.featured ? 1 : 0);
     })
     .slice(0, 3);
+
+  const handleQuickRead = (e, blog) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setQuickReadBlog(blog);
+  };
 
   return (
     <section className="section bg-surface-alt blog-preview-section">
@@ -36,8 +45,8 @@ export default function BlogPreviewSection() {
             const slug = blog.slug || getBlogSlug(blog);
             return (
               <article key={blog.id || slug} className="blog-card">
-                <Link to={`/blogs/${slug}`} className="blog-card-link">
-                  <div className="blog-card-cover-wrap">
+                <div className="blog-card-link">
+                  <Link to={`/blogs/${slug}`} className="blog-card-cover-wrap">
                     <img
                       src={blog.coverImage}
                       alt={blog.title}
@@ -49,7 +58,15 @@ export default function BlogPreviewSection() {
                         <i className="fa-solid fa-star"></i>
                       </span>
                     )}
-                  </div>
+                    <button
+                      type="button"
+                      className="blog-card-quick-btn"
+                      onClick={(e) => handleQuickRead(e, blog)}
+                      title="Quick preview without leaving page"
+                    >
+                      <i className="fa-solid fa-book-open"></i> Quick Read
+                    </button>
+                  </Link>
 
                   <div className="blog-card-body">
                     <div className="blog-card-meta">
@@ -60,7 +77,11 @@ export default function BlogPreviewSection() {
                       </span>
                     </div>
 
-                    <h3 className="blog-card-title">{blog.title}</h3>
+                    <h3 className="blog-card-title">
+                      <Link to={`/blogs/${slug}`} className="blog-card-title-link">
+                        {blog.title}
+                      </Link>
+                    </h3>
 
                     <p className="blog-card-excerpt">{blog.excerpt}</p>
                   </div>
@@ -78,11 +99,20 @@ export default function BlogPreviewSection() {
                       </div>
                     </div>
 
-                    <span className="blog-card-read-more">
-                      Read <i className="fa-solid fa-arrow-right"></i>
-                    </span>
+                    <div className="blog-card-actions">
+                      <button
+                        type="button"
+                        className="blog-btn-quick"
+                        onClick={(e) => handleQuickRead(e, blog)}
+                      >
+                        <i className="fa-solid fa-book-open"></i> Preview
+                      </button>
+                      <Link to={`/blogs/${slug}`} className="blog-card-read-more">
+                        Read <i className="fa-solid fa-arrow-right"></i>
+                      </Link>
+                    </div>
                   </div>
-                </Link>
+                </div>
               </article>
             );
           })}
@@ -95,6 +125,13 @@ export default function BlogPreviewSection() {
           </Link>
         </div>
       </div>
+
+      {/* Quick Reader Modal */}
+      <BlogQuickReadModal
+        isOpen={Boolean(quickReadBlog)}
+        blog={quickReadBlog}
+        onClose={() => setQuickReadBlog(null)}
+      />
     </section>
   );
 }

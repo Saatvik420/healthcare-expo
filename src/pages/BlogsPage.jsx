@@ -1,12 +1,22 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { getBlogSlug, getBlogTimestamp, formatBlogPublishedDate } from '../services/blogService';
+import BlogQuickReadModal from '../components/BlogQuickReadModal';
 
 export default function BlogsPage() {
   const { blogs = [] } = useData();
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest'); // newest, oldest, readTime
+  const [quickReadBlog, setQuickReadBlog] = useState(null);
+
+  // Clear any lingering scroll lock on mount
+  useEffect(() => {
+    document.body.style.overflow = '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
 
   // Filter and sort blogs
   const filteredBlogs = useMemo(() => {
@@ -60,6 +70,12 @@ export default function BlogsPage() {
     return filteredBlogs;
   }, [filteredBlogs, searchQuery, featuredBlog]);
 
+  const handleQuickRead = (e, blog) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setQuickReadBlog(blog);
+  };
+
   return (
     <div className="page-wrapper blogs-page">
       {/* Hero Header */}
@@ -69,6 +85,9 @@ export default function BlogsPage() {
             <h1 className="blogs-hero-title">
               Our <span className="text-gradient">Blogs</span>
             </h1>
+            <p className="blogs-hero-subtitle">
+              Expert articles, regulatory blueprints, and bilateral trade intelligence for the international healthcare community.
+            </p>
           </div>
         </div>
       </section>
@@ -120,11 +139,11 @@ export default function BlogsPage() {
           {/* FEATURED STORY SPOTLIGHT (Only when not actively searching) */}
           {!searchQuery.trim() && featuredBlog && (
             <div className="blogs-featured-spotlight">
-              <Link
-                to={`/blogs/${featuredBlog.slug || getBlogSlug(featuredBlog)}`}
-                className="featured-spotlight-card"
-              >
-                <div className="featured-spotlight-img-wrap">
+              <div className="featured-spotlight-card">
+                <Link
+                  to={`/blogs/${featuredBlog.slug || getBlogSlug(featuredBlog)}`}
+                  className="featured-spotlight-img-wrap"
+                >
                   <img
                     src={featuredBlog.coverImage}
                     alt={featuredBlog.title}
@@ -133,7 +152,7 @@ export default function BlogsPage() {
                   <div className="featured-spotlight-tag">
                     <i className="fa-solid fa-star"></i> Featured Editorial
                   </div>
-                </div>
+                </Link>
 
                 <div className="featured-spotlight-info">
                   <div className="featured-spotlight-meta">
@@ -144,7 +163,14 @@ export default function BlogsPage() {
                     </span>
                   </div>
 
-                  <h2 className="featured-spotlight-title">{featuredBlog.title}</h2>
+                  <h2 className="featured-spotlight-title">
+                    <Link
+                      to={`/blogs/${featuredBlog.slug || getBlogSlug(featuredBlog)}`}
+                      className="featured-spotlight-title-link"
+                    >
+                      {featuredBlog.title}
+                    </Link>
+                  </h2>
 
                   <p className="featured-spotlight-excerpt">{featuredBlog.excerpt}</p>
 
@@ -159,12 +185,24 @@ export default function BlogsPage() {
                       </div>
                     </div>
 
-                    <span className="featured-read-btn">
-                      Read Full Article <i className="fa-solid fa-arrow-right"></i>
-                    </span>
+                    <div className="featured-spotlight-actions">
+                      <button
+                        type="button"
+                        className="blog-btn-quick"
+                        onClick={(e) => handleQuickRead(e, featuredBlog)}
+                      >
+                        <i className="fa-solid fa-book-open"></i> Quick Read
+                      </button>
+                      <Link
+                        to={`/blogs/${featuredBlog.slug || getBlogSlug(featuredBlog)}`}
+                        className="featured-read-btn"
+                      >
+                        <span>Full Article</span> <i className="fa-solid fa-arrow-right"></i>
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </Link>
+              </div>
             </div>
           )}
 
@@ -175,8 +213,8 @@ export default function BlogsPage() {
                 const slug = blog.slug || getBlogSlug(blog);
                 return (
                   <article key={blog.id || slug} className="blog-card">
-                    <Link to={`/blogs/${slug}`} className="blog-card-link">
-                      <div className="blog-card-cover-wrap">
+                    <div className="blog-card-link">
+                      <Link to={`/blogs/${slug}`} className="blog-card-cover-wrap">
                         <img
                           src={blog.coverImage || 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1200&q=80'}
                           alt={blog.title}
@@ -191,7 +229,15 @@ export default function BlogsPage() {
                             <i className="fa-solid fa-star"></i>
                           </span>
                         )}
-                      </div>
+                        <button
+                          type="button"
+                          className="blog-card-quick-btn"
+                          onClick={(e) => handleQuickRead(e, blog)}
+                          title="Quick preview without leaving page"
+                        >
+                          <i className="fa-solid fa-book-open"></i> Quick Read
+                        </button>
+                      </Link>
 
                       <div className="blog-card-body">
                         <div className="blog-card-meta">
@@ -202,7 +248,11 @@ export default function BlogsPage() {
                           </span>
                         </div>
 
-                        <h3 className="blog-card-title">{blog.title}</h3>
+                        <h3 className="blog-card-title">
+                          <Link to={`/blogs/${slug}`} className="blog-card-title-link">
+                            {blog.title}
+                          </Link>
+                        </h3>
 
                         <p className="blog-card-excerpt">{blog.excerpt}</p>
                       </div>
@@ -220,11 +270,20 @@ export default function BlogsPage() {
                           </div>
                         </div>
 
-                        <span className="blog-card-read-more">
-                          Read <i className="fa-solid fa-arrow-right"></i>
-                        </span>
+                        <div className="blog-card-actions">
+                          <button
+                            type="button"
+                            className="blog-btn-quick"
+                            onClick={(e) => handleQuickRead(e, blog)}
+                          >
+                            <i className="fa-solid fa-book-open"></i> Preview
+                          </button>
+                          <Link to={`/blogs/${slug}`} className="blog-card-read-more">
+                            Read <i className="fa-solid fa-arrow-right"></i>
+                          </Link>
+                        </div>
                       </div>
-                    </Link>
+                    </div>
                   </article>
                 );
               })}
@@ -268,6 +327,13 @@ export default function BlogsPage() {
           </div>
         </div>
       </section>
+
+      {/* Quick Reader Modal */}
+      <BlogQuickReadModal
+        isOpen={Boolean(quickReadBlog)}
+        blog={quickReadBlog}
+        onClose={() => setQuickReadBlog(null)}
+      />
     </div>
   );
 }
