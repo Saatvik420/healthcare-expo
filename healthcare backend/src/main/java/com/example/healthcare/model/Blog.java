@@ -64,6 +64,9 @@ public class Blog {
         if (slug == null || slug.isEmpty()) {
             slug = generateSlug(title);
         }
+        if (textAlign == null || textAlign.trim().isEmpty()) {
+            textAlign = "left";
+        }
     }
 
     @PreUpdate

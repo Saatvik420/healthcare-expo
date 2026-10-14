@@ -27,12 +27,17 @@ public class Visitor {
     private String phone;
     private String organization;
     private String designation;
+    private String country;
     private String sector;
     private String sectorLabel;
     private String passType; // 'vip', 'standard'
     private String passCode;
     private String attendDate;
+    private String attendDay;
     private String status; // 'Confirmed', 'Pending'
+
+    @Column(length = 1000)
+    private String notes;
 
     private LocalDateTime createdAt;
 
@@ -46,6 +51,12 @@ public class Visitor {
         }
         if (status == null || status.isEmpty()) {
             status = "Confirmed";
+        }
+        if (country == null || country.isEmpty()) {
+            country = "India";
+        }
+        if (attendDay == null || attendDay.isEmpty()) {
+            attendDay = "all";
         }
     }
 }

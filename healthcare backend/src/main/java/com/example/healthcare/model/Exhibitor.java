@@ -30,6 +30,7 @@ public class Exhibitor {
     private String email;
 
     private String phone;
+    private String website;
     private String stallType;
     private String hall;
     private String amount;

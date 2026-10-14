@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/exhibitors")
+@CrossOrigin(origins = "*")
 public class ExhibitorController {
 
     private final ExhibitorRepository exhibitorRepository;
@@ -25,6 +26,13 @@ public class ExhibitorController {
         return ResponseEntity.ok(exhibitorRepository.findAllByOrderByIdDesc());
     }
 
+    @GetMapping("/{identifier}")
+    public ResponseEntity<Exhibitor> getExhibitorByIdentifier(@PathVariable String identifier) {
+        return findByIdentifier(identifier)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<Exhibitor> createExhibitor(@RequestBody Exhibitor exhibitor) {
         if (exhibitor.getExhibitorCode() == null || exhibitor.getExhibitorCode().isEmpty()) {
@@ -35,6 +43,33 @@ public class ExhibitorController {
         }
         Exhibitor saved = exhibitorRepository.save(exhibitor);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PutMapping("/{identifier}")
+    public ResponseEntity<Exhibitor> updateExhibitor(
+            @PathVariable String identifier,
+            @RequestBody Exhibitor updateData) {
+        Optional<Exhibitor> optional = findByIdentifier(identifier);
+        if (optional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Exhibitor current = optional.get();
+        if (updateData.getCompany() != null) current.setCompany(updateData.getCompany());
+        if (updateData.getContactPerson() != null) current.setContactPerson(updateData.getContactPerson());
+        if (updateData.getDesignation() != null) current.setDesignation(updateData.getDesignation());
+        if (updateData.getEmail() != null) current.setEmail(updateData.getEmail());
+        if (updateData.getPhone() != null) current.setPhone(updateData.getPhone());
+        if (updateData.getWebsite() != null) current.setWebsite(updateData.getWebsite());
+        if (updateData.getStallType() != null) current.setStallType(updateData.getStallType());
+        if (updateData.getHall() != null) current.setHall(updateData.getHall());
+        if (updateData.getAmount() != null) current.setAmount(updateData.getAmount());
+        if (updateData.getStatus() != null) current.setStatus(updateData.getStatus());
+        if (updateData.getBookingDate() != null) current.setBookingDate(updateData.getBookingDate());
+        if (updateData.getNotes() != null) current.setNotes(updateData.getNotes());
+
+        Exhibitor updated = exhibitorRepository.save(current);
+        return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/{identifier}/status")

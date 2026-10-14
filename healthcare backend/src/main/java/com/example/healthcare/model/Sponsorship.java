@@ -27,6 +27,7 @@ public class Sponsorship {
     @Column(nullable = false)
     private String email;
 
+    private String phone;
     private String tier; // e.g. 'Platinum Partner', 'Gold Partner'
     private String investment;
     private String status; // 'Agreement Signed', 'In Discussion'

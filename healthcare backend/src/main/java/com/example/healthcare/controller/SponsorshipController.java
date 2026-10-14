@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/sponsorships")
+@CrossOrigin(origins = "*")
 public class SponsorshipController {
 
     private final SponsorshipRepository sponsorshipRepository;
@@ -25,6 +26,13 @@ public class SponsorshipController {
         return ResponseEntity.ok(sponsorshipRepository.findAllByOrderByIdDesc());
     }
 
+    @GetMapping("/{identifier}")
+    public ResponseEntity<Sponsorship> getSponsorshipByIdentifier(@PathVariable String identifier) {
+        return findByIdentifier(identifier)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping
     public ResponseEntity<Sponsorship> createSponsorship(@RequestBody Sponsorship sponsorship) {
         if (sponsorship.getSponsorshipCode() == null || sponsorship.getSponsorshipCode().isEmpty()) {
@@ -35,6 +43,29 @@ public class SponsorshipController {
         }
         Sponsorship saved = sponsorshipRepository.save(sponsorship);
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
+    @PutMapping("/{identifier}")
+    public ResponseEntity<Sponsorship> updateSponsorship(
+            @PathVariable String identifier,
+            @RequestBody Sponsorship updateData) {
+        Optional<Sponsorship> optional = findByIdentifier(identifier);
+        if (optional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Sponsorship current = optional.get();
+        if (updateData.getCompany() != null) current.setCompany(updateData.getCompany());
+        if (updateData.getContactPerson() != null) current.setContactPerson(updateData.getContactPerson());
+        if (updateData.getEmail() != null) current.setEmail(updateData.getEmail());
+        if (updateData.getPhone() != null) current.setPhone(updateData.getPhone());
+        if (updateData.getTier() != null) current.setTier(updateData.getTier());
+        if (updateData.getInvestment() != null) current.setInvestment(updateData.getInvestment());
+        if (updateData.getStatus() != null) current.setStatus(updateData.getStatus());
+        if (updateData.getDate() != null) current.setDate(updateData.getDate());
+
+        Sponsorship updated = sponsorshipRepository.save(current);
+        return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/{identifier}/status")
@@ -50,6 +81,16 @@ public class SponsorshipController {
         sponsorship.setStatus(request.getStatus());
         Sponsorship updated = sponsorshipRepository.save(sponsorship);
         return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{identifier}")
+    public ResponseEntity<Void> deleteSponsorship(@PathVariable String identifier) {
+        Optional<Sponsorship> optional = findByIdentifier(identifier);
+        if (optional.isPresent()) {
+            sponsorshipRepository.delete(optional.get());
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
     private Optional<Sponsorship> findByIdentifier(String identifier) {

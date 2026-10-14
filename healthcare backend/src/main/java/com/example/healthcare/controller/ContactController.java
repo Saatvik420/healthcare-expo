@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/contact")
+@CrossOrigin(origins = "*")
 public class ContactController {
 
     private final ContactInquiryRepository inquiryRepository;
@@ -27,5 +28,21 @@ public class ContactController {
     @GetMapping
     public ResponseEntity<List<ContactInquiry>> getAllInquiries() {
         return ResponseEntity.ok(inquiryRepository.findAllByOrderBySubmittedAtDesc());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ContactInquiry> getInquiryById(@PathVariable Long id) {
+        return inquiryRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteInquiry(@PathVariable Long id) {
+        if (inquiryRepository.existsById(id)) {
+            inquiryRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 }
