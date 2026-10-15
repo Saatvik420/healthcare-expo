@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "blogs")
 @Data
-@NoArgsConstructor
 @Builder
 public class Blog {
 
@@ -48,6 +47,10 @@ public class Blog {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Blog() {
+        this.textAlign = "left";
+    }
 
     public Blog(Long id, String blogId, String title, String slug, String excerpt,
                 String content, String category, String tags, String author,

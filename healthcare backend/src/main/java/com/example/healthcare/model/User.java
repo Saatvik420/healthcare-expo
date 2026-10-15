@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "users")
 @Data
-@NoArgsConstructor
 @Builder
 public class User {
 
@@ -40,6 +39,9 @@ public class User {
     private String status;
 
     private LocalDateTime createdAt;
+
+    public User() {
+    }
 
     public User(Long id, String uid, String name, String email, String password, String role,
                 String phone, String organization, String designation, String company,

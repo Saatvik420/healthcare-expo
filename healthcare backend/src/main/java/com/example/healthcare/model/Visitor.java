@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "visitors")
 @Data
-@NoArgsConstructor
 @Builder
 public class Visitor {
 
@@ -39,6 +38,9 @@ public class Visitor {
     private String notes;
 
     private LocalDateTime createdAt;
+
+    public Visitor() {
+    }
 
     public Visitor(Long id, String visitorCode, String name, String email, String phone,
                    String organization, String designation, String country, String sector,

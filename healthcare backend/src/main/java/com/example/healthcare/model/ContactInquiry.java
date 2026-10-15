@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "contact_inquiries")
 @Data
-@NoArgsConstructor
 @Builder
 public class ContactInquiry {
 
@@ -35,6 +34,9 @@ public class ContactInquiry {
     private String date;
 
     private LocalDateTime submittedAt;
+
+    public ContactInquiry() {
+    }
 
     public ContactInquiry(Long id, String inquiryCode, String name, String email, String phone,
                           String organization, String inquiryType, String subject,

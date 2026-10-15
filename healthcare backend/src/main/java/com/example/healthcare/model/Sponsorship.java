@@ -7,7 +7,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "sponsorships")
 @Data
-@NoArgsConstructor
 @Builder
 public class Sponsorship {
 
@@ -33,6 +32,9 @@ public class Sponsorship {
     private String date;
 
     private LocalDateTime createdAt;
+
+    public Sponsorship() {
+    }
 
     public Sponsorship(Long id, String sponsorshipCode, String company, String contactPerson,
                        String email, String phone, String tier, String investment,
