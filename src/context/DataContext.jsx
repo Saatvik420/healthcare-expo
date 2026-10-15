@@ -293,12 +293,23 @@ export function DataProvider({ children }) {
       const stored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
       if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           const unique = [];
           for (const b of parsed) {
-            if (!unique.some((u) => isSameBlog(u, b))) {
+            if (b && !unique.some((u) => isSameBlog(u, b))) {
               unique.push(b);
             }
+          }
+          for (const initBlog of INITIAL_BLOGS) {
+            if (!unique.some((u) => isSameBlog(u, initBlog))) {
+              unique.push(initBlog);
+            }
+          }
+          try {
+            localStorage.setItem('ghe_blogs', JSON.stringify(unique));
+            localStorage.setItem('ighe_blogs_cache', JSON.stringify(unique));
+          } catch {
+            // ignore
           }
           return unique;
         }
@@ -373,10 +384,16 @@ export function DataProvider({ children }) {
             slug: b.slug || getBlogSlug(b),
             publishedDate: formatBlogPublishedDate(b),
           }));
-          setBlogs(normalized);
+          const merged = [...normalized];
+          for (const initBlog of INITIAL_BLOGS) {
+            if (!merged.some((u) => isSameBlog(u, initBlog))) {
+              merged.push(initBlog);
+            }
+          }
+          setBlogs(merged);
           try {
-            localStorage.setItem('ghe_blogs', JSON.stringify(normalized));
-            localStorage.setItem('ighe_blogs_cache', JSON.stringify(normalized));
+            localStorage.setItem('ghe_blogs', JSON.stringify(merged));
+            localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
           } catch (storageErr) {
             console.warn('Cache write failed:', storageErr);
           }
@@ -454,10 +471,16 @@ export function DataProvider({ children }) {
               slug: b.slug || getBlogSlug(b),
               publishedDate: formatBlogPublishedDate(b),
             }));
-            setBlogs(normalized);
+            const merged = [...normalized];
+            for (const initBlog of INITIAL_BLOGS) {
+              if (!merged.some((u) => isSameBlog(u, initBlog))) {
+                merged.push(initBlog);
+              }
+            }
+            setBlogs(merged);
             try {
-              localStorage.setItem('ghe_blogs', JSON.stringify(normalized));
-              localStorage.setItem('ighe_blogs_cache', JSON.stringify(normalized));
+              localStorage.setItem('ghe_blogs', JSON.stringify(merged));
+              localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
             } catch (storageErr) {
               console.warn('Cache write failed:', storageErr);
             }

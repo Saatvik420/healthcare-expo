@@ -299,8 +299,13 @@ const getLocalBlogs = () => {
       if (Array.isArray(parsed)) {
         const unique = [];
         for (const b of parsed) {
-          if (!unique.some((u) => isSameBlog(u, b))) {
+          if (b && !unique.some((u) => isSameBlog(u, b))) {
             unique.push(b);
+          }
+        }
+        for (const initBlog of INITIAL_BLOGS) {
+          if (!unique.some((u) => isSameBlog(u, initBlog))) {
+            unique.push(initBlog);
           }
         }
         return unique;
