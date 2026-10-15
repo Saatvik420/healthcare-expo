@@ -424,7 +424,11 @@ export const blogsApi = {
     if (!res.ok || isHtml) {
       res = await requestWithFallback(`/blogs/slug/${encodeURIComponent(idOrSlug)}`);
     }
-    if (!res.ok) throw new Error('Failed to fetch blog');
+    if (!res.ok) {
+      const err = new Error('Failed to fetch blog');
+      err.status = res.status;
+      throw err;
+    }
     return await safeJsonResponse(res);
   },
 

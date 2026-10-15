@@ -513,18 +513,31 @@ app.get(['/api/blogs/slug/:slug', '/blogs/slug/:slug'], (req, res) => {
   res.json(blog);
 });
 
+const findBlogIndex = (idParam) => {
+  if (!Array.isArray(db.blogs) || !idParam) return -1;
+  const target = String(idParam).trim().toLowerCase();
+  const targetNorm = target.replace(/^blog_/, '');
+  return db.blogs.findIndex((b) => {
+    const idStr = String(b.id || '').toLowerCase();
+    const blogIdStr = String(b.blogId || '').toLowerCase();
+    const slugStr = String(b.slug || '').toLowerCase();
+    const idNorm = idStr.replace(/^blog_/, '');
+    const blogIdNorm = blogIdStr.replace(/^blog_/, '');
+    return (
+      idStr === target ||
+      blogIdStr === target ||
+      slugStr === target ||
+      (targetNorm && (idNorm === targetNorm || blogIdNorm === targetNorm))
+    );
+  });
+};
+
 app.get(['/api/blogs/:id', '/blogs/:id'], (req, res) => {
-  const blog = (db.blogs || []).find(
-    (b) =>
-      b.id === req.params.id ||
-      b.slug === req.params.id ||
-      b.blogId === req.params.id ||
-      String(b.id) === String(req.params.id)
-  );
-  if (!blog) {
+  const index = findBlogIndex(req.params.id);
+  if (index === -1) {
     return res.status(404).json({ error: 'Blog not found' });
   }
-  res.json(blog);
+  res.json(db.blogs[index]);
 });
 
 app.post(['/api/blogs', '/blogs', '/api/admin/blogs', '/admin/blogs'], (req, res) => {
@@ -582,13 +595,7 @@ app.put(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blogs/:
     return res.status(404).json({ error: 'Blog not found' });
   }
 
-  const index = db.blogs.findIndex(
-    (b) =>
-      b.id === req.params.id ||
-      b.slug === req.params.id ||
-      b.blogId === req.params.id ||
-      String(b.id) === String(req.params.id)
-  );
+  const index = findBlogIndex(req.params.id);
   if (index === -1) {
     return res.status(404).json({ error: 'Blog not found' });
   }
@@ -619,19 +626,12 @@ app.delete(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blog
     return res.status(404).json({ error: 'Blog not found' });
   }
 
-  const initialLen = db.blogs.length;
-  db.blogs = db.blogs.filter(
-    (b) =>
-      b.id !== req.params.id &&
-      b.slug !== req.params.id &&
-      b.blogId !== req.params.id &&
-      String(b.id) !== String(req.params.id)
-  );
-
-  if (db.blogs.length === initialLen) {
+  const index = findBlogIndex(req.params.id);
+  if (index === -1) {
     return res.status(404).json({ error: 'Blog not found' });
   }
 
+  db.blogs.splice(index, 1);
   saveDatabase();
   res.status(200).json({ success: true, message: 'Blog deleted successfully' });
 });

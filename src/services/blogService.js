@@ -254,7 +254,11 @@ export const isSameBlog = (a, b) => {
   const slugB = (b.slug || '').trim().toLowerCase();
   if (slugA && slugB && slugA === slugB) return true;
 
-  // 6. Title match (case-insensitive, trimmed)
+  // 6. Cross slug vs id / blogId matching
+  if (slugA && (String(b.id).toLowerCase() === slugA || String(b.blogId).toLowerCase() === slugA)) return true;
+  if (slugB && (String(a.id).toLowerCase() === slugB || String(a.blogId).toLowerCase() === slugB)) return true;
+
+  // 7. Title match (case-insensitive, trimmed)
   const titleA = (a.title || '').trim().toLowerCase();
   const titleB = (b.title || '').trim().toLowerCase();
   if (titleA && titleB && titleA === titleB) return true;
@@ -262,35 +266,37 @@ export const isSameBlog = (a, b) => {
   return false;
 };
 
-// Robust merge utility that gives backend data priority and preserves unique local blogs
+// Merge utility: Authoritative backend data takes priority; does not resurrect deleted blogs
 export const mergeBlogLists = (backendList = [], localList = []) => {
-  const enrichedBackend = (backendList || []).map((b) => ({
-    ...b,
-    id: b.id || b.blogId,
-    slug: b.slug || getBlogSlug(b),
-    publishedDate: formatBlogPublishedDate(b),
-  }));
+  if (Array.isArray(backendList) && backendList.length > 0) {
+    return backendList
+      .map((b) => ({
+        ...b,
+        id: b.id || b.blogId,
+        slug: b.slug || getBlogSlug(b),
+        publishedDate: formatBlogPublishedDate(b),
+      }))
+      .sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+  }
 
-  // Keep only local items that DO NOT match any backend blog
-  const localOnly = (localList || [])
+  // When backend is not reachable or empty offline, use local storage items
+  return (localList || [])
     .map((b) => ({
       ...b,
       id: b.id || b.blogId,
       slug: b.slug || getBlogSlug(b),
       publishedDate: formatBlogPublishedDate(b),
     }))
-    .filter((localB) => !enrichedBackend.some((backendB) => isSameBlog(localB, backendB)));
-
-  return [...enrichedBackend, ...localOnly].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+    .sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
 };
 
 // Helper to get local stored blogs with deduplication
 const getLocalBlogs = () => {
   try {
     const raw = localStorage.getItem('ghe_blogs') || localStorage.getItem(STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         const unique = [];
         for (const b of parsed) {
           if (!unique.some((u) => isSameBlog(u, b))) {
@@ -302,12 +308,6 @@ const getLocalBlogs = () => {
     }
   } catch (e) {
     console.error('Error reading blogs from localStorage', e);
-  }
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_BLOGS));
-    localStorage.setItem('ghe_blogs', JSON.stringify(INITIAL_BLOGS));
-  } catch {
-    // Ignore storage quota or access issues
   }
   return INITIAL_BLOGS;
 };
@@ -333,16 +333,20 @@ export const blogService = {
   getAllBlogs: async (category = '') => {
     try {
       const data = await blogsApi.getAll(category);
-      if (Array.isArray(data) && data.length > 0) {
-        const local = getLocalBlogs();
-        const merged = mergeBlogLists(data, local);
-        saveLocalBlogs(merged);
+      if (Array.isArray(data)) {
+        const enriched = data.map((b) => ({
+          ...b,
+          id: b.id || b.blogId,
+          slug: b.slug || getBlogSlug(b),
+          publishedDate: formatBlogPublishedDate(b),
+        }));
+        saveLocalBlogs(enriched);
         if (category && category.toLowerCase() !== 'all') {
-          return merged.filter(
+          return enriched.filter(
             (b) => b.category && b.category.toLowerCase() === category.toLowerCase()
           );
         }
-        return merged;
+        return enriched;
       }
     } catch (err) {
       console.warn('API blogs fetch failed, falling back to local cache:', err.message);
@@ -365,6 +369,7 @@ export const blogService = {
 
   // Get single blog by ID or Slug
   getBlogByIdOrSlug: async (idOrSlug) => {
+    let apiError = null;
     try {
       const data = await blogsApi.getByIdOrSlug(idOrSlug);
       if (data) {
@@ -376,9 +381,34 @@ export const blogService = {
         };
       }
     } catch (err) {
-      console.warn('API blog detail fetch failed, falling back to local cache:', err.message);
+      apiError = err;
+      console.warn('API blog detail fetch failed:', err.message);
     }
 
+    // If backend explicitly returned 404 (Not Found), the blog was deleted or never existed.
+    // Do NOT resurrect it from stale local cache!
+    if (
+      apiError &&
+      (apiError.status === 404 ||
+        apiError.message?.includes('404') ||
+        apiError.message?.toLowerCase().includes('not found'))
+    ) {
+      try {
+        const local = getLocalBlogs().filter(
+          (b) =>
+            !isSameBlog(b, { id: idOrSlug, slug: idOrSlug, blogId: idOrSlug }) &&
+            b.slug !== idOrSlug &&
+            String(b.id) !== String(idOrSlug) &&
+            String(b.blogId) !== String(idOrSlug)
+        );
+        saveLocalBlogs(local);
+      } catch (cacheErr) {
+        console.warn('Failed to prune deleted blog from local cache:', cacheErr);
+      }
+      throw new Error('Blog article not found');
+    }
+
+    // Offline fallback to local cache
     const local = getLocalBlogs();
     const found = local.find(
       (b) =>
@@ -486,7 +516,13 @@ export const blogService = {
     }
 
     const local = getLocalBlogs();
-    const filtered = local.filter((b) => !isSameBlog(b, { id }) && b.slug !== id && String(b.id) !== String(id));
+    const filtered = local.filter(
+      (b) =>
+        !isSameBlog(b, { id, slug: id, blogId: id }) &&
+        b.slug !== id &&
+        String(b.id) !== String(id) &&
+        String(b.blogId) !== String(id)
+    );
     saveLocalBlogs(filtered);
     return true;
   },

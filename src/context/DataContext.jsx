@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, blogsApi, healthApi } from '../services/api';
-import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, isSameBlog, mergeBlogLists } from '../services/blogService';
+import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, isSameBlog } from '../services/blogService';
 
 const DataContext = createContext();
 
@@ -291,9 +291,9 @@ export function DataProvider({ children }) {
   const [blogs, setBlogs] = useState(() => {
     try {
       const stored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
-      if (stored) {
+      if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           const unique = [];
           for (const b of parsed) {
             if (!unique.some((u) => isSameBlog(u, b))) {
@@ -315,7 +315,7 @@ export function DataProvider({ children }) {
     database: null,
   });
 
-  // Re-fetch everything from backend
+  // Re-fetch everything from backend as authoritative source of truth
   const refreshData = useCallback(async () => {
     try {
       const health = await healthApi.check();
@@ -334,58 +334,52 @@ export function DataProvider({ children }) {
           blogsApi.getAll(),
         ]);
 
-        if (bVisitors.status === 'fulfilled' && bVisitors.value?.length > 0) {
+        if (bVisitors.status === 'fulfilled' && Array.isArray(bVisitors.value)) {
           setVisitors(bVisitors.value);
+          try {
+            localStorage.setItem('ghe_visitors', JSON.stringify(bVisitors.value));
+          } catch (storageErr) {
+            console.warn('Failed to cache visitors:', storageErr);
+          }
         }
-        if (bExhibitors.status === 'fulfilled' && bExhibitors.value?.length > 0) {
+        if (bExhibitors.status === 'fulfilled' && Array.isArray(bExhibitors.value)) {
           setExhibitors(bExhibitors.value);
+          try {
+            localStorage.setItem('ghe_exhibitors', JSON.stringify(bExhibitors.value));
+          } catch (storageErr) {
+            console.warn('Failed to cache exhibitors:', storageErr);
+          }
         }
-        if (bSponsorships.status === 'fulfilled' && bSponsorships.value?.length > 0) {
+        if (bSponsorships.status === 'fulfilled' && Array.isArray(bSponsorships.value)) {
           setSponsorships(bSponsorships.value);
+          try {
+            localStorage.setItem('ghe_sponsorships', JSON.stringify(bSponsorships.value));
+          } catch (storageErr) {
+            console.warn('Failed to cache sponsorships:', storageErr);
+          }
         }
-        if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
+        if (bInquiries.status === 'fulfilled' && Array.isArray(bInquiries.value)) {
           setInquiries(bInquiries.value);
+          try {
+            localStorage.setItem('ghe_inquiries', JSON.stringify(bInquiries.value));
+          } catch (storageErr) {
+            console.warn('Failed to cache inquiries:', storageErr);
+          }
         }
-        if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
-          setBlogs((prev) => {
-            const merged = mergeBlogLists(bBlogs.value, prev);
-
-            // Auto-sync custom local blogs to backend if not yet present
-            const customLocal = prev.filter(
-              (localB) =>
-                !bBlogs.value.some((backendB) => isSameBlog(localB, backendB)) &&
-                !INITIAL_BLOGS.some((seed) => isSameBlog(seed, localB))
-            );
-
-            if (customLocal.length > 0) {
-              for (const customBlog of customLocal) {
-                blogsApi
-                  .create(customBlog)
-                  .then((created) => {
-                    if (created) {
-                      setBlogs((current) =>
-                        current.map((item) =>
-                          isSameBlog(item, customBlog)
-                            ? { ...item, ...created, id: created.id || created.blogId || item.id }
-                            : item
-                        )
-                      );
-                    }
-                  })
-                  .catch((err) => {
-                    console.warn('Auto-sync custom blog to backend failed:', err);
-                  });
-              }
-            }
-
-            try {
-              localStorage.setItem('ghe_blogs', JSON.stringify(merged));
-              localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
-            } catch (storageErr) {
-              console.warn('Cache write failed:', storageErr);
-            }
-            return merged;
-          });
+        if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
+          const normalized = bBlogs.value.map((b) => ({
+            ...b,
+            id: b.id || b.blogId,
+            slug: b.slug || getBlogSlug(b),
+            publishedDate: formatBlogPublishedDate(b),
+          }));
+          setBlogs(normalized);
+          try {
+            localStorage.setItem('ghe_blogs', JSON.stringify(normalized));
+            localStorage.setItem('ighe_blogs_cache', JSON.stringify(normalized));
+          } catch (storageErr) {
+            console.warn('Cache write failed:', storageErr);
+          }
         }
         return true;
       } else {
@@ -421,58 +415,52 @@ export function DataProvider({ children }) {
           ]);
 
           if (!active) return;
-          if (bVisitors.status === 'fulfilled' && bVisitors.value?.length > 0) {
+          if (bVisitors.status === 'fulfilled' && Array.isArray(bVisitors.value)) {
             setVisitors(bVisitors.value);
+            try {
+              localStorage.setItem('ghe_visitors', JSON.stringify(bVisitors.value));
+            } catch (storageErr) {
+              console.warn('Failed to cache visitors:', storageErr);
+            }
           }
-          if (bExhibitors.status === 'fulfilled' && bExhibitors.value?.length > 0) {
+          if (bExhibitors.status === 'fulfilled' && Array.isArray(bExhibitors.value)) {
             setExhibitors(bExhibitors.value);
+            try {
+              localStorage.setItem('ghe_exhibitors', JSON.stringify(bExhibitors.value));
+            } catch (storageErr) {
+              console.warn('Failed to cache exhibitors:', storageErr);
+            }
           }
-          if (bSponsorships.status === 'fulfilled' && bSponsorships.value?.length > 0) {
+          if (bSponsorships.status === 'fulfilled' && Array.isArray(bSponsorships.value)) {
             setSponsorships(bSponsorships.value);
+            try {
+              localStorage.setItem('ghe_sponsorships', JSON.stringify(bSponsorships.value));
+            } catch (storageErr) {
+              console.warn('Failed to cache sponsorships:', storageErr);
+            }
           }
-          if (bInquiries.status === 'fulfilled' && bInquiries.value?.length > 0) {
+          if (bInquiries.status === 'fulfilled' && Array.isArray(bInquiries.value)) {
             setInquiries(bInquiries.value);
+            try {
+              localStorage.setItem('ghe_inquiries', JSON.stringify(bInquiries.value));
+            } catch (storageErr) {
+              console.warn('Failed to cache inquiries:', storageErr);
+            }
           }
-          if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value) && bBlogs.value.length > 0) {
-            setBlogs((prev) => {
-              const merged = mergeBlogLists(bBlogs.value, prev);
-
-              // Auto-sync custom local blogs to backend if not yet present
-              const customLocal = prev.filter(
-                (localB) =>
-                  !bBlogs.value.some((backendB) => isSameBlog(localB, backendB)) &&
-                  !INITIAL_BLOGS.some((seed) => isSameBlog(seed, localB))
-              );
-
-              if (customLocal.length > 0) {
-                for (const customBlog of customLocal) {
-                  blogsApi
-                    .create(customBlog)
-                    .then((created) => {
-                      if (created) {
-                        setBlogs((current) =>
-                          current.map((item) =>
-                            isSameBlog(item, customBlog)
-                              ? { ...item, ...created, id: created.id || created.blogId || item.id }
-                              : item
-                          )
-                        );
-                      }
-                    })
-                    .catch((err) => {
-                      console.warn('Auto-sync custom blog to backend failed:', err);
-                    });
-                }
-              }
-
-              try {
-                localStorage.setItem('ghe_blogs', JSON.stringify(merged));
-                localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
-              } catch (storageErr) {
-                console.warn('Cache write failed:', storageErr);
-              }
-              return merged;
-            });
+          if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
+            const normalized = bBlogs.value.map((b) => ({
+              ...b,
+              id: b.id || b.blogId,
+              slug: b.slug || getBlogSlug(b),
+              publishedDate: formatBlogPublishedDate(b),
+            }));
+            setBlogs(normalized);
+            try {
+              localStorage.setItem('ghe_blogs', JSON.stringify(normalized));
+              localStorage.setItem('ighe_blogs_cache', JSON.stringify(normalized));
+            } catch (storageErr) {
+              console.warn('Cache write failed:', storageErr);
+            }
           }
         } else {
           setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
@@ -488,6 +476,31 @@ export function DataProvider({ children }) {
       active = false;
     };
   }, []);
+
+  // Auto-sync when window / tab gains focus to immediately reflect edits/deletions from another browser
+  useEffect(() => {
+    let lastRefresh = 0;
+    const handleSync = () => {
+      const now = Date.now();
+      if (now - lastRefresh < 3000) return;
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        lastRefresh = now;
+        refreshData();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('focus', handleSync);
+      document.addEventListener('visibilitychange', handleSync);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('focus', handleSync);
+        document.removeEventListener('visibilitychange', handleSync);
+      }
+    };
+  }, [refreshData]);
 
   // Persist local storage fallbacks
   useEffect(() => {
@@ -762,7 +775,10 @@ export function DataProvider({ children }) {
 
     setBlogs((prev) => {
       const next = prev.map((b) =>
-        isSameBlog(b, { id }) || b.slug === id || String(b.id) === String(id)
+        isSameBlog(b, { id, slug: id, blogId: id }) ||
+        b.slug === id ||
+        String(b.id) === String(id) ||
+        String(b.blogId) === String(id)
           ? { ...b, ...updated }
           : b
       );
@@ -776,7 +792,32 @@ export function DataProvider({ children }) {
     });
 
     try {
-      await blogsApi.update(id, updated);
+      const res = await blogsApi.update(id, updated);
+      if (res) {
+        const enriched = {
+          ...res,
+          id: res.id || res.blogId || id,
+          slug: res.slug || slug,
+          publishedDate: formatBlogPublishedDate(res),
+        };
+        setBlogs((prev) => {
+          const next = prev.map((b) =>
+            isSameBlog(b, { id, slug: id, blogId: id }) ||
+            b.slug === id ||
+            String(b.id) === String(id) ||
+            String(b.blogId) === String(id)
+              ? { ...b, ...enriched }
+              : b
+          );
+          try {
+            localStorage.setItem('ghe_blogs', JSON.stringify(next));
+            localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
+          } catch (storageErr) {
+            console.warn('Failed to cache enriched blog:', storageErr);
+          }
+          return next;
+        });
+      }
     } catch (err) {
       console.warn('Backend API update failed, safely preserved in local storage:', err);
     }
@@ -785,7 +826,11 @@ export function DataProvider({ children }) {
   const deleteBlog = async (id) => {
     setBlogs((prev) => {
       const next = prev.filter(
-        (b) => !isSameBlog(b, { id }) && b.slug !== id && String(b.id) !== String(id)
+        (b) =>
+          !isSameBlog(b, { id, slug: id, blogId: id }) &&
+          b.slug !== id &&
+          String(b.id) !== String(id) &&
+          String(b.blogId) !== String(id)
       );
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));

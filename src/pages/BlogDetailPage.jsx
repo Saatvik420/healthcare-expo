@@ -42,58 +42,56 @@ export default function BlogDetailPage({ onNotify }) {
     let active = true;
 
     const loadBlog = async () => {
-      setIsLoading(true);
-      try {
-        // 1. Instant in-memory lookup
-        let found = (blogs || []).find(
-          (b) =>
-            b.id === id ||
-            String(b.id) === String(id) ||
-            b.slug === id ||
-            b.blogId === id ||
-            getBlogSlug(b) === id ||
-            getBlogSlug(b)?.toLowerCase() === id?.toLowerCase()
-        );
+      // 1. Instant optimistic candidate from in-memory blogs
+      let candidate = (blogs || []).find(
+        (b) =>
+          b.id === id ||
+          String(b.id) === String(id) ||
+          b.slug === id ||
+          b.blogId === id ||
+          getBlogSlug(b) === id ||
+          getBlogSlug(b)?.toLowerCase() === id?.toLowerCase()
+      );
 
-        // 2. Instant local storage cache lookup
-        if (!found) {
-          try {
-            const cached = JSON.parse(
-              localStorage.getItem('ghe_blogs') ||
-                localStorage.getItem('ighe_blogs_cache') ||
-                '[]'
+      // 2. Instant local storage cache candidate if memory hasn't loaded yet
+      if (!candidate) {
+        try {
+          const cached = JSON.parse(
+            localStorage.getItem('ghe_blogs') ||
+              localStorage.getItem('ighe_blogs_cache') ||
+              '[]'
+          );
+          if (Array.isArray(cached)) {
+            candidate = cached.find(
+              (b) =>
+                b.id === id ||
+                String(b.id) === String(id) ||
+                b.slug === id ||
+                b.blogId === id ||
+                getBlogSlug(b) === id ||
+                getBlogSlug(b)?.toLowerCase() === id?.toLowerCase()
             );
-            if (Array.isArray(cached)) {
-              found = cached.find(
-                (b) =>
-                  b.id === id ||
-                  String(b.id) === String(id) ||
-                  b.slug === id ||
-                  b.blogId === id ||
-                  getBlogSlug(b) === id ||
-                  getBlogSlug(b)?.toLowerCase() === id?.toLowerCase()
-              );
-            }
-          } catch {
-            // ignore cache parse error
           }
+        } catch {
+          // ignore cache parse error
         }
+      }
 
-        // 3. Fallback to API if still not found
-        if (!found) {
-          try {
-            found = await blogService.getBlogByIdOrSlug(id);
-          } catch {
-            // ignore
-          }
-        }
+      if (candidate) {
+        setBlog(candidate);
+        setIsLoading(false);
+      } else {
+        setIsLoading(true);
+      }
 
+      // 3. Always verify / fetch authoritative version from backend API
+      try {
+        const fresh = await blogService.getBlogByIdOrSlug(id);
         if (!active) return;
-        setBlog(found || null);
+        setBlog(fresh || null);
 
-        // Canonical URL update: If opened by raw ID, replace URL with SEO-friendly slug
-        if (found) {
-          const cleanSlug = getBlogSlug(found);
+        if (fresh) {
+          const cleanSlug = getBlogSlug(fresh);
           if (cleanSlug && id !== cleanSlug) {
             window.history.replaceState(null, '', `/blogs/${cleanSlug}`);
           }
@@ -103,11 +101,19 @@ export default function BlogDetailPage({ onNotify }) {
         const allBlogs = blogs.length > 0 ? blogs : await blogService.getAllBlogs();
         if (!active) return;
         const related = (allBlogs || [])
-          .filter((b) => !isSameBlog(b, found))
+          .filter((b) => !isSameBlog(b, fresh))
           .slice(0, 3);
         setRelatedBlogs(related);
       } catch (err) {
-        console.error('Failed to load blog:', err);
+        if (!active) return;
+        // If API explicitly said not found (e.g. blog was deleted), clear blog
+        if (
+          err.message === 'Blog article not found' ||
+          err.status === 404 ||
+          err.message?.includes('404')
+        ) {
+          setBlog(null);
+        }
       } finally {
         if (active) setIsLoading(false);
       }

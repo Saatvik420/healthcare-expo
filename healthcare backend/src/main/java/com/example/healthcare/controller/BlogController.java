@@ -44,20 +44,37 @@ public class BlogController {
         return ResponseEntity.ok(list);
     }
 
-    @GetMapping("/{idOrSlug}")
-    public ResponseEntity<Blog> getBlogByIdOrSlug(@PathVariable String idOrSlug) {
-        Optional<Blog> blog = blogRepository.findBySlug(idOrSlug);
-        if (blog.isEmpty()) {
-            blog = blogRepository.findByBlogId(idOrSlug);
+    private Optional<Blog> findBlog(String idOrSlug) {
+        if (idOrSlug == null || idOrSlug.trim().isEmpty()) {
+            return Optional.empty();
         }
-        if (blog.isEmpty()) {
+        String target = idOrSlug.trim();
+        Optional<Blog> existing = blogRepository.findBySlug(target);
+        if (existing.isPresent()) return existing;
+
+        existing = blogRepository.findByBlogId(target);
+        if (existing.isPresent()) return existing;
+
+        try {
+            Long id = Long.parseLong(target);
+            existing = blogRepository.findById(id);
+            if (existing.isPresent()) return existing;
+        } catch (NumberFormatException ignored) {}
+
+        if (target.startsWith("blog_")) {
             try {
-                Long id = Long.parseLong(idOrSlug);
-                blog = blogRepository.findById(id);
+                Long id = Long.parseLong(target.substring(5));
+                existing = blogRepository.findById(id);
+                if (existing.isPresent()) return existing;
             } catch (NumberFormatException ignored) {}
         }
+        return Optional.empty();
+    }
 
-        return blog.map(ResponseEntity::ok)
+    @GetMapping("/{idOrSlug}")
+    public ResponseEntity<Blog> getBlogByIdOrSlug(@PathVariable String idOrSlug) {
+        return findBlog(idOrSlug)
+                .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -95,17 +112,7 @@ public class BlogController {
 
     @PutMapping("/{idOrSlug}")
     public ResponseEntity<Blog> updateBlog(@PathVariable String idOrSlug, @RequestBody Blog updatedData) {
-        Optional<Blog> existing = blogRepository.findBySlug(idOrSlug);
-        if (existing.isEmpty()) {
-            existing = blogRepository.findByBlogId(idOrSlug);
-        }
-        if (existing.isEmpty()) {
-            try {
-                Long id = Long.parseLong(idOrSlug);
-                existing = blogRepository.findById(id);
-            } catch (NumberFormatException ignored) {}
-        }
-
+        Optional<Blog> existing = findBlog(idOrSlug);
         if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -134,17 +141,7 @@ public class BlogController {
 
     @DeleteMapping("/{idOrSlug}")
     public ResponseEntity<?> deleteBlog(@PathVariable String idOrSlug) {
-        Optional<Blog> existing = blogRepository.findBySlug(idOrSlug);
-        if (existing.isEmpty()) {
-            existing = blogRepository.findByBlogId(idOrSlug);
-        }
-        if (existing.isEmpty()) {
-            try {
-                Long id = Long.parseLong(idOrSlug);
-                existing = blogRepository.findById(id);
-            } catch (NumberFormatException ignored) {}
-        }
-
+        Optional<Blog> existing = findBlog(idOrSlug);
         if (existing.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
