@@ -4,11 +4,11 @@
  * Renders inline elements with proper wrapping so layouts never overflow or get clipped.
  */
 export default function BlogContentRenderer({ content, textAlign = 'left', className = '' }) {
-  if (!content) return null;
+  if (!content || typeof content !== 'string') return null;
 
   // Inline parser supporting markdown hyperlinks [text](url), raw URLs, and **bold**
   const renderInlineContent = (text) => {
-    if (!text) return null;
+    if (!text || typeof text !== 'string') return null;
 
     // Pattern matches:
     // 1. Markdown link: [Anchor text](https://example.com)
@@ -120,30 +120,34 @@ export default function BlogContentRenderer({ content, textAlign = 'left', class
           );
         }
 
-        // List Block (Numbered or Bullet)
-        if (
-          cleanText.includes('\n1.') ||
-          cleanText.startsWith('1.') ||
-          cleanText.includes('\n*') ||
-          cleanText.startsWith('*') ||
-          cleanText.includes('\n-') ||
-          cleanText.startsWith('-')
-        ) {
-          const lines = cleanText.split('\n');
+        // List Block (Numbered or Bullet) - only matches real lists, strictly ignores **bold text**
+        const lines = cleanText.split('\n');
+        const isListBlock = lines.some((line) => {
+          const cleanLine = line.trim();
+          if ((cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) && !cleanLine.startsWith('**')) {
+            return true;
+          }
+          if (/^\d+\.\s+/.test(cleanLine)) {
+            return true;
+          }
+          return false;
+        });
+
+        if (isListBlock) {
           return (
             <div key={idx} className={`blog-article-list-block ${alignClass}`} style={alignStyle}>
               {lines.map((line, lineIdx) => {
                 const cleanLine = line.trim();
                 if (!cleanLine) return null;
 
-                if (cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) {
+                if ((cleanLine.startsWith('* ') || cleanLine.startsWith('- ')) && !cleanLine.startsWith('**')) {
                   return (
                     <div key={lineIdx} className="blog-list-item">
                       <span className="blog-list-bullet">&bull;</span>
                       <span className="blog-list-text">{renderInlineContent(cleanLine.slice(2))}</span>
                     </div>
                   );
-                } else if (/^\d+\./.test(cleanLine)) {
+                } else if (/^\d+\.\s*/.test(cleanLine)) {
                   const match = cleanLine.match(/^(\d+\.)\s*(.*)$/);
                   return (
                     <div key={lineIdx} className="blog-list-item">

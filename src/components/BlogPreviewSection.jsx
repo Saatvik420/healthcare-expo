@@ -12,6 +12,7 @@ export default function BlogPreviewSection() {
 
   // Take top 3 blogs (newest published/created articles displayed first)
   const displayBlogs = [...blogs]
+    .filter(Boolean)
     .sort((a, b) => {
       const diff = getBlogTimestamp(b) - getBlogTimestamp(a);
       if (diff !== 0) return diff;

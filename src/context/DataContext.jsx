@@ -766,22 +766,31 @@ export function DataProvider({ children }) {
   };
 
   const updateBlog = async (id, updateData) => {
+    if (!id && !updateData) return null;
+
     const slug = updateData.slug || (updateData.title ? getBlogSlug(updateData) : undefined);
+    const tagsArray = Array.isArray(updateData.tags)
+      ? updateData.tags
+      : typeof updateData.tags === 'string'
+      ? updateData.tags.split(',').map((t) => t.trim()).filter(Boolean)
+      : [];
+
     const updated = {
       ...updateData,
       ...(slug ? { slug } : {}),
+      tags: tagsArray,
       updatedAt: new Date().toISOString(),
     };
 
     setBlogs((prev) => {
-      const next = prev.map((b) =>
-        isSameBlog(b, { id, slug: id, blogId: id }) ||
-        b.slug === id ||
-        String(b.id) === String(id) ||
-        String(b.blogId) === String(id)
-          ? { ...b, ...updated }
-          : b
-      );
+      const currentList = Array.isArray(prev) ? prev : [];
+      const next = currentList.map((b) => {
+        if (!b) return b;
+        const matches =
+          isSameBlog(b, { id, slug: id, blogId: id }) ||
+          (id !== undefined && id !== null && (b.slug === id || String(b.id) === String(id) || String(b.blogId) === String(id)));
+        return matches ? { ...b, ...updated } : b;
+      });
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));
         localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
@@ -793,22 +802,29 @@ export function DataProvider({ children }) {
 
     try {
       const res = await blogsApi.update(id, updated);
-      if (res) {
+      if (res && typeof res === 'object') {
         const enriched = {
+          ...updated,
           ...res,
-          id: res.id || res.blogId || id,
-          slug: res.slug || slug,
-          publishedDate: formatBlogPublishedDate(res),
+          id: res.id || res.blogId || updated.id || id,
+          blogId: res.blogId || updated.blogId || (res.id ? `blog_${res.id}` : id),
+          slug: res.slug || slug || updated.slug,
+          publishedDate: formatBlogPublishedDate(res) || updated.publishedDate,
+          tags: Array.isArray(res.tags)
+            ? res.tags
+            : typeof res.tags === 'string'
+            ? res.tags.split(',').map((t) => t.trim()).filter(Boolean)
+            : tagsArray,
         };
         setBlogs((prev) => {
-          const next = prev.map((b) =>
-            isSameBlog(b, { id, slug: id, blogId: id }) ||
-            b.slug === id ||
-            String(b.id) === String(id) ||
-            String(b.blogId) === String(id)
-              ? { ...b, ...enriched }
-              : b
-          );
+          const currentList = Array.isArray(prev) ? prev : [];
+          const next = currentList.map((b) => {
+            if (!b) return b;
+            const matches =
+              isSameBlog(b, { id, slug: id, blogId: id }) ||
+              (id !== undefined && id !== null && (b.slug === id || String(b.id) === String(id) || String(b.blogId) === String(id)));
+            return matches ? { ...b, ...enriched } : b;
+          });
           try {
             localStorage.setItem('ghe_blogs', JSON.stringify(next));
             localStorage.setItem('ighe_blogs_cache', JSON.stringify(next));
@@ -817,20 +833,22 @@ export function DataProvider({ children }) {
           }
           return next;
         });
+        return enriched;
       }
     } catch (err) {
       console.warn('Backend API update failed, safely preserved in local storage:', err);
     }
+    return updated;
   };
 
   const deleteBlog = async (id) => {
     setBlogs((prev) => {
-      const next = prev.filter(
+      const currentList = Array.isArray(prev) ? prev : [];
+      const next = currentList.filter(
         (b) =>
+          b &&
           !isSameBlog(b, { id, slug: id, blogId: id }) &&
-          b.slug !== id &&
-          String(b.id) !== String(id) &&
-          String(b.blogId) !== String(id)
+          (id === undefined || id === null || (b.slug !== id && String(b.id) !== String(id) && String(b.blogId) !== String(id)))
       );
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));

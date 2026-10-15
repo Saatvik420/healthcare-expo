@@ -202,28 +202,32 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
     setError('');
 
     try {
-      const tagsArray = formData.tags
+      const tagsArray = (formData.tags || '')
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean);
 
       const payload = {
         ...formData,
-        title: formData.title.trim(),
-        category: formData.category?.trim() || 'Healthcare Insights',
-        author: formData.author?.trim() || 'IndiGlobal Healthcare Expo',
-        authorRole: formData.authorRole?.trim() || 'Secretariat Contributor',
-        coverImage: formData.coverImage?.trim() || SAMPLE_COVERS[0].url,
-        readTime: formData.readTime?.trim() || '5 min read',
-        excerpt: formData.excerpt.trim(),
-        content: formData.content.trim(),
+        title: (formData.title || '').trim(),
+        category: (formData.category || 'Healthcare Insights').trim(),
+        author: (formData.author || 'IndiGlobal Healthcare Expo').trim(),
+        authorRole: (formData.authorRole || 'Secretariat Contributor').trim(),
+        coverImage: (formData.coverImage || SAMPLE_COVERS[0].url).trim(),
+        readTime: (formData.readTime || '5 min read').trim(),
+        excerpt: (formData.excerpt || '').trim(),
+        content: (formData.content || '').trim(),
         textAlign: formData.textAlign || 'left',
         tags: tagsArray,
         slug: liveSlug,
       };
 
-      await onSave(payload);
-      onClose();
+      if (onSave) {
+        await onSave(payload);
+      }
+      if (onClose) {
+        onClose();
+      }
     } catch (err) {
       setError(err.message || 'Failed to save blog article. Please check input and try again.');
     } finally {
@@ -620,7 +624,7 @@ Summary and recommendations for trade delegates..."
                   <div className="preview-box-body">
                     <BlogContentRenderer
                       content={
-                        formData.content.trim() ||
+                        (formData.content || '').trim() ||
                         '*No article content written yet. Switch to the Editor tab to start typing.*'
                       }
                       textAlign={formData.textAlign}

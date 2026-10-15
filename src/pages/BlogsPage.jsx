@@ -22,13 +22,14 @@ export default function BlogsPage() {
   const filteredBlogs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
     let result = (blogs || []).filter((blog) => {
+      if (!blog) return false;
       if (!query) return true;
       return (
         blog.title?.toLowerCase().includes(query) ||
         blog.excerpt?.toLowerCase().includes(query) ||
         blog.content?.toLowerCase().includes(query) ||
         blog.author?.toLowerCase().includes(query) ||
-        (Array.isArray(blog.tags) && blog.tags.some((t) => t.toLowerCase().includes(query))) ||
+        (Array.isArray(blog.tags) && blog.tags.some((t) => typeof t === 'string' && t.toLowerCase().includes(query))) ||
         (typeof blog.tags === 'string' && blog.tags.toLowerCase().includes(query))
       );
     });
