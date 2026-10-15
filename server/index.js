@@ -444,11 +444,11 @@ app.delete('/api/sponsorships/:id', (req, res) => {
 // -------------------------------------------------------------
 // Contact Inquiries API
 // -------------------------------------------------------------
-app.get('/api/contact', (req, res) => {
+app.get(['/api/contact', '/api/contacts'], (req, res) => {
   res.json(db.contactInquiries);
 });
 
-app.post('/api/contact', (req, res) => {
+app.post(['/api/contact', '/api/contacts'], (req, res) => {
   const data = req.body || {};
   const newInquiry = {
     id: 'inq_' + Date.now(),
@@ -472,7 +472,7 @@ app.post('/api/contact', (req, res) => {
   res.status(201).json(newInquiry);
 });
 
-app.delete('/api/contact/:id', (req, res) => {
+app.delete(['/api/contact/:id', '/api/contacts/:id'], (req, res) => {
   db.contactInquiries = db.contactInquiries.filter((c) => c.id !== req.params.id);
   saveDatabase();
   res.status(200).json({ success: true });
@@ -642,9 +642,11 @@ app.delete(['/api/blogs/:id', '/blogs/:id', '/api/admin/blogs/:id', '/admin/blog
 const distPath = path.join(__dirname, '..', 'dist');
 if (fs.existsSync(distPath)) {
   app.use(express.static(distPath));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(distPath, 'index.html'));
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(distPath, 'index.html'));
+    }
+    next();
   });
 }
 

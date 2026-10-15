@@ -107,6 +107,8 @@ public class VisitorController {
             if (byId.isPresent()) return byId;
         } catch (NumberFormatException ignored) {
         }
-        return visitorRepository.findByVisitorCode(identifier);
+        Optional<Visitor> byCode = visitorRepository.findByVisitorCode(identifier);
+        if (byCode.isPresent()) return byCode;
+        return visitorRepository.findByPassCode(identifier);
     }
 }

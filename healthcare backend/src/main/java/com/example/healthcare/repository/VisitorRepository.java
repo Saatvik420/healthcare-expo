@@ -11,5 +11,6 @@ import java.util.Optional;
 public interface VisitorRepository extends JpaRepository<Visitor, Long> {
     List<Visitor> findAllByOrderByIdDesc();
     Optional<Visitor> findByVisitorCode(String visitorCode);
+    Optional<Visitor> findByPassCode(String passCode);
     void deleteByVisitorCode(String visitorCode);
 }

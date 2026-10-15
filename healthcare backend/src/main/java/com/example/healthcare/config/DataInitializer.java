@@ -1,11 +1,13 @@
 package com.example.healthcare.config;
 
 import com.example.healthcare.model.Blog;
+import com.example.healthcare.model.ContactInquiry;
 import com.example.healthcare.model.Exhibitor;
 import com.example.healthcare.model.Sponsorship;
 import com.example.healthcare.model.User;
 import com.example.healthcare.model.Visitor;
 import com.example.healthcare.repository.BlogRepository;
+import com.example.healthcare.repository.ContactInquiryRepository;
 import com.example.healthcare.repository.ExhibitorRepository;
 import com.example.healthcare.repository.SponsorshipRepository;
 import com.example.healthcare.repository.UserRepository;
@@ -25,6 +27,7 @@ public class DataInitializer implements CommandLineRunner {
     private final ExhibitorRepository exhibitorRepository;
     private final SponsorshipRepository sponsorshipRepository;
     private final BlogRepository blogRepository;
+    private final ContactInquiryRepository inquiryRepository;
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(
@@ -33,12 +36,14 @@ public class DataInitializer implements CommandLineRunner {
             ExhibitorRepository exhibitorRepository,
             SponsorshipRepository sponsorshipRepository,
             BlogRepository blogRepository,
+            ContactInquiryRepository inquiryRepository,
             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.visitorRepository = visitorRepository;
         this.exhibitorRepository = exhibitorRepository;
         this.sponsorshipRepository = sponsorshipRepository;
         this.blogRepository = blogRepository;
+        this.inquiryRepository = inquiryRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -49,6 +54,7 @@ public class DataInitializer implements CommandLineRunner {
         seedExhibitors();
         seedSponsorships();
         seedBlogs();
+        seedContactInquiries();
     }
 
     private void seedUsers() {
@@ -389,6 +395,40 @@ public class DataInitializer implements CommandLineRunner {
                     .build();
 
             blogRepository.saveAll(Arrays.asList(b1, b2, b3, b4, b5, b6));
+        }
+    }
+
+    private void seedContactInquiries() {
+        if (inquiryRepository.count() == 0) {
+            ContactInquiry inq1 = ContactInquiry.builder()
+                    .inquiryCode("inq_401")
+                    .name("Dr. Aris Thorne")
+                    .email("a.thorne@oxfordhealth.uk")
+                    .phone("+44 1865 270000")
+                    .organization("Oxford Clinical Institute")
+                    .inquiryType("speaking")
+                    .subject("Keynote Panel Proposal on AI in Oncology Diagnostics")
+                    .message("We would like to propose a 30-minute keynote on automated diagnostic imaging for the India-ASEAN clinical conference track.")
+                    .date("Jan 19, 2027")
+                    .status("New")
+                    .submittedAt(LocalDateTime.now().minusDays(2))
+                    .build();
+
+            ContactInquiry inq2 = ContactInquiry.builder()
+                    .inquiryCode("inq_402")
+                    .name("Priya Nambiar")
+                    .email("priya.n@keralamed.org")
+                    .phone("+91 94471 22334")
+                    .organization("Kerala State Health Board")
+                    .inquiryType("delegation")
+                    .subject("Official State Delegation Visit (12 Officers)")
+                    .message("Planning to bring a 12-member delegation of hospital administrators to study Southeast Asian pharmaceutical supply chains.")
+                    .date("Jan 20, 2027")
+                    .status("Replied")
+                    .submittedAt(LocalDateTime.now().minusDays(1))
+                    .build();
+
+            inquiryRepository.saveAll(Arrays.asList(inq1, inq2));
         }
     }
 }

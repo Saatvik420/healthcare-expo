@@ -14,5 +14,6 @@ import java.util.Map;
 public class AuthResponse {
     private boolean success;
     private String message;
+    private String token;
     private Map<String, Object> user;
 }

@@ -16,6 +16,8 @@ public class ContactInquiry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String inquiryCode;
+
     @Column(nullable = false)
     private String name;
 
@@ -30,12 +32,21 @@ public class ContactInquiry {
     @Column(length = 2000)
     private String message;
 
+    private String status; // 'New', 'Replied', 'Under Review', 'Archived'
+    private String date;
+
     private LocalDateTime submittedAt;
 
     @PrePersist
     protected void onCreate() {
         if (submittedAt == null) {
             submittedAt = LocalDateTime.now();
+        }
+        if (inquiryCode == null || inquiryCode.isEmpty()) {
+            inquiryCode = "inq_" + System.currentTimeMillis();
+        }
+        if (status == null || status.isEmpty()) {
+            status = "New";
         }
     }
 }

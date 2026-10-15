@@ -21,11 +21,27 @@ public class BlogController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Blog>> getAllBlogs(@RequestParam(required = false) String category) {
+    public ResponseEntity<List<Blog>> getAllBlogs(
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) String q) {
+        List<Blog> list;
         if (category != null && !category.trim().isEmpty() && !category.equalsIgnoreCase("all")) {
-            return ResponseEntity.ok(blogRepository.findByCategoryIgnoreCase(category));
+            list = blogRepository.findByCategoryIgnoreCase(category);
+        } else {
+            list = blogRepository.findAllByOrderByCreatedAtDesc();
         }
-        return ResponseEntity.ok(blogRepository.findAllByOrderByCreatedAtDesc());
+
+        if (q != null && !q.trim().isEmpty()) {
+            String query = q.trim().toLowerCase();
+            list = list.stream().filter(b ->
+                (b.getTitle() != null && b.getTitle().toLowerCase().contains(query)) ||
+                (b.getExcerpt() != null && b.getExcerpt().toLowerCase().contains(query)) ||
+                (b.getAuthor() != null && b.getAuthor().toLowerCase().contains(query)) ||
+                (b.getTags() != null && b.getTags().toLowerCase().contains(query))
+            ).toList();
+        }
+
+        return ResponseEntity.ok(list);
     }
 
     @GetMapping("/{idOrSlug}")
