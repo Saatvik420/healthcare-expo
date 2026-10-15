@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @Table(name = "blogs")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class Blog {
 
@@ -49,6 +48,29 @@ public class Blog {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    public Blog(Long id, String blogId, String title, String slug, String excerpt,
+                String content, String category, String tags, String author,
+                String authorRole, String coverImage, String readTime, String publishedDate,
+                boolean featured, String textAlign, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.id = id;
+        this.blogId = blogId;
+        this.title = title;
+        this.slug = slug;
+        this.excerpt = excerpt;
+        this.content = content;
+        this.category = category;
+        this.tags = tags;
+        this.author = author;
+        this.authorRole = authorRole;
+        this.coverImage = coverImage;
+        this.readTime = readTime;
+        this.publishedDate = publishedDate;
+        this.featured = featured;
+        this.textAlign = textAlign;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
 
     @PrePersist
     protected void onCreate() {

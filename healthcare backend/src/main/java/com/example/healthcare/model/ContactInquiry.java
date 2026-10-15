@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Table(name = "contact_inquiries")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class ContactInquiry {
 
@@ -36,6 +35,23 @@ public class ContactInquiry {
     private String date;
 
     private LocalDateTime submittedAt;
+
+    public ContactInquiry(Long id, String inquiryCode, String name, String email, String phone,
+                          String organization, String inquiryType, String subject,
+                          String message, String status, String date, LocalDateTime submittedAt) {
+        this.id = id;
+        this.inquiryCode = inquiryCode;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.organization = organization;
+        this.inquiryType = inquiryType;
+        this.subject = subject;
+        this.message = message;
+        this.status = status;
+        this.date = date;
+        this.submittedAt = submittedAt;
+    }
 
     @PrePersist
     protected void onCreate() {

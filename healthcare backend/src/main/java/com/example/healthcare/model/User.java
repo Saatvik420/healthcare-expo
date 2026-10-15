@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class User {
 
@@ -41,6 +40,28 @@ public class User {
     private String status;
 
     private LocalDateTime createdAt;
+
+    public User(Long id, String uid, String name, String email, String password, String role,
+                String phone, String organization, String designation, String company,
+                String sector, String stallType, String hall, String passCode, String status,
+                LocalDateTime createdAt) {
+        this.id = id;
+        this.uid = uid;
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.role = role;
+        this.phone = phone;
+        this.organization = organization;
+        this.designation = designation;
+        this.company = company;
+        this.sector = sector;
+        this.stallType = stallType;
+        this.hall = hall;
+        this.passCode = passCode;
+        this.status = status;
+        this.createdAt = createdAt;
+    }
 
     @PrePersist
     protected void onCreate() {

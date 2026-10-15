@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 @Table(name = "exhibitors")
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
 public class Exhibitor {
 
@@ -41,6 +40,27 @@ public class Exhibitor {
     private String notes;
 
     private LocalDateTime createdAt;
+
+    public Exhibitor(Long id, String exhibitorCode, String company, String contactPerson,
+                     String designation, String email, String phone, String website,
+                     String stallType, String hall, String amount, String status,
+                     String bookingDate, String notes, LocalDateTime createdAt) {
+        this.id = id;
+        this.exhibitorCode = exhibitorCode;
+        this.company = company;
+        this.contactPerson = contactPerson;
+        this.designation = designation;
+        this.email = email;
+        this.phone = phone;
+        this.website = website;
+        this.stallType = stallType;
+        this.hall = hall;
+        this.amount = amount;
+        this.status = status;
+        this.bookingDate = bookingDate;
+        this.notes = notes;
+        this.createdAt = createdAt;
+    }
 
     @PrePersist
     protected void onCreate() {
