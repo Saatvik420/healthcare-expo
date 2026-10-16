@@ -319,101 +319,105 @@ export function DataProvider({ children }) {
   // Re-fetch everything from backend as authoritative source of truth
   const refreshData = useCallback(async () => {
     try {
-      const health = await healthApi.check();
-      if (health && health.isOnline) {
-        setBackendStatus({
-          isOnline: true,
-          checked: true,
-          database: health.database || 'active',
-        });
+      const [healthRes, bVisitors, bExhibitors, bSponsorships, bInquiries, bBlogs] = await Promise.allSettled([
+        healthApi.check(),
+        visitorsApi.getAll(),
+        exhibitorsApi.getAll(),
+        sponsorshipsApi.getAll(),
+        contactApi.getAll(),
+        blogsApi.getAll(),
+      ]);
 
-        const [bVisitors, bExhibitors, bSponsorships, bInquiries, bBlogs] = await Promise.allSettled([
-          visitorsApi.getAll(),
-          exhibitorsApi.getAll(),
-          sponsorshipsApi.getAll(),
-          contactApi.getAll(),
-          blogsApi.getAll(),
-        ]);
+      const health = healthRes.status === 'fulfilled' ? healthRes.value : { isOnline: false };
+      const isOnline = Boolean(
+        health.isOnline ||
+        bBlogs.status === 'fulfilled' ||
+        bVisitors.status === 'fulfilled'
+      );
 
-        if (bVisitors.status === 'fulfilled' && Array.isArray(bVisitors.value)) {
-          setVisitors(bVisitors.value);
-          try {
-            localStorage.setItem('ghe_visitors', JSON.stringify(bVisitors.value));
-          } catch (storageErr) {
-            console.warn('Failed to cache visitors:', storageErr);
-          }
-        }
-        if (bExhibitors.status === 'fulfilled' && Array.isArray(bExhibitors.value)) {
-          setExhibitors(bExhibitors.value);
-          try {
-            localStorage.setItem('ghe_exhibitors', JSON.stringify(bExhibitors.value));
-          } catch (storageErr) {
-            console.warn('Failed to cache exhibitors:', storageErr);
-          }
-        }
-        if (bSponsorships.status === 'fulfilled' && Array.isArray(bSponsorships.value)) {
-          setSponsorships(bSponsorships.value);
-          try {
-            localStorage.setItem('ghe_sponsorships', JSON.stringify(bSponsorships.value));
-          } catch (storageErr) {
-            console.warn('Failed to cache sponsorships:', storageErr);
-          }
-        }
-        if (bInquiries.status === 'fulfilled' && Array.isArray(bInquiries.value)) {
-          setInquiries(bInquiries.value);
-          try {
-            localStorage.setItem('ghe_inquiries', JSON.stringify(bInquiries.value));
-          } catch (storageErr) {
-            console.warn('Failed to cache inquiries:', storageErr);
-          }
-        }
-        if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
-          const normalized = bBlogs.value
-            .filter((b) => b && !isBlogDeleted(b))
-            .map((b) => ({
-              ...b,
-              id: b.id || b.blogId,
-              slug: b.slug || getBlogSlug(b),
-              publishedDate: formatBlogPublishedDate(b),
-              tags: Array.isArray(b.tags)
-                ? b.tags
-                : typeof b.tags === 'string'
-                ? b.tags.split(',').map((t) => t.trim()).filter(Boolean)
-                : [],
-            }));
+      setBackendStatus({
+        isOnline,
+        checked: true,
+        database: health.database || (isOnline ? 'cloud-api' : 'local-storage'),
+      });
 
-          // Merge authoritative backend data with any locally stored articles (e.g. offline drafts)
-          const currentLocal = (() => {
-            try {
-              const raw = localStorage.getItem('ghe_blogs');
-              return raw ? JSON.parse(raw) : [];
-            } catch {
-              return [];
-            }
-          })();
-
-          const merged = [...normalized];
-          if (Array.isArray(currentLocal)) {
-            for (const loc of currentLocal) {
-              if (loc && !isBlogDeleted(loc) && !merged.some((u) => isSameBlog(u, loc))) {
-                merged.push(loc);
-              }
-            }
-          }
-
-          setBlogs(merged);
-          try {
-            localStorage.setItem('ghe_blogs', JSON.stringify(merged));
-            localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
-          } catch (storageErr) {
-            console.warn('Cache write failed:', storageErr);
-          }
+      if (bVisitors.status === 'fulfilled' && Array.isArray(bVisitors.value)) {
+        setVisitors(bVisitors.value);
+        try {
+          localStorage.setItem('ghe_visitors', JSON.stringify(bVisitors.value));
+        } catch (storageErr) {
+          console.warn('Failed to cache visitors:', storageErr);
         }
-        return true;
-      } else {
-        setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
-        return false;
       }
+      if (bExhibitors.status === 'fulfilled' && Array.isArray(bExhibitors.value)) {
+        setExhibitors(bExhibitors.value);
+        try {
+          localStorage.setItem('ghe_exhibitors', JSON.stringify(bExhibitors.value));
+        } catch (storageErr) {
+          console.warn('Failed to cache exhibitors:', storageErr);
+        }
+      }
+      if (bSponsorships.status === 'fulfilled' && Array.isArray(bSponsorships.value)) {
+        setSponsorships(bSponsorships.value);
+        try {
+          localStorage.setItem('ghe_sponsorships', JSON.stringify(bSponsorships.value));
+        } catch (storageErr) {
+          console.warn('Failed to cache sponsorships:', storageErr);
+        }
+      }
+      if (bInquiries.status === 'fulfilled' && Array.isArray(bInquiries.value)) {
+        setInquiries(bInquiries.value);
+        try {
+          localStorage.setItem('ghe_inquiries', JSON.stringify(bInquiries.value));
+        } catch (storageErr) {
+          console.warn('Failed to cache inquiries:', storageErr);
+        }
+      }
+      if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
+        const normalized = bBlogs.value
+          .filter((b) => b && !isBlogDeleted(b))
+          .map((b) => ({
+            ...b,
+            id: b.id || b.blogId,
+            slug: b.slug || getBlogSlug(b),
+            publishedDate: formatBlogPublishedDate(b),
+            tags: Array.isArray(b.tags)
+              ? b.tags
+              : typeof b.tags === 'string'
+              ? b.tags.split(',').map((t) => t.trim()).filter(Boolean)
+              : [],
+          }));
+
+        // Merge authoritative backend data with any locally stored articles (e.g. offline drafts)
+        const currentLocal = (() => {
+          try {
+            const raw = localStorage.getItem('ghe_blogs');
+            return raw ? JSON.parse(raw) : [];
+          } catch {
+            return [];
+          }
+        })();
+
+        const merged = [...normalized];
+        if (Array.isArray(currentLocal)) {
+          for (const loc of currentLocal) {
+            if (loc && !isBlogDeleted(loc) && !merged.some((u) => isSameBlog(u, loc))) {
+              merged.push(loc);
+              // Auto-upload local draft to cloud backend so other browsers receive it
+              blogsApi.create(loc).catch((e) => console.warn('Cloud sync of local blog failed:', e));
+            }
+          }
+        }
+
+        setBlogs(merged);
+        try {
+          localStorage.setItem('ghe_blogs', JSON.stringify(merged));
+          localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
+        } catch (storageErr) {
+          console.warn('Cache write failed:', storageErr);
+        }
+      }
+      return isOnline;
     } catch {
       setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
       return false;
@@ -422,114 +426,8 @@ export function DataProvider({ children }) {
 
   // Sync on mount
   useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const health = await healthApi.check();
-        if (!active) return;
-        if (health && health.isOnline) {
-          setBackendStatus({
-            isOnline: true,
-            checked: true,
-            database: health.database || 'active',
-          });
-
-          const [bVisitors, bExhibitors, bSponsorships, bInquiries, bBlogs] = await Promise.allSettled([
-            visitorsApi.getAll(),
-            exhibitorsApi.getAll(),
-            sponsorshipsApi.getAll(),
-            contactApi.getAll(),
-            blogsApi.getAll(),
-          ]);
-
-          if (!active) return;
-          if (bVisitors.status === 'fulfilled' && Array.isArray(bVisitors.value)) {
-            setVisitors(bVisitors.value);
-            try {
-              localStorage.setItem('ghe_visitors', JSON.stringify(bVisitors.value));
-            } catch (storageErr) {
-              console.warn('Failed to cache visitors:', storageErr);
-            }
-          }
-          if (bExhibitors.status === 'fulfilled' && Array.isArray(bExhibitors.value)) {
-            setExhibitors(bExhibitors.value);
-            try {
-              localStorage.setItem('ghe_exhibitors', JSON.stringify(bExhibitors.value));
-            } catch (storageErr) {
-              console.warn('Failed to cache exhibitors:', storageErr);
-            }
-          }
-          if (bSponsorships.status === 'fulfilled' && Array.isArray(bSponsorships.value)) {
-            setSponsorships(bSponsorships.value);
-            try {
-              localStorage.setItem('ghe_sponsorships', JSON.stringify(bSponsorships.value));
-            } catch (storageErr) {
-              console.warn('Failed to cache sponsorships:', storageErr);
-            }
-          }
-          if (bInquiries.status === 'fulfilled' && Array.isArray(bInquiries.value)) {
-            setInquiries(bInquiries.value);
-            try {
-              localStorage.setItem('ghe_inquiries', JSON.stringify(bInquiries.value));
-            } catch (storageErr) {
-              console.warn('Failed to cache inquiries:', storageErr);
-            }
-          }
-          if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
-            const normalized = bBlogs.value
-              .filter((b) => b && !isBlogDeleted(b))
-              .map((b) => ({
-                ...b,
-                id: b.id || b.blogId,
-                slug: b.slug || getBlogSlug(b),
-                publishedDate: formatBlogPublishedDate(b),
-                tags: Array.isArray(b.tags)
-                  ? b.tags
-                  : typeof b.tags === 'string'
-                  ? b.tags.split(',').map((t) => t.trim()).filter(Boolean)
-                  : [],
-              }));
-
-            const currentLocal = (() => {
-              try {
-                const raw = localStorage.getItem('ghe_blogs');
-                return raw ? JSON.parse(raw) : [];
-              } catch {
-                return [];
-              }
-            })();
-
-            const merged = [...normalized];
-            if (Array.isArray(currentLocal)) {
-              for (const loc of currentLocal) {
-                if (loc && !isBlogDeleted(loc) && !merged.some((u) => isSameBlog(u, loc))) {
-                  merged.push(loc);
-                }
-              }
-            }
-
-            setBlogs(merged);
-            try {
-              localStorage.setItem('ghe_blogs', JSON.stringify(merged));
-              localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
-            } catch (storageErr) {
-              console.warn('Cache write failed:', storageErr);
-            }
-          }
-        } else {
-          setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
-        }
-      } catch {
-        if (active) {
-          setBackendStatus({ isOnline: false, checked: true, database: 'local-storage' });
-        }
-      }
-    })();
-
-    return () => {
-      active = false;
-    };
-  }, []);
+    refreshData();
+  }, [refreshData]);
 
   // Auto-sync when window / tab gains focus to immediately reflect edits/deletions from another browser
   useEffect(() => {
