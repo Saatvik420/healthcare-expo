@@ -8,6 +8,7 @@ import NotificationModal from './components/NotificationModal';
 import LoadingScreen from './components/LoadingScreen';
 import RouteTopLoader from './components/RouteTopLoader';
 import BackToTopButton from './components/BackToTopButton';
+import ErrorBoundary from './components/ErrorBoundary';
 
 // Context Providers
 import { AuthProvider } from './context/AuthContext';
@@ -59,37 +60,39 @@ function App() {
           <TopBar />
           <Navbar />
           <main>
-            <Routes>
-              <Route path="/" element={<HomePage onNotify={handleNotify} />} />
-              {/* Dedicated Visitor Registration Routes */}
-              <Route path="/visitor-registration" element={<VisitorPassPage onNotify={handleNotify} />} />
-              <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
+            <ErrorBoundary>
+              <Routes>
+                <Route path="/" element={<HomePage onNotify={handleNotify} />} />
+                {/* Dedicated Visitor Registration Routes */}
+                <Route path="/visitor-registration" element={<VisitorPassPage onNotify={handleNotify} />} />
+                <Route path="/register-visitor" element={<VisitorPassPage onNotify={handleNotify} />} />
 
-              {/* Dedicated Exhibitor Registration Routes */}
-              <Route path="/exhibitor-registration" element={<BookStallPage onNotify={handleNotify} />} />
-              <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />
+                {/* Dedicated Exhibitor Registration Routes */}
+                <Route path="/exhibitor-registration" element={<BookStallPage onNotify={handleNotify} />} />
+                <Route path="/book-stall" element={<BookStallPage onNotify={handleNotify} />} />
 
-              {/* Conference, Schedule & Awards */}
-              <Route path="/schedule" element={<SchedulePage />} />
-              <Route path="/awards" element={<AwardsPage />} />
+                {/* Conference, Schedule & Awards */}
+                <Route path="/schedule" element={<SchedulePage />} />
+                <Route path="/awards" element={<AwardsPage />} />
 
-              {/* Blogs & Insights */}
-              <Route path="/blogs" element={<BlogsPage onNotify={handleNotify} />} />
-              <Route path="/blogs/:id" element={<BlogDetailPage onNotify={handleNotify} />} />
-              <Route path="/blog/:id" element={<BlogDetailPage onNotify={handleNotify} />} />
+                {/* Blogs & Insights */}
+                <Route path="/blogs" element={<BlogsPage onNotify={handleNotify} />} />
+                <Route path="/blogs/:id" element={<BlogDetailPage onNotify={handleNotify} />} />
+                <Route path="/blog/:id" element={<BlogDetailPage onNotify={handleNotify} />} />
 
-              {/* General Registration Gateway */}
-              <Route path="/registration" element={<RegistrationPage onNotify={handleNotify} />} />
-              <Route path="/register" element={<RegistrationPage onNotify={handleNotify} />} />
+                {/* General Registration Gateway */}
+                <Route path="/registration" element={<RegistrationPage onNotify={handleNotify} />} />
+                <Route path="/register" element={<RegistrationPage onNotify={handleNotify} />} />
 
-              {/* Other Pages */}
-              <Route path="/contact" element={<ContactPage onNotify={handleNotify} />} />
-              <Route path="/login" element={<LoginPage onNotify={handleNotify} />} />
-              <Route path="/signup" element={<SignupPage onNotify={handleNotify} />} />
-              <Route path="/dashboard" element={<UserDashboardPage onNotify={handleNotify} />} />
-              <Route path="/admin" element={<AdminDashboardPage onNotify={handleNotify} />} />
-              <Route path="*" element={<HomePage onNotify={handleNotify} />} />
-            </Routes>
+                {/* Other Pages */}
+                <Route path="/contact" element={<ContactPage onNotify={handleNotify} />} />
+                <Route path="/login" element={<LoginPage onNotify={handleNotify} />} />
+                <Route path="/signup" element={<SignupPage onNotify={handleNotify} />} />
+                <Route path="/dashboard" element={<UserDashboardPage onNotify={handleNotify} />} />
+                <Route path="/admin" element={<AdminDashboardPage onNotify={handleNotify} />} />
+                <Route path="*" element={<HomePage onNotify={handleNotify} />} />
+              </Routes>
+            </ErrorBoundary>
           </main>
           <Footer />
           <BackToTopButton />

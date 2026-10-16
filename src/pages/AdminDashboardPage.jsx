@@ -202,27 +202,42 @@ export default function AdminDashboardPage({ onNotify }) {
 
   const handleSaveBlog = async (blogData) => {
     const targetBlog = editingBlog;
-    setIsBlogModalOpen(false);
-    setEditingBlog(null);
-
     try {
       if (targetBlog) {
-        await updateBlog(targetBlog.id || targetBlog.blogId || targetBlog.slug, blogData);
-        onNotify('Article Updated', `"${blogData.title}" has been updated.`);
+        const idToUpdate = targetBlog.id || targetBlog.blogId || targetBlog.slug;
+        await updateBlog(idToUpdate, blogData);
+        setIsBlogModalOpen(false);
+        setEditingBlog(null);
+        if (typeof onNotify === 'function') {
+          onNotify('Article Updated', `"${blogData.title}" has been updated.`);
+        }
       } else {
         await addBlog(blogData);
-        onNotify('Article Published', `"${blogData.title}" is now published.`);
+        setIsBlogModalOpen(false);
+        setEditingBlog(null);
+        if (typeof onNotify === 'function') {
+          onNotify('Article Published', `"${blogData.title}" is now published.`);
+        }
       }
     } catch (err) {
       console.error('Error saving blog article:', err);
-      onNotify('Update Complete', `"${blogData.title}" changes saved.`);
+      if (typeof onNotify === 'function') {
+        onNotify('Save Notice', `Saved locally. ${err.message || ''}`);
+      }
+      setIsBlogModalOpen(false);
+      setEditingBlog(null);
     }
   };
 
-  const handleDeleteBlog = async (id, title) => {
-    if (window.confirm(`Are you sure you want to delete "${title}"?`)) {
+  const handleDeleteBlog = async (blogOrId, title) => {
+    if (!blogOrId) return;
+    const blogTitle = title || (typeof blogOrId === 'object' ? blogOrId.title : 'Article');
+    if (window.confirm(`Are you sure you want to permanently delete "${blogTitle}"? This cannot be undone.`)) {
+      const id = typeof blogOrId === 'object' ? (blogOrId.id || blogOrId.blogId || blogOrId.slug) : blogOrId;
       await deleteBlog(id);
-      onNotify('Article Deleted', `"${title}" has been removed from the portal.`);
+      if (typeof onNotify === 'function') {
+        onNotify('Article Deleted', `"${blogTitle}" has been permanently removed.`);
+      }
     }
   };
 
@@ -1236,19 +1251,23 @@ export default function AdminDashboardPage({ onNotify }) {
                   </tr>
                 </thead>
                 <tbody>
-                  {blogs
+                  {(Array.isArray(blogs) ? blogs : [])
                     .filter((b) => {
                       if (!b) return false;
-                      const query = blogSearch.trim().toLowerCase();
+                      const query = (blogSearch || '').trim().toLowerCase();
+                      const title = String(b.title || '').toLowerCase();
+                      const excerpt = String(b.excerpt || '').toLowerCase();
+                      const author = String(b.author || '').toLowerCase();
+                      const tagsStr = Array.isArray(b.tags)
+                        ? b.tags.join(' ').toLowerCase()
+                        : String(b.tags || '').toLowerCase();
+
                       const matchesSearch =
                         !query ||
-                        (b.title && b.title.toLowerCase().includes(query)) ||
-                        (b.excerpt && b.excerpt.toLowerCase().includes(query)) ||
-                        (b.author && b.author.toLowerCase().includes(query)) ||
-                        (Array.isArray(b.tags) &&
-                          b.tags.some((t) => typeof t === 'string' && t.toLowerCase().includes(query))) ||
-                        (typeof b.tags === 'string' &&
-                          b.tags.toLowerCase().includes(query));
+                        title.includes(query) ||
+                        excerpt.includes(query) ||
+                        author.includes(query) ||
+                        tagsStr.includes(query);
 
                       const matchesFeatured =
                         blogFeaturedFilter === 'all' ||
@@ -1257,102 +1276,126 @@ export default function AdminDashboardPage({ onNotify }) {
 
                       return Boolean(matchesSearch && matchesFeatured);
                     })
-                    .map((blog, bIdx) => (
-                      <tr key={blog.id || blog.slug || blog.blogId || `blog-${bIdx}`}>
-                        <td>
-                          <div className="admin-blog-cell">
-                            <div className="admin-blog-thumb">
-                              <img
-                                src={blog.coverImage || 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80'}
-                                alt={blog.title || 'Blog Cover'}
-                                onError={(e) => {
-                                  e.target.style.display = 'none';
-                                }}
-                              />
-                            </div>
-                            <div className="admin-blog-info">
-                              <span className="admin-blog-title" title={blog.title || 'Untitled Article'}>
-                                {blog.title || 'Untitled Article'}
-                              </span>
-                              <small className="admin-blog-excerpt">
-                                {blog.excerpt ? blog.excerpt.slice(0, 85) + '...' : ''}
-                              </small>
-                              <div className="admin-blog-meta-tags mt-1">
-                                <span className="badge-align-chip" title={`Article Text Alignment: ${blog.textAlign || 'left'}`}>
-                                  <i className={`fa-solid fa-align-${blog.textAlign === 'center' ? 'center' : blog.textAlign === 'right' ? 'right' : blog.textAlign === 'justify' ? 'justify' : 'left'}`}></i>
-                                  <span className="text-capitalize">{blog.textAlign || 'left'}</span>
+                    .map((blog, bIdx) => {
+                      const blogTitle = String(blog.title || 'Untitled Article');
+                      const blogExcerpt = typeof blog.excerpt === 'string'
+                        ? (blog.excerpt.length > 85 ? blog.excerpt.slice(0, 85) + '...' : blog.excerpt)
+                        : '';
+                      const blogAuthor = String(blog.author || 'IndiGlobal Secretariat');
+                      const blogRole = String(blog.authorRole || 'Contributor');
+                      const blogAlign = String(blog.textAlign || 'left');
+                      const blogDate = String(
+                        typeof blog.publishedDate === 'string' && blog.publishedDate.trim()
+                          ? blog.publishedDate.trim()
+                          : formatBlogPublishedDate(blog) || 'Recently Published'
+                      );
+                      const blogRead = String(blog.readTime || '5 min read');
+                      const blogCover = typeof blog.coverImage === 'string' && blog.coverImage.trim()
+                        ? blog.coverImage.trim()
+                        : 'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80';
+                      const blogSlug = String(blog.slug || getBlogSlug(blog) || '');
+
+                      return (
+                        <tr key={blog.id || blogSlug || blog.blogId || `blog-${bIdx}`}>
+                          <td>
+                            <div className="admin-blog-cell">
+                              <div className="admin-blog-thumb">
+                                <img
+                                  src={blogCover}
+                                  alt={blogTitle}
+                                  onError={(e) => {
+                                    e.target.style.display = 'none';
+                                  }}
+                                />
+                              </div>
+                              <div className="admin-blog-info">
+                                <span className="admin-blog-title" title={blogTitle}>
+                                  {blogTitle}
                                 </span>
+                                <small className="admin-blog-excerpt">
+                                  {blogExcerpt}
+                                </small>
+                                <div className="admin-blog-meta-tags mt-1">
+                                  <span className="badge-align-chip" title={`Article Text Alignment: ${blogAlign}`}>
+                                    <i className={`fa-solid fa-align-${blogAlign === 'center' ? 'center' : blogAlign === 'right' ? 'right' : blogAlign === 'justify' ? 'justify' : 'left'}`}></i>
+                                    <span className="text-capitalize">{blogAlign}</span>
+                                  </span>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="admin-cell-user">
-                            <span className="user-name">{blog.author || 'IndiGlobal Secretariat'}</span>
-                            <small className="user-meta">{blog.authorRole || 'Contributor'}</small>
-                          </div>
-                        </td>
-                        <td>
-                          <div className="admin-cell-date">
-                            <span>{blog.publishedDate || formatBlogPublishedDate(blog)}</span>
-                            <small>{blog.readTime || '5 min read'}</small>
-                          </div>
-                        </td>
-                        <td>
-                          {blog.featured ? (
-                            <span className="badge badge-featured">
-                              <i className="fa-solid fa-star"></i> Featured
-                            </span>
-                          ) : (
-                            <span className="badge badge-standard">Standard</span>
-                          )}
-                        </td>
-                        <td style={{ textAlign: 'right' }}>
-                          <div className="table-row-actions">
-                            <Link
-                              to={`/blogs/${blog.slug || getBlogSlug(blog)}`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn-action-icon"
-                              title="Read Published Article"
-                            >
-                              <i className="fa-solid fa-arrow-up-right-from-square"></i>
-                            </Link>
-                            <button
-                              type="button"
-                              className="btn-action-icon"
-                              title="Edit Article"
-                              onClick={() => {
-                                setEditingBlog(blog);
-                                setIsBlogModalOpen(true);
-                              }}
-                            >
-                              <i className="fa-solid fa-pen-to-square"></i>
-                            </button>
-                            <button
-                              type="button"
-                              className="btn-action-icon text-danger"
-                              title="Delete Article"
-                              onClick={() => handleDeleteBlog(blog.id || blog.blogId || blog.slug, blog.title || 'Article')}
-                            >
-                              <i className="fa-solid fa-trash"></i>
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  {blogs.filter((b) => {
+                          </td>
+                          <td>
+                            <div className="admin-cell-user">
+                              <span className="user-name">{blogAuthor}</span>
+                              <small className="user-meta">{blogRole}</small>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="admin-cell-date">
+                              <span>{blogDate}</span>
+                              <small>{blogRead}</small>
+                            </div>
+                          </td>
+                          <td>
+                            {blog.featured ? (
+                              <span className="badge badge-featured">
+                                <i className="fa-solid fa-star"></i> Featured
+                              </span>
+                            ) : (
+                              <span className="badge badge-standard">Standard</span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: 'right' }}>
+                            <div className="table-row-actions">
+                              <Link
+                                to={`/blogs/${blogSlug}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn-action-icon"
+                                title="Read Published Article"
+                              >
+                                <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                              </Link>
+                              <button
+                                type="button"
+                                className="btn-action-icon"
+                                title="Edit Article"
+                                onClick={() => {
+                                  setEditingBlog(blog);
+                                  setIsBlogModalOpen(true);
+                                }}
+                              >
+                                <i className="fa-solid fa-pen-to-square"></i>
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-action-icon text-danger"
+                                title="Delete Article"
+                                onClick={() => handleDeleteBlog(blog, blogTitle)}
+                              >
+                                <i className="fa-solid fa-trash"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  {(Array.isArray(blogs) ? blogs : []).filter((b) => {
                     if (!b) return false;
-                    const query = blogSearch.trim().toLowerCase();
+                    const query = (blogSearch || '').trim().toLowerCase();
+                    const title = String(b.title || '').toLowerCase();
+                    const excerpt = String(b.excerpt || '').toLowerCase();
+                    const author = String(b.author || '').toLowerCase();
+                    const tagsStr = Array.isArray(b.tags)
+                      ? b.tags.join(' ').toLowerCase()
+                      : String(b.tags || '').toLowerCase();
+
                     const matchesSearch =
                       !query ||
-                      (b.title && b.title.toLowerCase().includes(query)) ||
-                      (b.excerpt && b.excerpt.toLowerCase().includes(query)) ||
-                      (b.author && b.author.toLowerCase().includes(query)) ||
-                      (Array.isArray(b.tags) &&
-                        b.tags.some((t) => typeof t === 'string' && t.toLowerCase().includes(query))) ||
-                      (typeof b.tags === 'string' &&
-                        b.tags.toLowerCase().includes(query));
+                      title.includes(query) ||
+                      excerpt.includes(query) ||
+                      author.includes(query) ||
+                      tagsStr.includes(query);
 
                     const matchesFeatured =
                       blogFeaturedFilter === 'all' ||

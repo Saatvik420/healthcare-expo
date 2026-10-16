@@ -58,7 +58,7 @@ function loadDatabase() {
     if (fs.existsSync(DB_FILE)) {
       const data = fs.readFileSync(DB_FILE, 'utf8');
       db = JSON.parse(data);
-      if (!Array.isArray(db.blogs) || db.blogs.length === 0) {
+      if (!Array.isArray(db.blogs)) {
         db.blogs = INITIAL_BLOGS;
         saveDatabase();
       }

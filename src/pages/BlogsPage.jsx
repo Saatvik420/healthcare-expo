@@ -21,16 +21,24 @@ export default function BlogsPage() {
   // Filter and sort blogs
   const filteredBlogs = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    let result = (blogs || []).filter((blog) => {
+    const cleanList = (Array.isArray(blogs) ? blogs : []).filter(Boolean);
+    let result = cleanList.filter((blog) => {
       if (!blog) return false;
       if (!query) return true;
+      const title = String(blog.title || '').toLowerCase();
+      const excerpt = String(blog.excerpt || '').toLowerCase();
+      const content = String(blog.content || '').toLowerCase();
+      const author = String(blog.author || '').toLowerCase();
+      const tagsStr = Array.isArray(blog.tags)
+        ? blog.tags.join(' ').toLowerCase()
+        : String(blog.tags || '').toLowerCase();
+
       return (
-        blog.title?.toLowerCase().includes(query) ||
-        blog.excerpt?.toLowerCase().includes(query) ||
-        blog.content?.toLowerCase().includes(query) ||
-        blog.author?.toLowerCase().includes(query) ||
-        (Array.isArray(blog.tags) && blog.tags.some((t) => typeof t === 'string' && t.toLowerCase().includes(query))) ||
-        (typeof blog.tags === 'string' && blog.tags.toLowerCase().includes(query))
+        title.includes(query) ||
+        excerpt.includes(query) ||
+        content.includes(query) ||
+        author.includes(query) ||
+        tagsStr.includes(query)
       );
     });
 
@@ -52,23 +60,25 @@ export default function BlogsPage() {
 
   // Featured story: Prioritize newest featured editorial; fallback to freshest article overall
   const featuredBlog = useMemo(() => {
-    if (!blogs || blogs.length === 0) return null;
-    const featuredList = blogs
-      .filter((b) => b.featured)
+    if (!blogs || !Array.isArray(blogs) || blogs.length === 0) return null;
+    const cleanList = blogs.filter(Boolean);
+    const featuredList = cleanList
+      .filter((b) => Boolean(b.featured))
       .sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
     if (featuredList.length > 0) {
       return featuredList[0];
     }
-    const sortedAll = [...blogs].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+    const sortedAll = [...cleanList].sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
     return sortedAll[0] || null;
   }, [blogs]);
 
   // Other blogs excluding the featured one if showing all and no search query
   const gridBlogs = useMemo(() => {
     if (!searchQuery.trim() && featuredBlog) {
-      return filteredBlogs.filter((b) => (b.id || b.slug) !== (featuredBlog.id || featuredBlog.slug));
+      const featId = featuredBlog.id || featuredBlog.slug;
+      return filteredBlogs.filter((b) => b && (b.id || b.slug) !== featId);
     }
-    return filteredBlogs;
+    return filteredBlogs.filter(Boolean);
   }, [filteredBlogs, searchQuery, featuredBlog]);
 
   const handleQuickRead = (e, blog) => {

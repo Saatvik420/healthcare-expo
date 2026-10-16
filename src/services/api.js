@@ -521,18 +521,51 @@ export const blogsApi = {
         : '',
     };
 
-    const res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
+    let res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
     });
+
+    // If request failed and id starts with blog_, retry with numeric id for Spring Boot backend
+    if (!res.ok && typeof id === 'string' && id.startsWith('blog_')) {
+      const numericId = id.replace(/^blog_/, '');
+      if (/^\d+$/.test(numericId)) {
+        try {
+          const retryRes = await requestWithFallback(`/blogs/${encodeURIComponent(numericId)}`, {
+            method: 'PUT',
+            body: JSON.stringify(payload),
+          });
+          if (retryRes.ok) res = retryRes;
+        } catch {
+          // keep original res
+        }
+      }
+    }
+
     if (!res.ok) throw new Error('Failed to update blog');
     return await safeJsonResponse(res);
   },
 
   delete: async (id) => {
-    const res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
+    let res = await requestWithFallback(`/blogs/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
+
+    // If request failed and id starts with blog_, retry with numeric id for Spring Boot backend
+    if (!res.ok && typeof id === 'string' && id.startsWith('blog_')) {
+      const numericId = id.replace(/^blog_/, '');
+      if (/^\d+$/.test(numericId)) {
+        try {
+          const retryRes = await requestWithFallback(`/blogs/${encodeURIComponent(numericId)}`, {
+            method: 'DELETE',
+          });
+          if (retryRes.ok) res = retryRes;
+        } catch {
+          // keep original res
+        }
+      }
+    }
+
     return res.ok;
   },
 };

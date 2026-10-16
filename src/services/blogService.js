@@ -170,6 +170,112 @@ Whether your organization is seeking regional distribution partners or evaluatin
   }
 ];
 
+export const getDeletedBlogTombstones = () => {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return [];
+    const raw = localStorage.getItem('ghe_deleted_blog_ids');
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
+export const addBlogTombstone = (blogOrId) => {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    const current = getDeletedBlogTombstones();
+    const set = new Set(current.map((s) => String(s).toLowerCase().trim()));
+
+    if (typeof blogOrId === 'string' || typeof blogOrId === 'number') {
+      const s = String(blogOrId).toLowerCase().trim();
+      set.add(s);
+      set.add(s.replace(/^blog_/, ''));
+    } else if (blogOrId && typeof blogOrId === 'object') {
+      if (blogOrId.id !== undefined && blogOrId.id !== null) {
+        const s = String(blogOrId.id).toLowerCase().trim();
+        set.add(s);
+        set.add(s.replace(/^blog_/, ''));
+      }
+      if (blogOrId.blogId) {
+        const s = String(blogOrId.blogId).toLowerCase().trim();
+        set.add(s);
+        set.add(s.replace(/^blog_/, ''));
+      }
+      if (blogOrId.slug) {
+        set.add(String(blogOrId.slug).toLowerCase().trim());
+      }
+      if (blogOrId.title && typeof blogOrId.title === 'string') {
+        const slug = getBlogSlug(blogOrId).toLowerCase().trim();
+        if (slug) set.add(slug);
+      }
+    }
+
+    localStorage.setItem('ghe_deleted_blog_ids', JSON.stringify([...set].filter(Boolean)));
+  } catch (e) {
+    console.warn('Failed to record blog deletion tombstone:', e);
+  }
+};
+
+export const removeBlogTombstone = (blogOrId) => {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    const current = getDeletedBlogTombstones();
+    if (!current || current.length === 0) return;
+
+    const toRemove = new Set();
+    if (typeof blogOrId === 'string' || typeof blogOrId === 'number') {
+      const s = String(blogOrId).toLowerCase().trim();
+      toRemove.add(s);
+      toRemove.add(s.replace(/^blog_/, ''));
+    } else if (blogOrId && typeof blogOrId === 'object') {
+      if (blogOrId.id !== undefined && blogOrId.id !== null) {
+        const s = String(blogOrId.id).toLowerCase().trim();
+        toRemove.add(s);
+        toRemove.add(s.replace(/^blog_/, ''));
+      }
+      if (blogOrId.blogId) {
+        const s = String(blogOrId.blogId).toLowerCase().trim();
+        toRemove.add(s);
+        toRemove.add(s.replace(/^blog_/, ''));
+      }
+      if (blogOrId.slug) {
+        toRemove.add(String(blogOrId.slug).toLowerCase().trim());
+      }
+    }
+
+    const filtered = current.filter((id) => !toRemove.has(String(id).toLowerCase().trim()));
+    localStorage.setItem('ghe_deleted_blog_ids', JSON.stringify(filtered));
+  } catch (e) {
+    console.warn('Failed to remove blog deletion tombstone:', e);
+  }
+};
+
+export const isBlogDeleted = (blog) => {
+  if (!blog) return false;
+  try {
+    const list = getDeletedBlogTombstones();
+    if (!list || list.length === 0) return false;
+    const set = new Set(list.map((s) => String(s).toLowerCase().trim()));
+
+    const idStr = blog.id !== undefined && blog.id !== null ? String(blog.id).toLowerCase().trim() : '';
+    const blogIdStr = blog.blogId ? String(blog.blogId).toLowerCase().trim() : '';
+    const slugStr = blog.slug ? String(blog.slug).toLowerCase().trim() : '';
+    const idNorm = idStr.replace(/^blog_/, '');
+    const blogIdNorm = blogIdStr.replace(/^blog_/, '');
+
+    if (idStr && set.has(idStr)) return true;
+    if (blogIdStr && set.has(blogIdStr)) return true;
+    if (slugStr && set.has(slugStr)) return true;
+    if (idNorm && set.has(idNorm)) return true;
+    if (blogIdNorm && set.has(blogIdNorm)) return true;
+  } catch {
+    // ignore
+  }
+  return false;
+};
+
 export const formatBlogPublishedDate = (blog) => {
   if (!blog) return '';
   if (blog.publishedDate && typeof blog.publishedDate === 'string' && blog.publishedDate.trim()) {
@@ -177,6 +283,16 @@ export const formatBlogPublishedDate = (blog) => {
   }
   if (blog.createdAt) {
     try {
+      if (Array.isArray(blog.createdAt) && blog.createdAt.length >= 3) {
+        const d = new Date(blog.createdAt[0], (blog.createdAt[1] || 1) - 1, blog.createdAt[2] || 1);
+        if (!isNaN(d.getTime())) {
+          return d.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          });
+        }
+      }
       const normalized = String(blog.createdAt).replace(/(\.\d{3})\d+/, '$1');
       const d = new Date(normalized);
       if (!isNaN(d.getTime())) {
@@ -206,17 +322,22 @@ export const getBlogSlug = (blog) => {
       .replace(/-+/g, '-')
       .trim();
   }
-  return blog.id || blog.blogId || '';
+  return String(blog.id || blog.blogId || '');
 };
 
 export const getBlogTimestamp = (blog) => {
   if (!blog) return 0;
   if (blog.createdAt) {
+    if (Array.isArray(blog.createdAt) && blog.createdAt.length >= 3) {
+      const d = new Date(blog.createdAt[0], (blog.createdAt[1] || 1) - 1, blog.createdAt[2] || 1);
+      const t = d.getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
     const normalized = String(blog.createdAt).replace(/(\.\d{3})\d+/, '$1');
     const t = new Date(normalized).getTime();
     if (!isNaN(t) && t > 0) return t;
   }
-  if (blog.publishedDate) {
+  if (blog.publishedDate && typeof blog.publishedDate === 'string') {
     const t = new Date(blog.publishedDate).getTime();
     if (!isNaN(t) && t > 0) return t;
   }
@@ -227,6 +348,9 @@ export const getBlogTimestamp = (blog) => {
   if (blog.blogId && typeof blog.blogId === 'string' && blog.blogId.startsWith('blog_')) {
     const num = parseInt(blog.blogId.replace('blog_', ''), 10);
     if (!isNaN(num) && num > 1000000) return num;
+  }
+  if (typeof blog.id === 'number') {
+    return blog.id;
   }
   return 0;
 };
@@ -268,29 +392,36 @@ export const isSameBlog = (a, b) => {
 
 // Merge utility: Authoritative backend data takes priority; does not resurrect deleted blogs
 export const mergeBlogLists = (backendList = [], localList = []) => {
-  if (Array.isArray(backendList) && backendList.length > 0) {
-    return backendList
-      .map((b) => ({
+  const merged = [];
+  const bList = Array.isArray(backendList) ? backendList.filter((b) => b && !isBlogDeleted(b)) : [];
+  const lList = Array.isArray(localList) ? localList.filter((b) => b && !isBlogDeleted(b)) : [];
+
+  for (const b of bList) {
+    if (!merged.some((m) => isSameBlog(m, b))) {
+      merged.push({
         ...b,
         id: b.id || b.blogId,
         slug: b.slug || getBlogSlug(b),
         publishedDate: formatBlogPublishedDate(b),
-      }))
-      .sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+      });
+    }
   }
 
-  // When backend is not reachable or empty offline, use local storage items
-  return (localList || [])
-    .map((b) => ({
-      ...b,
-      id: b.id || b.blogId,
-      slug: b.slug || getBlogSlug(b),
-      publishedDate: formatBlogPublishedDate(b),
-    }))
-    .sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
+  for (const l of lList) {
+    if (!merged.some((m) => isSameBlog(m, l))) {
+      merged.push({
+        ...l,
+        id: l.id || l.blogId,
+        slug: l.slug || getBlogSlug(l),
+        publishedDate: formatBlogPublishedDate(l),
+      });
+    }
+  }
+
+  return merged.sort((a, b) => getBlogTimestamp(b) - getBlogTimestamp(a));
 };
 
-// Helper to get local stored blogs with deduplication
+// Helper to get local stored blogs with deduplication and tombstone filtering
 const getLocalBlogs = () => {
   try {
     const raw = localStorage.getItem('ghe_blogs') || localStorage.getItem(STORAGE_KEY);
@@ -299,13 +430,8 @@ const getLocalBlogs = () => {
       if (Array.isArray(parsed)) {
         const unique = [];
         for (const b of parsed) {
-          if (b && !unique.some((u) => isSameBlog(u, b))) {
+          if (b && !isBlogDeleted(b) && !unique.some((u) => isSameBlog(u, b))) {
             unique.push(b);
-          }
-        }
-        for (const initBlog of INITIAL_BLOGS) {
-          if (!unique.some((u) => isSameBlog(u, initBlog))) {
-            unique.push(initBlog);
           }
         }
         return unique;
@@ -314,14 +440,15 @@ const getLocalBlogs = () => {
   } catch (e) {
     console.error('Error reading blogs from localStorage', e);
   }
-  return INITIAL_BLOGS;
+  return INITIAL_BLOGS.filter((b) => !isBlogDeleted(b));
 };
 
 // Helper to save local stored blogs
 const saveLocalBlogs = (blogs) => {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(blogs));
-    localStorage.setItem('ghe_blogs', JSON.stringify(blogs));
+    const clean = (Array.isArray(blogs) ? blogs : []).filter((b) => b && !isBlogDeleted(b));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
+    localStorage.setItem('ghe_blogs', JSON.stringify(clean));
   } catch (e) {
     console.error('Error saving blogs to localStorage', e);
   }
@@ -333,36 +460,53 @@ export const blogService = {
   formatBlogPublishedDate,
   isSameBlog,
   mergeBlogLists,
+  isBlogDeleted,
+  addBlogTombstone,
+  getDeletedBlogTombstones,
 
   // Get all blogs with optional category filter
   getAllBlogs: async (category = '') => {
     try {
       const data = await blogsApi.getAll(category);
       if (Array.isArray(data)) {
-        const enriched = data.map((b) => ({
-          ...b,
-          id: b.id || b.blogId,
-          slug: b.slug || getBlogSlug(b),
-          publishedDate: formatBlogPublishedDate(b),
-        }));
-        saveLocalBlogs(enriched);
+        const enriched = data
+          .filter((b) => b && !isBlogDeleted(b))
+          .map((b) => ({
+            ...b,
+            id: b.id || b.blogId,
+            slug: b.slug || getBlogSlug(b),
+            publishedDate: formatBlogPublishedDate(b),
+          }));
+
+        // Merge with locally stored blogs that have not synced yet
+        const local = getLocalBlogs();
+        const merged = [...enriched];
+        for (const loc of local) {
+          if (loc && !isBlogDeleted(loc) && !merged.some((m) => isSameBlog(m, loc))) {
+            merged.push(loc);
+          }
+        }
+
+        saveLocalBlogs(merged);
         if (category && category.toLowerCase() !== 'all') {
-          return enriched.filter(
+          return merged.filter(
             (b) => b.category && b.category.toLowerCase() === category.toLowerCase()
           );
         }
-        return enriched;
+        return merged;
       }
     } catch (err) {
       console.warn('API blogs fetch failed, falling back to local cache:', err.message);
     }
 
-    const local = getLocalBlogs().map((b) => ({
-      ...b,
-      slug: b.slug || getBlogSlug(b),
-      id: b.id || b.blogId,
-      publishedDate: formatBlogPublishedDate(b),
-    }));
+    const local = getLocalBlogs()
+      .filter((b) => b && !isBlogDeleted(b))
+      .map((b) => ({
+        ...b,
+        slug: b.slug || getBlogSlug(b),
+        id: b.id || b.blogId,
+        publishedDate: formatBlogPublishedDate(b),
+      }));
 
     if (category && category.toLowerCase() !== 'all') {
       return local.filter(
@@ -374,10 +518,15 @@ export const blogService = {
 
   // Get single blog by ID or Slug
   getBlogByIdOrSlug: async (idOrSlug) => {
+    if (!idOrSlug) throw new Error('Blog article not found');
+    if (isBlogDeleted({ id: idOrSlug, slug: idOrSlug, blogId: idOrSlug })) {
+      throw new Error('Blog article not found');
+    }
+
     let apiError = null;
     try {
       const data = await blogsApi.getByIdOrSlug(idOrSlug);
-      if (data) {
+      if (data && !isBlogDeleted(data)) {
         return {
           ...data,
           slug: data.slug || getBlogSlug(data),
@@ -398,6 +547,7 @@ export const blogService = {
         apiError.message?.includes('404') ||
         apiError.message?.toLowerCase().includes('not found'))
     ) {
+      addBlogTombstone(idOrSlug);
       try {
         const local = getLocalBlogs().filter(
           (b) =>
@@ -414,7 +564,7 @@ export const blogService = {
     }
 
     // Offline fallback to local cache
-    const local = getLocalBlogs();
+    const local = getLocalBlogs().filter((b) => !isBlogDeleted(b));
     const found = local.find(
       (b) =>
         b.slug === idOrSlug ||
@@ -438,12 +588,14 @@ export const blogService = {
   createBlog: async (blogData) => {
     const slug =
       blogData.slug ||
-      blogData.title
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
+      (blogData.title
+        ? blogData.title
+            .toLowerCase()
+            .replace(/[^a-z0-9\s-]/g, '')
+            .replace(/\s+/g, '-')
+            .replace(/-+/g, '-')
+            .trim()
+        : `blog-${Date.now()}`);
 
     const newBlog = {
       ...blogData,
@@ -480,6 +632,7 @@ export const blogService = {
       slug: (created && created.slug) || newBlog.slug,
       id: (created && (created.id || created.blogId)) || newBlog.id,
     };
+    removeBlogTombstone(item);
     const local = getLocalBlogs();
     const updatedList = [item, ...local.filter((b) => !isSameBlog(b, item))];
     saveLocalBlogs(updatedList);
@@ -493,6 +646,9 @@ export const blogService = {
       updatedAt: new Date().toISOString(),
     };
 
+    removeBlogTombstone(id);
+    removeBlogTombstone(updatedData);
+
     let updated = null;
     try {
       updated = await blogsApi.update(id, updatedData);
@@ -504,6 +660,7 @@ export const blogService = {
       ...(updated || { ...updatedData, id }),
       publishedDate: formatBlogPublishedDate(updated || { ...updatedData, id }),
     };
+    removeBlogTombstone(item);
     const local = getLocalBlogs();
     const updatedList = local.map((b) =>
       isSameBlog(b, { id }) || b.slug === id || String(b.id) === String(id) ? item : b
@@ -514,13 +671,25 @@ export const blogService = {
 
   // Delete blog (Admin)
   deleteBlog: async (id) => {
-    try {
-      await blogsApi.delete(id);
-    } catch (err) {
-      console.warn('Failed to delete blog on API, removing locally:', err.message);
-    }
-
     const local = getLocalBlogs();
+    const target = local.find(
+      (b) =>
+        isSameBlog(b, { id, slug: id, blogId: id }) ||
+        b.slug === id ||
+        String(b.id) === String(id) ||
+        String(b.blogId) === String(id)
+    );
+
+    // Record tombstone so it can never resurrect
+    if (target) {
+      addBlogTombstone(target);
+      if (target.id) addBlogTombstone(target.id);
+      if (target.blogId) addBlogTombstone(target.blogId);
+      if (target.slug) addBlogTombstone(target.slug);
+    }
+    addBlogTombstone(id);
+
+    // Remove locally
     const filtered = local.filter(
       (b) =>
         !isSameBlog(b, { id, slug: id, blogId: id }) &&
@@ -529,6 +698,17 @@ export const blogService = {
         String(b.blogId) !== String(id)
     );
     saveLocalBlogs(filtered);
+
+    // Remove from API
+    try {
+      await blogsApi.delete(id);
+      if (target && target.id && String(target.id) !== String(id)) {
+        await blogsApi.delete(target.id);
+      }
+    } catch (err) {
+      console.warn('Failed to delete blog on API, removing locally:', err.message);
+    }
+
     return true;
   },
 

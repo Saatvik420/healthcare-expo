@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { getBlogSlug } from '../../services/blogService';
 import BlogContentRenderer from '../BlogContentRenderer';
 
@@ -15,6 +14,14 @@ const SAMPLE_COVERS = [
 const PRESET_TAGS = ['APIs', 'Pharma Machinery', 'Medical Devices', 'Cold Chain', 'Hospital Infra', 'ASEAN Confluence', 'Supply Chain', 'CDSCO Regulations'];
 
 export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   const [formData, setFormData] = useState({
     title: '',
     category: 'Healthcare Insights',
@@ -220,18 +227,20 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
         textAlign: formData.textAlign || 'left',
         tags: tagsArray,
         slug: liveSlug,
+        publishedDate: editingBlog?.publishedDate || undefined,
       };
 
       if (onSave) {
         await onSave(payload);
       }
-      if (onClose) {
-        onClose();
-      }
     } catch (err) {
-      setError(err.message || 'Failed to save blog article. Please check input and try again.');
+      if (isMountedRef.current) {
+        setError(err.message || 'Failed to save blog article. Please check input and try again.');
+      }
     } finally {
-      setIsSubmitting(false);
+      if (isMountedRef.current) {
+        setIsSubmitting(false);
+      }
     }
   };
 

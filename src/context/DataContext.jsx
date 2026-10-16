@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { visitorsApi, exhibitorsApi, sponsorshipsApi, contactApi, blogsApi, healthApi } from '../services/api';
-import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, isSameBlog } from '../services/blogService';
+import { INITIAL_BLOGS, getBlogSlug, formatBlogPublishedDate, isSameBlog, isBlogDeleted, addBlogTombstone, removeBlogTombstone } from '../services/blogService';
 
 const DataContext = createContext();
 
@@ -293,30 +293,20 @@ export function DataProvider({ children }) {
       const stored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
       if (stored !== null) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           const unique = [];
           for (const b of parsed) {
-            if (b && !unique.some((u) => isSameBlog(u, b))) {
+            if (b && !isBlogDeleted(b) && !unique.some((u) => isSameBlog(u, b))) {
               unique.push(b);
             }
           }
-          for (const initBlog of INITIAL_BLOGS) {
-            if (!unique.some((u) => isSameBlog(u, initBlog))) {
-              unique.push(initBlog);
-            }
-          }
-          try {
-            localStorage.setItem('ghe_blogs', JSON.stringify(unique));
-            localStorage.setItem('ighe_blogs_cache', JSON.stringify(unique));
-          } catch {
-            // ignore
-          }
+          // Do NOT blindly re-inject INITIAL_BLOGS if localStorage was already initialized
           return unique;
         }
       }
-      return INITIAL_BLOGS;
+      return INITIAL_BLOGS.filter((b) => !isBlogDeleted(b));
     } catch {
-      return INITIAL_BLOGS;
+      return INITIAL_BLOGS.filter((b) => !isBlogDeleted(b));
     }
   });
 
@@ -378,18 +368,39 @@ export function DataProvider({ children }) {
           }
         }
         if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
-          const normalized = bBlogs.value.map((b) => ({
-            ...b,
-            id: b.id || b.blogId,
-            slug: b.slug || getBlogSlug(b),
-            publishedDate: formatBlogPublishedDate(b),
-          }));
+          const normalized = bBlogs.value
+            .filter((b) => b && !isBlogDeleted(b))
+            .map((b) => ({
+              ...b,
+              id: b.id || b.blogId,
+              slug: b.slug || getBlogSlug(b),
+              publishedDate: formatBlogPublishedDate(b),
+              tags: Array.isArray(b.tags)
+                ? b.tags
+                : typeof b.tags === 'string'
+                ? b.tags.split(',').map((t) => t.trim()).filter(Boolean)
+                : [],
+            }));
+
+          // Merge authoritative backend data with any locally stored articles (e.g. offline drafts)
+          const currentLocal = (() => {
+            try {
+              const raw = localStorage.getItem('ghe_blogs');
+              return raw ? JSON.parse(raw) : [];
+            } catch {
+              return [];
+            }
+          })();
+
           const merged = [...normalized];
-          for (const initBlog of INITIAL_BLOGS) {
-            if (!merged.some((u) => isSameBlog(u, initBlog))) {
-              merged.push(initBlog);
+          if (Array.isArray(currentLocal)) {
+            for (const loc of currentLocal) {
+              if (loc && !isBlogDeleted(loc) && !merged.some((u) => isSameBlog(u, loc))) {
+                merged.push(loc);
+              }
             }
           }
+
           setBlogs(merged);
           try {
             localStorage.setItem('ghe_blogs', JSON.stringify(merged));
@@ -465,18 +476,38 @@ export function DataProvider({ children }) {
             }
           }
           if (bBlogs.status === 'fulfilled' && Array.isArray(bBlogs.value)) {
-            const normalized = bBlogs.value.map((b) => ({
-              ...b,
-              id: b.id || b.blogId,
-              slug: b.slug || getBlogSlug(b),
-              publishedDate: formatBlogPublishedDate(b),
-            }));
+            const normalized = bBlogs.value
+              .filter((b) => b && !isBlogDeleted(b))
+              .map((b) => ({
+                ...b,
+                id: b.id || b.blogId,
+                slug: b.slug || getBlogSlug(b),
+                publishedDate: formatBlogPublishedDate(b),
+                tags: Array.isArray(b.tags)
+                  ? b.tags
+                  : typeof b.tags === 'string'
+                  ? b.tags.split(',').map((t) => t.trim()).filter(Boolean)
+                  : [],
+              }));
+
+            const currentLocal = (() => {
+              try {
+                const raw = localStorage.getItem('ghe_blogs');
+                return raw ? JSON.parse(raw) : [];
+              } catch {
+                return [];
+              }
+            })();
+
             const merged = [...normalized];
-            for (const initBlog of INITIAL_BLOGS) {
-              if (!merged.some((u) => isSameBlog(u, initBlog))) {
-                merged.push(initBlog);
+            if (Array.isArray(currentLocal)) {
+              for (const loc of currentLocal) {
+                if (loc && !isBlogDeleted(loc) && !merged.some((u) => isSameBlog(u, loc))) {
+                  merged.push(loc);
+                }
               }
             }
+
             setBlogs(merged);
             try {
               localStorage.setItem('ghe_blogs', JSON.stringify(merged));
@@ -704,48 +735,53 @@ export function DataProvider({ children }) {
       ? blogData.tags.split(',').map((t) => t.trim()).filter(Boolean)
       : [];
 
+    const now = new Date().toISOString();
     const newBlog = {
       ...blogData,
       id: blogId,
       blogId,
       slug,
-      author: blogData.author?.trim() || 'IndiGlobal Healthcare Expo',
-      authorRole: blogData.authorRole?.trim() || 'Secretariat Contributor',
-      category: blogData.category?.trim() || 'Our Blogs',
+      author: String(blogData.author || 'IndiGlobal Healthcare Expo').trim(),
+      authorRole: String(blogData.authorRole || 'Secretariat Contributor').trim(),
+      category: String(blogData.category || 'Our Blogs').trim(),
       coverImage:
-        blogData.coverImage?.trim() ||
+        String(blogData.coverImage || '').trim() ||
         'https://images.unsplash.com/photo-1587854692152-cbe660dbde88?auto=format&fit=crop&w=1200&q=80',
-      readTime: blogData.readTime?.trim() || '5 min read',
+      readTime: String(blogData.readTime || '5 min read').trim(),
       publishedDate:
-        blogData.publishedDate ||
+        String(blogData.publishedDate || '').trim() ||
         new Date().toLocaleDateString('en-US', {
           month: 'long',
           day: 'numeric',
           year: 'numeric',
         }),
       featured: Boolean(blogData.featured),
-      textAlign: blogData.textAlign || 'left',
+      textAlign: String(blogData.textAlign || 'left'),
       tags: tagsArray,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      createdAt: blogData.createdAt || now,
+      updatedAt: now,
     };
 
     // 1. Immediately update state so it appears on screen without delay
-    setBlogs((prev) => [newBlog, ...prev.filter((b) => !isSameBlog(b, newBlog))]);
+    removeBlogTombstone(newBlog);
+    setBlogs((prev) => {
+      const currentList = Array.isArray(prev) ? prev : [];
+      return [newBlog, ...currentList.filter((b) => b && !isBlogDeleted(b) && !isSameBlog(b, newBlog))];
+    });
 
-    // 2. Immediately persist to localStorage, preserving initial blogs if first article
+    // 2. Immediately persist to localStorage
     try {
       const rawStored = localStorage.getItem('ghe_blogs') || localStorage.getItem('ighe_blogs_cache');
-      let baseList = INITIAL_BLOGS;
+      let baseList = [];
       if (rawStored) {
         try {
           const parsed = JSON.parse(rawStored);
-          if (Array.isArray(parsed) && parsed.length > 0) baseList = parsed;
+          if (Array.isArray(parsed)) baseList = parsed;
         } catch {
           // fallback
         }
       }
-      const updated = [newBlog, ...baseList.filter((b) => !isSameBlog(b, newBlog))];
+      const updated = [newBlog, ...baseList.filter((b) => b && !isBlogDeleted(b) && !isSameBlog(b, newBlog))];
       localStorage.setItem('ghe_blogs', JSON.stringify(updated));
       localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
     } catch (e) {
@@ -755,11 +791,12 @@ export function DataProvider({ children }) {
     // 3. Sync to API with fallback
     try {
       const created = await blogsApi.create(newBlog);
-      if (created) {
+      if (created && typeof created === 'object') {
         const enriched = {
           ...newBlog,
           ...created,
           id: created.id || created.blogId || newBlog.id,
+          blogId: created.blogId || (created.id ? `blog_${created.id}` : newBlog.blogId),
           slug: created.slug || newBlog.slug,
           publishedDate: formatBlogPublishedDate(created) || newBlog.publishedDate,
           tags: Array.isArray(created.tags)
@@ -768,15 +805,19 @@ export function DataProvider({ children }) {
             ? created.tags.split(',').map((t) => t.trim()).filter(Boolean)
             : newBlog.tags,
         };
-        setBlogs((prev) =>
-          prev.map((b) => (isSameBlog(b, newBlog) ? enriched : b))
-        );
+        removeBlogTombstone(enriched);
+        setBlogs((prev) => {
+          const currentList = Array.isArray(prev) ? prev : [];
+          return currentList.map((b) => (b && isSameBlog(b, newBlog) ? enriched : b));
+        });
         try {
           const rawStored = localStorage.getItem('ghe_blogs') || '[]';
           const stored = JSON.parse(rawStored);
-          const updated = stored.map((b) => (isSameBlog(b, newBlog) ? enriched : b));
-          localStorage.setItem('ghe_blogs', JSON.stringify(updated));
-          localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
+          if (Array.isArray(stored)) {
+            const updated = stored.map((b) => (b && isSameBlog(b, newBlog) ? enriched : b));
+            localStorage.setItem('ghe_blogs', JSON.stringify(updated));
+            localStorage.setItem('ighe_blogs_cache', JSON.stringify(updated));
+          }
         } catch (storageErr) {
           console.warn('Failed to re-cache enriched blog:', storageErr);
         }
@@ -796,14 +837,17 @@ export function DataProvider({ children }) {
       ? updateData.tags
       : typeof updateData.tags === 'string'
       ? updateData.tags.split(',').map((t) => t.trim()).filter(Boolean)
-      : [];
+      : undefined;
 
     const updated = {
       ...updateData,
       ...(slug ? { slug } : {}),
-      tags: tagsArray,
+      ...(tagsArray ? { tags: tagsArray } : {}),
       updatedAt: new Date().toISOString(),
     };
+
+    removeBlogTombstone(id);
+    removeBlogTombstone(updated);
 
     setBlogs((prev) => {
       const currentList = Array.isArray(prev) ? prev : [];
@@ -837,8 +881,9 @@ export function DataProvider({ children }) {
             ? res.tags
             : typeof res.tags === 'string'
             ? res.tags.split(',').map((t) => t.trim()).filter(Boolean)
-            : tagsArray,
+            : tagsArray || updated.tags,
         };
+        removeBlogTombstone(enriched);
         setBlogs((prev) => {
           const currentList = Array.isArray(prev) ? prev : [];
           const next = currentList.map((b) => {
@@ -865,13 +910,32 @@ export function DataProvider({ children }) {
   };
 
   const deleteBlog = async (id) => {
+    // 1. Identify target blog and add persistent tombstone so it never resurrects
+    const target = (blogs || []).find(
+      (b) =>
+        b &&
+        (isSameBlog(b, { id, slug: id, blogId: id }) ||
+          b.slug === id ||
+          String(b.id) === String(id) ||
+          String(b.blogId) === String(id))
+    );
+    if (target) {
+      addBlogTombstone(target);
+      if (target.id) addBlogTombstone(target.id);
+      if (target.blogId) addBlogTombstone(target.blogId);
+      if (target.slug) addBlogTombstone(target.slug);
+    }
+    addBlogTombstone(id);
+
+    // 2. Remove immediately from in-memory state
     setBlogs((prev) => {
       const currentList = Array.isArray(prev) ? prev : [];
       const next = currentList.filter(
         (b) =>
           b &&
           !isSameBlog(b, { id, slug: id, blogId: id }) &&
-          (id === undefined || id === null || (b.slug !== id && String(b.id) !== String(id) && String(b.blogId) !== String(id)))
+          (id === undefined || id === null || (b.slug !== id && String(b.id) !== String(id) && String(b.blogId) !== String(id))) &&
+          !isBlogDeleted(b)
       );
       try {
         localStorage.setItem('ghe_blogs', JSON.stringify(next));
@@ -882,8 +946,12 @@ export function DataProvider({ children }) {
       return next;
     });
 
+    // 3. Delete from backend API
     try {
       await blogsApi.delete(id);
+      if (target && target.id && String(target.id) !== String(id)) {
+        await blogsApi.delete(target.id);
+      }
     } catch (err) {
       console.warn('Backend API delete failed, removed from local storage:', err);
     }
