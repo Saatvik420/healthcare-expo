@@ -849,13 +849,20 @@ export function DataProvider({ children }) {
     removeBlogTombstone(id);
     removeBlogTombstone(updated);
 
+    const strId = id !== undefined && id !== null ? String(id).trim() : '';
+    const probe = {
+      id,
+      blogId: id,
+      ...(typeof id === 'string' && isNaN(Number(id)) ? { slug: id } : {}),
+    };
+
     setBlogs((prev) => {
       const currentList = Array.isArray(prev) ? prev : [];
       const next = currentList.map((b) => {
         if (!b) return b;
         const matches =
-          isSameBlog(b, { id, slug: id, blogId: id }) ||
-          (id !== undefined && id !== null && (b.slug === id || String(b.id) === String(id) || String(b.blogId) === String(id)));
+          isSameBlog(b, probe) ||
+          (strId && (String(b.id || '').trim() === strId || String(b.blogId || '').trim() === strId || String(b.slug || '').trim() === strId));
         return matches ? { ...b, ...updated } : b;
       });
       try {
@@ -889,8 +896,8 @@ export function DataProvider({ children }) {
           const next = currentList.map((b) => {
             if (!b) return b;
             const matches =
-              isSameBlog(b, { id, slug: id, blogId: id }) ||
-              (id !== undefined && id !== null && (b.slug === id || String(b.id) === String(id) || String(b.blogId) === String(id)));
+              isSameBlog(b, probe) ||
+              (strId && (String(b.id || '').trim() === strId || String(b.blogId || '').trim() === strId || String(b.slug || '').trim() === strId));
             return matches ? { ...b, ...enriched } : b;
           });
           try {
@@ -910,14 +917,19 @@ export function DataProvider({ children }) {
   };
 
   const deleteBlog = async (id) => {
+    const strId = id !== undefined && id !== null ? String(id).trim() : '';
+    const probe = {
+      id,
+      blogId: id,
+      ...(typeof id === 'string' && isNaN(Number(id)) ? { slug: id } : {}),
+    };
+
     // 1. Identify target blog and add persistent tombstone so it never resurrects
     const target = (blogs || []).find(
       (b) =>
         b &&
-        (isSameBlog(b, { id, slug: id, blogId: id }) ||
-          b.slug === id ||
-          String(b.id) === String(id) ||
-          String(b.blogId) === String(id))
+        (isSameBlog(b, probe) ||
+          (strId && (String(b.id || '').trim() === strId || String(b.blogId || '').trim() === strId || String(b.slug || '').trim() === strId)))
     );
     if (target) {
       addBlogTombstone(target);
@@ -925,7 +937,7 @@ export function DataProvider({ children }) {
       if (target.blogId) addBlogTombstone(target.blogId);
       if (target.slug) addBlogTombstone(target.slug);
     }
-    addBlogTombstone(id);
+    if (id) addBlogTombstone(id);
 
     // 2. Remove immediately from in-memory state
     setBlogs((prev) => {
@@ -933,8 +945,8 @@ export function DataProvider({ children }) {
       const next = currentList.filter(
         (b) =>
           b &&
-          !isSameBlog(b, { id, slug: id, blogId: id }) &&
-          (id === undefined || id === null || (b.slug !== id && String(b.id) !== String(id) && String(b.blogId) !== String(id))) &&
+          !isSameBlog(b, probe) &&
+          (!strId || (String(b.id || '').trim() !== strId && String(b.blogId || '').trim() !== strId && String(b.slug || '').trim() !== strId)) &&
           !isBlogDeleted(b)
       );
       try {

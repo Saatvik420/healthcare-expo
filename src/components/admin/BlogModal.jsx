@@ -216,17 +216,17 @@ export default function BlogModal({ isOpen, onClose, onSave, editingBlog }) {
 
       const payload = {
         ...formData,
-        title: (formData.title || '').trim(),
-        category: (formData.category || 'Healthcare Insights').trim(),
-        author: (formData.author || 'IndiGlobal Healthcare Expo').trim(),
-        authorRole: (formData.authorRole || 'Secretariat Contributor').trim(),
-        coverImage: (formData.coverImage || SAMPLE_COVERS[0].url).trim(),
-        readTime: (formData.readTime || '5 min read').trim(),
-        excerpt: (formData.excerpt || '').trim(),
-        content: (formData.content || '').trim(),
+        title: String(formData.title || '').trim(),
+        category: String(formData.category || 'Healthcare Insights').trim(),
+        author: String(formData.author || 'IndiGlobal Healthcare Expo').trim(),
+        authorRole: String(formData.authorRole || 'Secretariat Contributor').trim(),
+        coverImage: String(formData.coverImage || SAMPLE_COVERS[0].url).trim(),
+        readTime: String(formData.readTime || '5 min read').trim(),
+        excerpt: String(formData.excerpt || '').trim(),
+        content: String(formData.content || '').trim(),
         textAlign: formData.textAlign || 'left',
         tags: tagsArray,
-        slug: liveSlug,
+        slug: String(liveSlug || '').trim(),
         publishedDate: editingBlog?.publishedDate || undefined,
       };
 

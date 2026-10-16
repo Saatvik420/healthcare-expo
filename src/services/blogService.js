@@ -358,34 +358,37 @@ export const getBlogTimestamp = (blog) => {
 // Comprehensive blog deduplication matcher
 export const isSameBlog = (a, b) => {
   if (!a || !b) return false;
+  try {
+    // 1. Direct ID match (handles number vs string e.g. 1 == "1")
+    if (a.id !== undefined && a.id !== null && b.id !== undefined && b.id !== null && String(a.id).trim() === String(b.id).trim()) return true;
 
-  // 1. Direct ID match (handles number vs string e.g. 1 == "1")
-  if (a.id !== undefined && b.id !== undefined && String(a.id) === String(b.id)) return true;
+    // 2. blogId match (e.g. "blog_1" === "blog_1")
+    if (a.blogId && b.blogId && String(a.blogId).trim() === String(b.blogId).trim()) return true;
 
-  // 2. blogId match (e.g. "blog_1" === "blog_1")
-  if (a.blogId && b.blogId && String(a.blogId) === String(b.blogId)) return true;
+    // 3. Cross id vs blogId match
+    if (a.id && b.blogId && (String(a.id).trim() === String(b.blogId).trim() || String(a.blogId || '').trim() === String(b.id).trim())) return true;
 
-  // 3. Cross id vs blogId match
-  if (a.id && b.blogId && (String(a.id) === String(b.blogId) || String(a.blogId) === String(b.id))) return true;
+    // 4. Normalized numeric ID matching (e.g. "blog_1" vs "1" or 1)
+    const normA = String(a.id || a.blogId || '').trim().replace(/^blog_/, '');
+    const normB = String(b.id || b.blogId || '').trim().replace(/^blog_/, '');
+    if (normA && normB && normA === normB) return true;
 
-  // 4. Normalized numeric ID matching (e.g. "blog_1" vs "1" or 1)
-  const normA = String(a.id || a.blogId || '').replace(/^blog_/, '');
-  const normB = String(b.id || b.blogId || '').replace(/^blog_/, '');
-  if (normA && normB && normA === normB) return true;
+    // 5. Slug match
+    const slugA = String(a.slug || '').trim().toLowerCase();
+    const slugB = String(b.slug || '').trim().toLowerCase();
+    if (slugA && slugB && slugA === slugB) return true;
 
-  // 5. Slug match
-  const slugA = (a.slug || '').trim().toLowerCase();
-  const slugB = (b.slug || '').trim().toLowerCase();
-  if (slugA && slugB && slugA === slugB) return true;
+    // 6. Cross slug vs id / blogId matching
+    if (slugA && (String(b.id || '').toLowerCase().trim() === slugA || String(b.blogId || '').toLowerCase().trim() === slugA)) return true;
+    if (slugB && (String(a.id || '').toLowerCase().trim() === slugB || String(a.blogId || '').toLowerCase().trim() === slugB)) return true;
 
-  // 6. Cross slug vs id / blogId matching
-  if (slugA && (String(b.id).toLowerCase() === slugA || String(b.blogId).toLowerCase() === slugA)) return true;
-  if (slugB && (String(a.id).toLowerCase() === slugB || String(a.blogId).toLowerCase() === slugB)) return true;
-
-  // 7. Title match (case-insensitive, trimmed)
-  const titleA = (a.title || '').trim().toLowerCase();
-  const titleB = (b.title || '').trim().toLowerCase();
-  if (titleA && titleB && titleA === titleB) return true;
+    // 7. Title match (case-insensitive, trimmed)
+    const titleA = String(a.title || '').trim().toLowerCase();
+    const titleB = String(b.title || '').trim().toLowerCase();
+    if (titleA && titleB && titleA === titleB) return true;
+  } catch (err) {
+    console.warn('Error in isSameBlog comparison:', err);
+  }
 
   return false;
 };
