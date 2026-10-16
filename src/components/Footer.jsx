@@ -4,8 +4,85 @@ import logoImg from '../assets/logo.png';
 import posterImg from '../assets/poster.png';
 import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 
+// =============================================================================
+// SOCIAL MEDIA HANDLES CONFIGURATION
+// 👉 Paste your social profile links in the fields below between the quotes:
+// (Instagram is already set with your provided active link)
+// =============================================================================
+export const FOOTER_SOCIAL_LINKS = {
+  // 1. Instagram (Active link provided)
+  instagram: 'https://www.instagram.com/theglobalhealthcareexpo?psln=NTViZnFpbWtzem9x',
+
+  // 2. LinkedIn (Paste your LinkedIn link below between quotes)
+  linkedin: '', // <-- PASTE LINKEDIN LINK HERE (e.g. 'https://www.linkedin.com/company/theglobalhealthcareexpo')
+
+  // 3. Facebook (Paste your Facebook link below between quotes)
+  facebook: '', // <-- PASTE FACEBOOK LINK HERE (e.g. 'https://www.facebook.com/theglobalhealthcareexpo')
+
+  // 4. X / Twitter (Paste your X link below between quotes)
+  twitter: '', // <-- PASTE X / TWITTER LINK HERE (e.g. 'https://x.com/theglobalhealthcareexpo')
+
+  // 5. YouTube (Paste your YouTube channel link below between quotes)
+  youtube: '', // <-- PASTE YOUTUBE LINK HERE (e.g. 'https://www.youtube.com/@theglobalhealthcareexpo')
+
+  // 6. WhatsApp Channel / Direct Link (Optional)
+  whatsapp: '', // <-- PASTE WHATSAPP LINK HERE (leave blank for default visitor chat)
+};
+
 export default function Footer() {
   const { isAdmin } = useAuth();
+
+  // Combine configuration from contactConfig and local config
+  const socialConfig = {
+    ...CONTACT_CONFIG.social,
+    ...FOOTER_SOCIAL_LINKS,
+  };
+
+  const socialItems = [
+    {
+      id: 'instagram',
+      name: 'Instagram',
+      icon: 'fa-brands fa-instagram',
+      url: socialConfig.instagram || 'https://www.instagram.com/theglobalhealthcareexpo?psln=NTViZnFpbWtzem9x',
+      ariaLabel: 'Official Instagram Handle',
+    },
+    {
+      id: 'linkedin',
+      name: 'LinkedIn',
+      icon: 'fa-brands fa-linkedin-in',
+      url: socialConfig.linkedin || '',
+      ariaLabel: 'Official LinkedIn Page',
+    },
+    {
+      id: 'facebook',
+      name: 'Facebook',
+      icon: 'fa-brands fa-facebook-f',
+      url: socialConfig.facebook || '',
+      ariaLabel: 'Official Facebook Page',
+    },
+    {
+      id: 'twitter',
+      name: 'X (Twitter)',
+      icon: 'fa-brands fa-x-twitter',
+      url: socialConfig.twitter || '',
+      ariaLabel: 'Official X (Twitter) Account',
+    },
+    {
+      id: 'youtube',
+      name: 'YouTube',
+      icon: 'fa-brands fa-youtube',
+      url: socialConfig.youtube || '',
+      ariaLabel: 'Official YouTube Channel',
+    },
+    {
+      id: 'whatsapp',
+      name: 'WhatsApp',
+      icon: 'fa-brands fa-whatsapp',
+      url: socialConfig.whatsapp || getWhatsAppUrl('visitor'),
+      ariaLabel: 'Official WhatsApp Helpdesk',
+    },
+  ];
+
   return (
     <footer>
       <div className="container">
@@ -128,6 +205,34 @@ export default function Footer() {
             <div className="footer-contact-item">
               <i className="fa-solid fa-location-dot"></i>
               <span>Bangkok, Thailand (21st &amp; 22nd January 2027)</span>
+            </div>
+
+            {/* Official Social Handles */}
+            <div className="footer-social-wrap">
+              <span className="footer-social-caption">Official Social Handles</span>
+              <div className="footer-social-icons">
+                {socialItems.map((item) => {
+                  const hasLink = Boolean(item.url && item.url.trim() !== '' && item.url.trim() !== '#');
+                  return (
+                    <a
+                      key={item.id}
+                      href={hasLink ? item.url : '#'}
+                      target={hasLink ? '_blank' : undefined}
+                      rel={hasLink ? 'noopener noreferrer' : undefined}
+                      className={`footer-social-icon-btn footer-social-${item.id} ${hasLink ? 'is-configured' : 'is-placeholder'}`}
+                      aria-label={item.ariaLabel}
+                      title={hasLink ? `${item.name}: ${item.url}` : `${item.name} (Coming Soon - paste your link in config)`}
+                      onClick={(e) => {
+                        if (!hasLink) {
+                          e.preventDefault();
+                        }
+                      }}
+                    >
+                      <i className={item.icon}></i>
+                    </a>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
