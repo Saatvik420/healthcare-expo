@@ -388,31 +388,10 @@ export function DataProvider({ children }) {
               : [],
           }));
 
-        // Merge authoritative backend data with any locally stored articles (e.g. offline drafts)
-        const currentLocal = (() => {
-          try {
-            const raw = localStorage.getItem('ghe_blogs');
-            return raw ? JSON.parse(raw) : [];
-          } catch {
-            return [];
-          }
-        })();
-
-        const merged = [...normalized];
-        if (Array.isArray(currentLocal)) {
-          for (const loc of currentLocal) {
-            if (loc && !isBlogDeleted(loc) && !merged.some((u) => isSameBlog(u, loc))) {
-              merged.push(loc);
-              // Auto-upload local draft to cloud backend so other browsers receive it
-              blogsApi.create(loc).catch((e) => console.warn('Cloud sync of local blog failed:', e));
-            }
-          }
-        }
-
-        setBlogs(merged);
+        setBlogs(normalized);
         try {
-          localStorage.setItem('ghe_blogs', JSON.stringify(merged));
-          localStorage.setItem('ighe_blogs_cache', JSON.stringify(merged));
+          localStorage.setItem('ghe_blogs', JSON.stringify(normalized));
+          localStorage.setItem('ighe_blogs_cache', JSON.stringify(normalized));
         } catch (storageErr) {
           console.warn('Cache write failed:', storageErr);
         }
@@ -858,9 +837,19 @@ export function DataProvider({ children }) {
 
     // 3. Delete from backend API
     try {
-      await blogsApi.delete(id);
-      if (target && target.id && String(target.id) !== String(id)) {
-        await blogsApi.delete(target.id);
+      const idsToTry = new Set();
+      if (id) idsToTry.add(id);
+      if (target) {
+        if (target.id) idsToTry.add(target.id);
+        if (target.blogId) idsToTry.add(target.blogId);
+        if (target.slug) idsToTry.add(target.slug);
+      }
+      for (const delId of idsToTry) {
+        try {
+          await blogsApi.delete(delId);
+        } catch {
+          // ignore individual attempt failures
+        }
       }
     } catch (err) {
       console.warn('Backend API delete failed, removed from local storage:', err);

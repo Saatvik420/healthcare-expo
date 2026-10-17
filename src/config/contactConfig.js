@@ -37,27 +37,21 @@ export const CONTACT_CONFIG = {
 
   // Official Social Media Handles
   // =========================================================================
-  // Instagram is already configured with your active link.
+  // Instagram & Facebook are configured with your active links.
   // Paste your links for other platforms in the quotes below:
   // =========================================================================
   social: {
     // 1. Official Instagram (Active link)
     instagram: 'https://www.instagram.com/theglobalhealthcareexpo?psln=NTViZnFpbWtzem9x',
 
-    // 2. Official LinkedIn
+    // 2. Official Facebook (Active link)
+    facebook: 'https://www.facebook.com/people/The-Global-Healthcare-Expo/61594952579862/',
+
+    // 3. Official LinkedIn
     linkedin: '', // <-- PASTE YOUR LINKEDIN LINK HERE (e.g. 'https://www.linkedin.com/company/...')
 
-    // 3. Official Facebook
-    facebook: '', // <-- PASTE YOUR FACEBOOK LINK HERE (e.g. 'https://www.facebook.com/...')
-
-    // 4. Official X / Twitter
-    twitter: '', // <-- PASTE YOUR X (TWITTER) LINK HERE (e.g. 'https://x.com/...')
-
-    // 5. Official YouTube
+    // 4. Official YouTube
     youtube: '', // <-- PASTE YOUR YOUTUBE CHANNEL LINK HERE (e.g. 'https://www.youtube.com/@...')
-
-    // 6. Official WhatsApp
-    whatsapp: '', // <-- PASTE YOUR WHATSAPP LINK/CHANNEL HERE (leave empty for default visitor chat)
   },
 };
 

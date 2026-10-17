@@ -7,26 +7,20 @@ import { CONTACT_CONFIG, getWhatsAppUrl } from '../config/contactConfig';
 // =============================================================================
 // SOCIAL MEDIA HANDLES CONFIGURATION
 // 👉 Paste your social profile links in the fields below between the quotes:
-// (Instagram is already set with your provided active link)
+// (Instagram & Facebook are configured with your active links)
 // =============================================================================
 export const FOOTER_SOCIAL_LINKS = {
   // 1. Instagram (Active link provided)
   instagram: 'https://www.instagram.com/theglobalhealthcareexpo?psln=NTViZnFpbWtzem9x',
 
-  // 2. LinkedIn (Paste your LinkedIn link below between quotes)
+  // 2. Facebook (Active link provided)
+  facebook: 'https://www.facebook.com/people/The-Global-Healthcare-Expo/61594952579862/',
+
+  // 3. LinkedIn (Paste your LinkedIn link below between quotes when available)
   linkedin: '', // <-- PASTE LINKEDIN LINK HERE (e.g. 'https://www.linkedin.com/company/theglobalhealthcareexpo')
 
-  // 3. Facebook (Paste your Facebook link below between quotes)
-  facebook: '', // <-- PASTE FACEBOOK LINK HERE (e.g. 'https://www.facebook.com/theglobalhealthcareexpo')
-
-  // 4. X / Twitter (Paste your X link below between quotes)
-  twitter: '', // <-- PASTE X / TWITTER LINK HERE (e.g. 'https://x.com/theglobalhealthcareexpo')
-
-  // 5. YouTube (Paste your YouTube channel link below between quotes)
+  // 4. YouTube (Paste your YouTube channel link below between quotes when available)
   youtube: '', // <-- PASTE YOUTUBE LINK HERE (e.g. 'https://www.youtube.com/@theglobalhealthcareexpo')
-
-  // 6. WhatsApp Channel / Direct Link (Optional)
-  whatsapp: '', // <-- PASTE WHATSAPP LINK HERE (leave blank for default visitor chat)
 };
 
 export default function Footer() {
@@ -47,25 +41,18 @@ export default function Footer() {
       ariaLabel: 'Official Instagram Handle',
     },
     {
+      id: 'facebook',
+      name: 'Facebook',
+      icon: 'fa-brands fa-facebook-f',
+      url: socialConfig.facebook || 'https://www.facebook.com/people/The-Global-Healthcare-Expo/61594952579862/',
+      ariaLabel: 'Official Facebook Page',
+    },
+    {
       id: 'linkedin',
       name: 'LinkedIn',
       icon: 'fa-brands fa-linkedin-in',
       url: socialConfig.linkedin || '',
       ariaLabel: 'Official LinkedIn Page',
-    },
-    {
-      id: 'facebook',
-      name: 'Facebook',
-      icon: 'fa-brands fa-facebook-f',
-      url: socialConfig.facebook || '',
-      ariaLabel: 'Official Facebook Page',
-    },
-    {
-      id: 'twitter',
-      name: 'X (Twitter)',
-      icon: 'fa-brands fa-x-twitter',
-      url: socialConfig.twitter || '',
-      ariaLabel: 'Official X (Twitter) Account',
     },
     {
       id: 'youtube',
@@ -74,14 +61,7 @@ export default function Footer() {
       url: socialConfig.youtube || '',
       ariaLabel: 'Official YouTube Channel',
     },
-    {
-      id: 'whatsapp',
-      name: 'WhatsApp',
-      icon: 'fa-brands fa-whatsapp',
-      url: socialConfig.whatsapp || getWhatsAppUrl('visitor'),
-      ariaLabel: 'Official WhatsApp Helpdesk',
-    },
-  ];
+  ].filter((item) => Boolean(item.url && item.url.trim() && item.url.trim() !== '#'));
 
   return (
     <footer>
